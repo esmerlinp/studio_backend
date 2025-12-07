@@ -1,5 +1,6 @@
 from flask import Flask, request
 from app.blueprints.usuarios import usuarios_bp
+from app.security import token_required
 
 app = Flask(__name__)
 app.register_blueprint(usuarios_bp)
@@ -11,6 +12,7 @@ def hola_mundo():
 
 
 @app.route('/usuario/<nombre>')
+@token_required
 def mostrar_usuario(nombre):
     return f'Hola {nombre} desde Flask!'
 
