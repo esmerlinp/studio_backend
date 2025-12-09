@@ -8,8 +8,7 @@ usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/api')
 def hashear_password(password):
     return generate_password_hash(password)
 
-def verificar_password(hash_stored, password):
-    return check_password_hash(hash_stored, password)
+
 
 
 
