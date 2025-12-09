@@ -3,6 +3,7 @@ from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from datetime import timedelta
 from app.core import db   # conexión a BD
+from app.models import user_model
 from uuid import uuid4
 
 auth_bp = Blueprint('auth', __name__)
@@ -46,10 +47,11 @@ def login():
     password = data["password"]
 
     # Consulta del usuario
-    user = db.fetch_one(
-        "SELECT * FROM usuarios WHERE susuario = %s",
-        (username,)
-    )
+    # user = db.fetch_one(
+    #     "SELECT * FROM usuarios WHERE susuario = %s",
+    #     (username,)
+    # )
+    user = user_model.get_user_by_user_name_with_passwd(user_name=username)
 
 
     if not user:
@@ -60,65 +62,65 @@ def login():
     #     return jsonify({"error": "Credenciales inválidas"}), 401
 
     # TEMPORAL — Contraseñas sin hash
-    if password != user["scontrasena"]:
+    if password != user.password:
         return jsonify({"error": "Credenciales inválidas"}), 401
 
     # Crear Access Token con datos NO sensibles
-    token_uuid = str(uuid4())
-    identity = {
-        "userId": user["idusuario"],
-        "userName": user["susuario"],
-        "email": user["scorreoelectronico"]
-    }
+    # identity = {
+    #     "userId": user["idusuario"],
+    #     "userName": user["susuario"],
+    #     "email": user["scorreoelectronico"],
+    #     "uuidToken": token_uuid
+    # }
     
-    identity = str(user['idusuario'])   # identity debe ser string
+    identity = str(user.userId)   # identity debe ser string
 
     # ACCESS TOKEN con claims adicionales
+    token_uuid = str(uuid4())
     access_token = create_access_token(
         identity=identity,
         additional_claims={
-            "username": user['susuario'],
-            "email": user['scorreoelectronico']
+            "username": user.username,
+            "email": user.email,
+            "uuidToken": token_uuid
         }
     )
     
     refresh_token = create_refresh_token(identity=identity)
     
-    # access_token = create_access_token(
-    #     identity={
-    #         "userId": user['idusuario'],
-    #         "username": user['susuario'],
-    #         "email": user['scorreoelectronico'],
-    #         "token_uuid": token_uuid
-    #     },
-    #     expires_delta=timedelta(hours=24)
-    # )
     
-    #TODO:  Guardar el token uuid en la tabla de sesiones para saber que token invalidar 
-    #Code. here -> {} <-
-    
-    
-    response_data = {
-        "accessToken": access_token,
-        "refreshToken": refresh_token,
-        "userId": user['idusuario'],
-        "firstName": user['snombres'],
-        "lastName": user['sapellidos'],
-        "email": user['scorreoelectronico'],
-        "username": user['susuario'],
 
-        "isActive": user['bactivo'],
-        "isBlocked": user['bbloqueado'],
-        "mustChangePassword": user['bcambiarcontrasena'],
-        "isConfirmed": user['busuarioconfirmado'],
+    db.execute_non_query("""
+        INSERT INTO usuariossesiones (idusuario, srefreshtoken, dfechaexpiracion)
+        VALUES (%s, %s, NOW() + INTERVAL '3 minutes')
+    """, (user.userId, refresh_token))
 
-        "loginAttempts": user['iintentoslogin'],
+    response_data = user.__dict__
+    del response_data['password']
+    response_data['accessToken'] = access_token
+    response_data['refresh_token'] = refresh_token
 
-        "lastPasswordChangeDate": user['dfechaultcambiocont'],
-        "tokenExpirationDate": user['dexpiraciontoken'],
-        "blockedDate": user['dfechabloqueo'],
-        "lastLoginDate": user['dultimologin']
-    }
+    # response_data = {
+    #     "accessToken": access_token,
+    #     "refreshToken": refresh_token,
+    #     "userId": user['idusuario'],
+    #     "firstName": user['snombres'],
+    #     "lastName": user['sapellidos'],
+    #     "email": user['scorreoelectronico'],
+    #     "username": user['susuario'],
+
+    #     "isActive": user['bactivo'],
+    #     "isBlocked": user['bbloqueado'],
+    #     "mustChangePassword": user['bcambiarcontrasena'],
+    #     "isConfirmed": user['busuarioconfirmado'],
+
+    #     "loginAttempts": user['iintentoslogin'],
+
+    #     "lastPasswordChangeDate": user['dfechaultcambiocont'],
+    #     "tokenExpirationDate": user['dexpiraciontoken'],
+    #     "blockedDate": user['dfechabloqueo'],
+    #     "lastLoginDate": user['dultimologin']
+    # }
 
     return jsonify({"result": response_data}), 200
 
@@ -140,7 +142,7 @@ def logout():
 def refresh_token():
     identity = get_jwt_identity()     # recupera el mismo identity guardado en el refresh token
     new_access_token = create_access_token(identity=identity)
-
-    return jsonify({
+    result = {
         "accessToken": new_access_token
-    }), 200
+    }
+    return jsonify({'result': result}), 200

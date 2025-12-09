@@ -1,16 +1,17 @@
 from flask import Flask, request, jsonify
 from app.blueprints.usuarios import usuarios_bp
 from app.blueprints.auth import auth_bp
-from app.security import token_required
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import timedelta
+from app.middlewares.track_activity import track_activity
+
 app = Flask(__name__)
 
 # Clave secreta para firmar los tokens
 app.config["JWT_SECRET_KEY"] = "super-secret-key-123"  # cámbiala por una segura
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)     # token corto
-app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)    # token largo
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)     # token corto
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(hours=24)    # token largo
 
 jwt = JWTManager(app)
 
@@ -27,13 +28,15 @@ def hola_mundo():
 #El cliente debe enviar el token en el header: Authorization: Bearer <token>
 @app.route("/me", methods=["GET"])
 @jwt_required()
+@track_activity
 def me():
     user = get_jwt_identity()  # devuelve lo que enviaste como identity
     return jsonify(user)
 
 
 @app.route('/usuario/<nombre>')
-#@token_required
+@jwt_required()
+@track_activity
 def mostrar_usuario(nombre):
     return f'Hola {nombre} desde Flask!'
 
@@ -44,6 +47,9 @@ def buscar():
     #Visita /buscar?q=flask
     query = request.args.get('q', 'nada')
     return f'Buscando: {query}'
+
+
+
 
 
 
