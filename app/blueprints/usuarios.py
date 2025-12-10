@@ -3,7 +3,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from psycopg2.extras import RealDictCursor
 from app.core import db
 from app.models import user_model
-from dataclasses import asdict
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.middlewares.track_activity import track_activity
 usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/api')
@@ -12,6 +11,30 @@ def hashear_password(password):
     return generate_password_hash(password)
 
 
+
+#Consumir rutas protegidas con el JWT
+#El cliente debe enviar el token en el header: Authorization: Bearer <token>
+@usuarios_bp.route("/me", methods=["GET"])
+@jwt_required()
+@track_activity
+def me():
+    user_id = get_jwt_identity()  # devuelve lo que enviaste como identity
+    user = user_model.get_user_by_id(user_id=int(user_id))
+    return jsonify({"result": user})
+
+
+@usuarios_bp.route("/sessions", methods=["GET"])
+@jwt_required()
+def sessions():
+    sessions = user_model.get_open_sessions()
+    return jsonify({"result": sessions})
+
+@usuarios_bp.route("/sessions/close/<sessionId>", methods=["PUT"])
+@jwt_required()
+@track_activity
+def close_session(sessionId):
+    sessions = user_model.close_session(sessionId=sessionId)
+    return jsonify({"result": sessions})
 
 
 
@@ -30,6 +53,8 @@ def get_users():
 
 
 @usuarios_bp.route('/users/<userId>', methods=['GET'])
+@jwt_required()
+@track_activity
 def get_user_by_id(userId):
     user = user_model.get_user_by_id(user_id=userId)
     if user:

@@ -5,6 +5,7 @@ from datetime import timedelta
 from app.core import db   # conexión a BD
 from app.models import user_model
 from uuid import uuid4
+from app.middlewares.track_activity import track_activity
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -100,28 +101,6 @@ def login():
     response_data['accessToken'] = access_token
     response_data['refresh_token'] = refresh_token
 
-    # response_data = {
-    #     "accessToken": access_token,
-    #     "refreshToken": refresh_token,
-    #     "userId": user['idusuario'],
-    #     "firstName": user['snombres'],
-    #     "lastName": user['sapellidos'],
-    #     "email": user['scorreoelectronico'],
-    #     "username": user['susuario'],
-
-    #     "isActive": user['bactivo'],
-    #     "isBlocked": user['bbloqueado'],
-    #     "mustChangePassword": user['bcambiarcontrasena'],
-    #     "isConfirmed": user['busuarioconfirmado'],
-
-    #     "loginAttempts": user['iintentoslogin'],
-
-    #     "lastPasswordChangeDate": user['dfechaultcambiocont'],
-    #     "tokenExpirationDate": user['dexpiraciontoken'],
-    #     "blockedDate": user['dfechabloqueo'],
-    #     "lastLoginDate": user['dultimologin']
-    # }
-
     return jsonify({"result": response_data}), 200
 
 
@@ -139,6 +118,7 @@ def logout():
 
 @auth_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
+@track_activity
 def refresh_token():
     identity = get_jwt_identity()     # recupera el mismo identity guardado en el refresh token
     new_access_token = create_access_token(identity=identity)

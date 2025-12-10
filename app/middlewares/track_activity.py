@@ -33,7 +33,7 @@ def track_activity(func):
             """, (user_id,))
 
             if not session:
-                return jsonify({"error": "Sesión inválida"}), 401
+                return jsonify({"error": "Sesión inválida"}), 440
 
             #now = datetime.now()
             from datetime import datetime, timezone
@@ -48,7 +48,7 @@ def track_activity(func):
                 UPDATE usuariossesiones 
                 SET dultimoacceso = %s,
                     dfechaexpiracion = %s
-                WHERE id = %s
+                WHERE idusuariosesion = %s
             """, (
                 now,
                 now + timedelta(minutes=INACTIVITY_MINUTES),

@@ -5,6 +5,7 @@ from app.core import db
 
 from dataclasses import dataclass
 from typing import Optional
+from flask_jwt_extended import  get_jwt_identity
 
 @dataclass
 class UserModel:
@@ -156,6 +157,31 @@ def get_all_users() -> List[UserModel]:
         )
 
     return users
+
+
+def get_open_sessions():
+    user_id = get_jwt_identity()
+    rows = db.fetch_data("SELECT * FROM usuariossesiones where bactivo = TRUE AND idusuario = %s", (int(user_id), ))
+
+ 
+    sessions = []
+    for s in rows:
+        sessions.append(
+            {
+                "sessionId": s.get("idusuariosesion", 0),
+                "lastAccess": s.get("dultimoacceso", None),
+                "expired": s.get("dfechaexpiracion", None),
+                "device": f"Random device {s.get("idusuariosesion", 0)}"
+            }
+        )
+
+    return sessions
+
+def close_session(sessionId):
+    user_id = get_jwt_identity()
+    db.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion = %s AND idusuario = %s", (sessionId, int(user_id), ))
+
+    return {"sessionId": sessionId}
 
 
 # def get_users() -> list[UserModel]:

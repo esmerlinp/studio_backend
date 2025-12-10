@@ -24,32 +24,9 @@ def hola_mundo():
     return '¡Hola desde Flask!'
 
 
-#Consumir rutas protegidas con el JWT
-#El cliente debe enviar el token en el header: Authorization: Bearer <token>
-@app.route("/me", methods=["GET"])
-@jwt_required()
-@track_activity
-def me():
-    user = get_jwt_identity()  # devuelve lo que enviaste como identity
-    return jsonify(user)
-
-
-@app.route('/usuario/<nombre>')
-@jwt_required()
-@track_activity
-def mostrar_usuario(nombre):
-    return f'Hola {nombre} desde Flask!'
-
-
-
-@app.route('/buscar')
-def buscar():
-    #Visita /buscar?q=flask
-    query = request.args.get('q', 'nada')
-    return f'Buscando: {query}'
-
-
-
+@app.route('/ip')
+def get_ip():
+    return f'Tu IP es: {request.remote_addr}'
 
 
 

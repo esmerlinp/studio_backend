@@ -18,6 +18,14 @@ db_pool = SimpleConnectionPool(
 )
 
 
+def get_connection(scheme="public"):
+    conn = db_pool.getconn()
+    cur = conn.cursor()
+    cur.execute(f"SET search_path TO {scheme};")
+    return conn
+
+
+
 def fetch_data(query, params=None, as_dict=True):
     """
     Retorna múltiples filas.
@@ -29,7 +37,7 @@ def fetch_data(query, params=None, as_dict=True):
     """
     conn = None
     try:
-        conn = db_pool.getconn()
+        conn = get_connection()
         cursor_factory = psycopg2.extras.RealDictCursor if as_dict else None
 
         with conn.cursor(cursor_factory=cursor_factory) as cur:
@@ -55,7 +63,7 @@ def fetch_one(query, params=None, as_dict=True):
     """
     conn = None
     try:
-        conn = db_pool.getconn()
+        conn = get_connection()
         cursor_factory = psycopg2.extras.RealDictCursor if as_dict else None
 
         with conn.cursor(cursor_factory=cursor_factory) as cur:
@@ -85,7 +93,7 @@ def execute_non_query(query, params=None):
     """
     conn = None
     try:
-        conn = db_pool.getconn()
+        conn = get_connection()
 
         with conn.cursor() as cur:
             cur.execute(query, params)
