@@ -29,6 +29,7 @@ def sessions():
     sessions = user_model.get_open_sessions()
     return jsonify({"result": sessions})
 
+
 @usuarios_bp.route("/sessions/close/<sessionId>", methods=["PUT"])
 @jwt_required()
 @track_activity

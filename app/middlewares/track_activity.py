@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from app.core import db
 
 
-INACTIVITY_MINUTES = 3  # tiempo de inactividad permitido
+INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 
 
 # Funciona así:
@@ -24,7 +24,6 @@ def track_activity(func):
     def wrapper(*args, **kwargs):
         try:
             user_id = get_jwt_identity()
-
             # Buscar la sesión activa del usuario
             session = db.fetch_one("""
                 SELECT * FROM usuariossesiones
@@ -33,7 +32,7 @@ def track_activity(func):
             """, (user_id,))
 
             if not session:
-                return jsonify({"error": "Sesión inválida"}), 440
+                return jsonify({"msg": "Sesión inválida"}), 440
 
             #now = datetime.now()
             from datetime import datetime, timezone
@@ -41,7 +40,7 @@ def track_activity(func):
             # Si expiró por inactividad
             if session["dfechaexpiracion"] < now:
                 db.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion = %s", (session["idusuariosesion"],))
-                return jsonify({"error": "Sesión expirada por inactividad"}), 440
+                return jsonify({"msg": "Sesión expirada por inactividad"}), 440
 
             # Actualizar actividad
             db.execute_non_query("""
@@ -59,6 +58,6 @@ def track_activity(func):
 
         except Exception as e:
             print("track_activity error:", str(e))
-            return jsonify({"error": "Error en seguimiento de sesión"}), 500
+            return jsonify({"msg": "Error en seguimiento de sesión"}), 500
 
     return wrapper

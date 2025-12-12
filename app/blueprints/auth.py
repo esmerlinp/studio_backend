@@ -8,6 +8,7 @@ from uuid import uuid4
 from app.middlewares.track_activity import track_activity
 
 auth_bp = Blueprint('auth', __name__)
+INACTIVITY_MINUTES = 10  # tiempo de inactividad permitido
 
 
 # -----------------------------
@@ -56,7 +57,7 @@ def login():
 
 
     if not user:
-        return jsonify({"error": "Credenciales inválidas"}), 401
+        return jsonify({"msg": "Credenciales inválidas"}), 401
 
     # TODO: Activar cuando las claves estén encriptadas en la BD
     # if not verificar_password(user['scontrasena'], password):
@@ -64,7 +65,7 @@ def login():
 
     # TEMPORAL — Contraseñas sin hash
     if password != user.password:
-        return jsonify({"error": "Credenciales inválidas"}), 401
+        return jsonify({"msg": "Credenciales inválidas"}), 401
 
     # Crear Access Token con datos NO sensibles
     # identity = {
@@ -77,13 +78,12 @@ def login():
     identity = str(user.userId)   # identity debe ser string
 
     # ACCESS TOKEN con claims adicionales
-    token_uuid = str(uuid4())
     access_token = create_access_token(
         identity=identity,
+        expires_delta=timedelta(hours=24),
         additional_claims={
             "username": user.username,
             "email": user.email,
-            "uuidToken": token_uuid
         }
     )
     
@@ -93,8 +93,14 @@ def login():
 
     db.execute_non_query("""
         INSERT INTO usuariossesiones (idusuario, srefreshtoken, dfechaexpiracion)
-        VALUES (%s, %s, NOW() + INTERVAL '3 minutes')
-    """, (user.userId, refresh_token))
+        VALUES (%s, %s, NOW() + INTERVAL '%s minutes')
+    """, (user.userId, refresh_token, INACTIVITY_MINUTES))
+    
+    #TODO: usar este cuando se cree el campo ip en la tabla de sesiones
+    # db.execute_non_query("""
+    #     INSERT INTO usuariossesiones (idusuario, srefreshtoken, dfechaexpiracion, ssessionip)
+    #     VALUES (%s, %s, NOW() + INTERVAL '%s minutes', %s)
+    # """, (user.userId, refresh_token, INACTIVITY_MINUTES, request.remote_addr))
 
     response_data = user.__dict__
     del response_data['password']
@@ -121,7 +127,19 @@ def logout():
 @track_activity
 def refresh_token():
     identity = get_jwt_identity()     # recupera el mismo identity guardado en el refresh token
-    new_access_token = create_access_token(identity=identity)
+    user = user_model.get_user_by_id(user_id=int(identity))
+    if not user:
+        return jsonify({"msg": "Usuario no encontrado"}), 404
+    
+    additional_claims={
+        "username": user.username,
+        "email": user.email,
+    }
+    
+    new_access_token = create_access_token(identity=identity,  
+                                           expires_delta=timedelta(hours=24), 
+                                           additional_claims=additional_claims
+                                        )
     result = {
         "accessToken": new_access_token
     }

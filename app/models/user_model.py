@@ -6,6 +6,7 @@ from app.core import db
 from dataclasses import dataclass
 from typing import Optional
 from flask_jwt_extended import  get_jwt_identity
+from flask import request
 
 @dataclass
 class UserModel:
@@ -96,7 +97,7 @@ def get_user_by_user_name(user_name) -> Optional[UserModel]:
     )
 
 
-def get_user_by_id(user_id) -> Optional[UserModel]:
+def get_user_by_id(user_id:int) -> Optional[UserModel]:
     user = db.fetch_one(
         "SELECT * FROM usuarios WHERE idusuario = %s",
         (user_id,)
@@ -171,7 +172,8 @@ def get_open_sessions():
                 "sessionId": s.get("idusuariosesion", 0),
                 "lastAccess": s.get("dultimoacceso", None),
                 "expired": s.get("dfechaexpiracion", None),
-                "device": f"Random device {s.get("idusuariosesion", 0)}"
+                "device": f"Random device {s.get("idusuariosesion", 0)}",
+                "deviceIp": request.remote_addr #TODO: sustituir por campo real cuando se implemente
             }
         )
 

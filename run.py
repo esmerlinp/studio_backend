@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from app.blueprints.usuarios import usuarios_bp
 from app.blueprints.auth import auth_bp
+from app.blueprints.clientes import clientes_bp
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import timedelta
@@ -17,6 +18,7 @@ jwt = JWTManager(app)
 
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(clientes_bp)
 
 
 @app.route('/')
