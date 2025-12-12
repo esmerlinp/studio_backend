@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Optional
-from datetime import datetime
 from app.core import db
 
 from dataclasses import dataclass
