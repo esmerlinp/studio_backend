@@ -1,50 +1,30 @@
-from flask import Blueprint, request, jsonify
-from werkzeug.security import generate_password_hash, check_password_hash
-from psycopg2.extras import RealDictCursor
-from app.core import db
-from app.models import user_model
+from flask import request, jsonify
+from werkzeug.security import generate_password_hash
+from app.database import db
+from app.services import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.middlewares.track_activity import track_activity
-usuarios_bp = Blueprint('usuarios', __name__, url_prefix='/api')
+from app import track_activity
+
+
 
 def hashear_password(password):
     return generate_password_hash(password)
 
 
 
-#Consumir rutas protegidas con el JWT
-#El cliente debe enviar el token en el header: Authorization: Bearer <token>
-@usuarios_bp.route("/me", methods=["GET"])
 @jwt_required()
 @track_activity
 def me():
     user_id = get_jwt_identity()  # devuelve lo que enviaste como identity
-    user = user_model.get_user_by_id(user_id=int(user_id))
+    user = user_service.get_user_by_id(user_id=int(user_id))
     return jsonify({"result": user})
 
 
-@usuarios_bp.route("/sessions", methods=["GET"])
-@jwt_required()
-def sessions():
-    sessions = user_model.get_open_sessions()
-    return jsonify({"result": sessions})
-
-
-@usuarios_bp.route("/sessions/close/<sessionId>", methods=["PUT"])
-@jwt_required()
-@track_activity
-def close_session(sessionId):
-    sessions = user_model.close_session(sessionId=sessionId)
-    return jsonify({"result": sessions})
-
-
-
-@usuarios_bp.route('/users', methods=['GET'])
 @jwt_required()
 @track_activity
 def get_users():
     # data = db.fetch_data('SELECT * FROM usuarios')
-    users = user_model.get_all_users()
+    users = user_service.get_all_users()
     result = []
     if users:
         result = [user.__dict__ for user in users]
@@ -53,11 +33,19 @@ def get_users():
 
 
 
-@usuarios_bp.route('/users/<userId>', methods=['GET'])
 @jwt_required()
 @track_activity
-def get_user_by_id(userId):
-    user = user_model.get_user_by_id(user_id=userId)
+def get_user(userId):
+    user = user_service.get_user_by_id(user_id=userId)
+    if user:
+        return jsonify({"result": user}), 200
+    
+    return jsonify({"result": None}), 200
+
+@jwt_required()
+@track_activity
+def get_user_by_name(userName):
+    user = user_service.get_user_by_user_name(user_name=userName)
     if user:
         return jsonify({"result": user}), 200
     
@@ -65,9 +53,8 @@ def get_user_by_id(userId):
 
 
 
-
-
-@usuarios_bp.route('/usuarios', methods=['POST'])
+@jwt_required()
+@track_activity
 def create_user():
     data = request.json
     password_encriptada = hashear_password(data['password'])
@@ -118,6 +105,15 @@ def create_user():
         )
     )
     return filas
+
+
+
+
+
+
+
+
+
 
 
 

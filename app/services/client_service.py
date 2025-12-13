@@ -2,7 +2,7 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.middlewares.track_activity import track_activity
-from app.core import db
+from app.database import db
 clientes_bp = Blueprint('clientes', __name__, url_prefix='/api')
 
 client_preferences = [
@@ -56,10 +56,10 @@ client_preferences = [
 ]
 
 
-@clientes_bp.route("/client/settings", methods=["GET"])
+
 @jwt_required()
 @track_activity
-def me():
+def get_client_preferences():
     user_id = get_jwt_identity()  # devuelve lo que enviaste como identity
 
     # user = user_model.get_user_by_id(user_id=int(user_id))
@@ -68,4 +68,4 @@ def me():
         return jsonify({"msg": "Acceso no autorizado"}), 403
     
     
-    return jsonify({"result": client_preferences[0]})
+    return client_preferences[0]

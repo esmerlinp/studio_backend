@@ -1,12 +1,9 @@
-from flask import Flask, request, jsonify
-from app.blueprints.usuarios import usuarios_bp
-from app.blueprints.auth import auth_bp
-from app.blueprints.clientes import clientes_bp
+from flask import Flask, request
 from flask_jwt_extended import JWTManager
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from datetime import timedelta
-from app.middlewares.track_activity import track_activity
 from dotenv import load_dotenv
+from app.api.v1.users.routes import users_bp
+from app.api.v1.auth.routes import auth_bp
+from app.api.v1.clients.routes import client_bp
 
 
 app = Flask(__name__)
@@ -20,9 +17,9 @@ app.config["JWT_SECRET_KEY"] = "super-secret-key-123"  # cámbiala por una segur
 
 jwt = JWTManager(app)
 
-app.register_blueprint(usuarios_bp)
+app.register_blueprint(users_bp)
 app.register_blueprint(auth_bp)
-app.register_blueprint(clientes_bp)
+app.register_blueprint(client_bp)
 
 
 @app.route('/')

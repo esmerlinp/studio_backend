@@ -1,14 +1,15 @@
-from flask import Blueprint, request, jsonify
+from flask import  request, jsonify
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from datetime import timedelta
-from app.core import db   # conexión a BD
-from app.models import user_model
-from uuid import uuid4
+from app.database import db   # conexión a BD
+from app.services.user_service import get_user_by_user_name_with_passwd
 from app.middlewares.track_activity import track_activity
 
-auth_bp = Blueprint('auth', __name__)
+
+
 INACTIVITY_MINUTES = 10  # tiempo de inactividad permitido
+JWT_ACCESS_TOKEN_EXPIRES = 24   # horas
 
 
 # -----------------------------
@@ -37,7 +38,6 @@ def validar_login_payload(data):
 # -----------------------------
 # Rutas
 # -----------------------------
-@auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.json
     error = validar_login_payload(data)
@@ -53,7 +53,7 @@ def login():
     #     "SELECT * FROM usuarios WHERE susuario = %s",
     #     (username,)
     # )
-    user = user_model.get_user_by_user_name_with_passwd(user_name=username)
+    user = get_user_by_user_name_with_passwd(user_name=username)
 
 
     if not user:
@@ -112,22 +112,18 @@ def login():
 
 
 
-@auth_bp.route('/logout', methods=['POST'])
+
 def logout():
     # TODO: gestionar invalidación del token en tabla de sesiones
-    return jsonify({"result": "ok"}), 200
+    return {"result": "ok"}, 200
 
 
 
 
 
 
-@auth_bp.route("/refresh", methods=["POST"])
-@jwt_required(refresh=True)
-@track_activity
-def refresh_token():
-    identity = get_jwt_identity()     # recupera el mismo identity guardado en el refresh token
-    user = user_model.get_user_by_id(user_id=int(identity))
+def refresh_token(user_id: int):
+    user = user_model.get_user_by_id(user_id=int(user_id))
     if not user:
         return jsonify({"msg": "Usuario no encontrado"}), 404
     
@@ -136,11 +132,14 @@ def refresh_token():
         "email": user.email,
     }
     
-    new_access_token = create_access_token(identity=identity,  
-                                           expires_delta=timedelta(hours=24), 
+    new_access_token = create_access_token(identity=user_id,  
+                                           expires_delta=timedelta(hours=JWT_ACCESS_TOKEN_EXPIRES), 
                                            additional_claims=additional_claims
                                         )
+    if not new_access_token:
+        return jsonify({"msg": "Error al generar el nuevo token"}), 500
+    
     result = {
         "accessToken": new_access_token
     }
-    return jsonify({'result': result}), 200
+    return result
