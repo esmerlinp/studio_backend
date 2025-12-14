@@ -3,37 +3,52 @@ from app.services import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity
 from app.services import auth_service
-
+from app.utils.responses import success, error
 
 @jwt_required()
 def sessions():
-    user_id = get_jwt_identity()
-    sessions = user_service.get_open_sessions(user_id=int(user_id))
-    return jsonify({"result": sessions})
+    
+    try:
+        user_id = get_jwt_identity()
+        sessions = user_service.get_open_sessions(user_id=int(user_id))
+        return success(data=sessions, message="Open sessions retrieved successfully", status_code=200)
+    except Exception as e:
+        return error(message=str(e), status_code=500)
 
 
 @jwt_required()
 @track_activity
 def close_session(sessionId):
-    user_id = get_jwt_identity()
-    sessions = user_service.close_session(sessionId=sessionId, user_id=int(user_id))
-    return jsonify({"result": sessions})
-
+    try:
+        user_id = get_jwt_identity()
+        sessions = user_service.close_session(sessionId=sessionId, user_id=int(user_id))
+        return success(data=sessions, message="Session closed successfully", status_code=200)
+    except Exception as e:
+        return error(message=str(e), status_code=500)
 
 
 def login():
     return auth_service.login()
 
 
-def logout():
-    # TODO: gestionar invalidación del token en tabla de sesiones
-    return jsonify({"result": "ok"}), 200
+@jwt_required()
+@track_activity
+def logout(sessionId):
+    try:
+        user_id = get_jwt_identity()
+        sessions = user_service.close_session(sessionId=sessionId, user_id=int(user_id))
+        return success(data=sessions, message="Session closed successfully", status_code=200)
+    except Exception as e:
+        return error(message=str(e), status_code=500)
 
 
 @jwt_required(refresh=True)
 @track_activity
 def refresh_token():
-    identity = get_jwt_identity()     # recupera el mismo identity guardado en el refresh token
-    result = auth_service.refresh_token(user_id=int(identity))
-    
-    return jsonify({'result': result}), 200
+    try:
+        identity = get_jwt_identity()     # recupera el mismo identity guardado en el refresh token
+        result = auth_service.refresh_token(user_id=int(identity))
+        
+        return success(data=result, message="Token refreshed successfully", status_code=200)
+    except Exception as e:
+        return error(message=str(e), status_code=500)

@@ -4,7 +4,7 @@ from app.database import db
 from app.services import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity
-
+from app.utils.responses import success, error
 
 
 def hashear_password(password):
@@ -17,7 +17,11 @@ def hashear_password(password):
 def me():
     user_id = get_jwt_identity()  # devuelve lo que enviaste como identity
     user = user_service.get_user_by_id(user_id=int(user_id))
-    return jsonify({"result": user})
+    if not user:
+        return error("User not found", status_code=404)
+    
+    return success(data=user, message="User retrieved successfully", status_code=200)
+
 
 
 @jwt_required()
@@ -29,7 +33,7 @@ def get_users():
     if users:
         result = [user.__dict__ for user in users]
         #return jsonify({"result": result}), 200
-    return jsonify({"result": result}), 200
+    return success(data=result, message="Users retrieved successfully", status_code=200)
 
 
 
@@ -37,19 +41,13 @@ def get_users():
 @track_activity
 def get_user(userId):
     user = user_service.get_user_by_id(user_id=userId)
-    if user:
-        return jsonify({"result": user}), 200
-    
-    return jsonify({"result": None}), 200
+    return success(data=user, message="User retrieved successfully", status_code=200)
 
 @jwt_required()
 @track_activity
 def get_user_by_name(userName):
     user = user_service.get_user_by_user_name(user_name=userName)
-    if user:
-        return jsonify({"result": user}), 200
-    
-    return jsonify({"result": None}), 200
+    return success(data=user, message="User retrieved successfully", status_code=200)
 
 
 

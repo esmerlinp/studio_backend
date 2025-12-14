@@ -146,7 +146,9 @@ def get_open_sessions(user_id: int) -> List[dict]:
     return sessions
 
 def close_session(sessionId, user_id:int) -> dict:
-    db.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion = %s AND idusuario = %s", (sessionId, int(user_id), ))
-
+    value = db.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion = %s AND idusuario = %s", (sessionId, int(user_id), ))
+    if value == 0:
+        return {"sessionId": 0}
+    
     return {"sessionId": sessionId}
 

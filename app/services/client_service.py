@@ -1,9 +1,6 @@
 
-from flask import Blueprint, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.middlewares.track_activity import track_activity
-from app.database import db
-clientes_bp = Blueprint('clientes', __name__, url_prefix='/api')
+
+from flask_jwt_extended import  get_jwt_identity
 
 client_preferences = [
   {
@@ -57,15 +54,14 @@ client_preferences = [
 
 
 
-@jwt_required()
-@track_activity
+
 def get_client_preferences():
-    user_id = get_jwt_identity()  # devuelve lo que enviaste como identity
+    #user_id = get_jwt_identity()  # devuelve lo que enviaste como identity
 
     # user = user_model.get_user_by_id(user_id=int(user_id))
-    is_admin = db.fetch_one("select idrol from usuariosroles where idusuario=%s and idrol=1", (int(user_id),))
-    if not is_admin:
-        return jsonify({"msg": "Acceso no autorizado"}), 403
+    # is_admin = db.fetch_one("select idrol from usuariosroles where idusuario=%s and idrol=1", (int(user_id),))
+    # if not is_admin:
+    #     return jsonify({"msg": "Acceso no autorizado"}), 403
     
     
-    return client_preferences[0]
+    return {"user_id": 1, "preferences": []}

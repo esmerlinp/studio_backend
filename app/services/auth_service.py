@@ -1,11 +1,10 @@
 from flask import  request, jsonify
 from werkzeug.security import check_password_hash
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, create_refresh_token
 from datetime import timedelta
 from app.database import db   # conexión a BD
-from app.services.user_service import get_user_by_user_name_with_passwd
-from app.middlewares.track_activity import track_activity
-
+from app.services.user_service import get_user_by_user_name_with_passwd, get_user_by_id, close_session
+from app.utils.responses import success, error
 
 
 INACTIVITY_MINUTES = 10  # tiempo de inactividad permitido
@@ -57,7 +56,7 @@ def login():
 
 
     if not user:
-        return jsonify({"msg": "Credenciales inválidas"}), 401
+        return error("Invalid username or password", status_code=401)
 
     # TODO: Activar cuando las claves estén encriptadas en la BD
     # if not verificar_password(user['scontrasena'], password):
@@ -65,7 +64,7 @@ def login():
 
     # TEMPORAL — Contraseñas sin hash
     if password != user.password:
-        return jsonify({"msg": "Credenciales inválidas"}), 401
+        return error("Invalid password", status_code=401)
 
     # Crear Access Token con datos NO sensibles
     # identity = {
@@ -107,15 +106,20 @@ def login():
     response_data['accessToken'] = access_token
     response_data['refresh_token'] = refresh_token
 
-    return jsonify({"result": response_data}), 200
+    return success(data=response_data, message="Login successful", status_code=200)
 
 
 
 
 
-def logout():
+
+def logout(user_id:int, sessionId:int):
     # TODO: gestionar invalidación del token en tabla de sesiones
-    return {"result": "ok"}, 200
+    result = close_session(sessionId=sessionId, user_id=user_id)
+    if sessionId != result.get("sessionId", 0):
+        return error("Session not found or already closed", status_code=404)
+        
+    return success(data={"sessionId": sessionId}, message="Logout successful", status_code=200) 
 
 
 
@@ -123,9 +127,9 @@ def logout():
 
 
 def refresh_token(user_id: int):
-    user = user_model.get_user_by_id(user_id=int(user_id))
+    user = get_user_by_id(user_id=int(user_id))
     if not user:
-        return jsonify({"msg": "Usuario no encontrado"}), 404
+        return error("User not found", status_code=404)
     
     additional_claims={
         "username": user.username,
@@ -137,7 +141,7 @@ def refresh_token(user_id: int):
                                            additional_claims=additional_claims
                                         )
     if not new_access_token:
-        return jsonify({"msg": "Error al generar el nuevo token"}), 500
+        return error("Error generating new token", status_code=500)
     
     result = {
         "accessToken": new_access_token
