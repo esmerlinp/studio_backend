@@ -44,3 +44,18 @@ def send_reset_email(email: str, token: str, userName = ""):
     )
 
     mail.send(msg)
+    
+    
+def send_email(subject:str, to:list[str], path_template, **kwargs):
+ 
+    msg = Message(
+        subject=subject,
+        recipients=to
+    )
+
+    msg.html = render_template(
+        path_template,
+        kwargs
+    )
+
+    mail.send(msg)

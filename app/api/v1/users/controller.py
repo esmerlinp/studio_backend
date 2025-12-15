@@ -88,7 +88,7 @@ def forgot_password():
     print(f"Generated token: {token}")
     #reset_url = f"{current_app.config['FRONTEND_URL']}/reset-password?token={token}"
     
-    send_reset_email(email="epaniagua@camsoft.com.do", token=token, userName=user.firstName)
+    send_reset_email(email=user.email, token=token, userName=user.firstName)
 
     return {"message": "Si el correo existe, se enviará un enlace"}, 200
 
