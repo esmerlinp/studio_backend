@@ -4,16 +4,13 @@ from dotenv import load_dotenv
 from app.api.v1.users.routes import users_bp
 from app.api.v1.auth.routes import auth_bp
 from app.api.v1.clients.routes import client_bp
+from app.services.user_service import change_user_password
+import os
+from app import create_app
 
 
-app = Flask(__name__)
+app = create_app()
 
-load_dotenv()
-
-# Clave secreta para firmar los tokens
-app.config["JWT_SECRET_KEY"] = "super-secret-key-123"  # cámbiala por una segura
-# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)     # token corto
-# app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(hours=24)    # token largo
 
 jwt = JWTManager(app)
 
@@ -27,10 +24,42 @@ def hola_mundo():
     return '¡Hola desde Flask!'
 
 
+
+from flask import render_template
+from app.utils.helpers import verify_reset_token
+@app.route("/reset-password")
+def reset_password_page():
+    token = request.args.get("token")
+
+    if not token or verify_reset_token(token) in (None, "expired"):
+        return render_template("errors/token_invalid.html"), 400
+
+    return render_template("emails/es/reset_password.html")
+
+
+
+@app.post("/auth/reset-password")
+def reset_password():
+    data = request.json
+    token = data.get("token")
+    password = data.get("password")
+
+    user_id = verify_reset_token(token)
+
+    if user_id in (None, "expired"):
+        return {"error": "Token inválido o expirado"}, 400
+
+    user = change_user_password(user_id=user_id, new_password=password)
+    if not user:
+        return {"error": "Usuario no encontrado"}, 404
+
+    return {"message": "Contraseña actualizada correctamente"}
+
+
+
 @app.route('/ip')
 def get_ip():
     return f'Tu IP es: {request.remote_addr}'
-
 
 
 

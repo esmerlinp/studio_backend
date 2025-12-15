@@ -3,7 +3,10 @@ from flask import jsonify, request
 from flask_jwt_extended import get_jwt_identity
 from datetime import datetime, timedelta
 from app.database import db
-
+from flask import Flask
+from dotenv import load_dotenv
+import os
+from .extensions import mail
 
 INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 
@@ -17,6 +20,31 @@ INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 # Si está expirada por inactividad → devuelve error 440.
 
 # Si está activa → actualiza ultimo_acceso y renueva expiracion.
+
+
+
+def create_app():
+    load_dotenv()
+
+    app = Flask(__name__)
+    app.config["JWT_SECRET_KEY"] = "super-secret-key-123"  # cámbiala por una segura
+    
+    app.config.update(
+        SECRET_KEY=os.getenv("SECRET_KEY"),
+        FRONTEND_URL=os.getenv("FRONTEND_URL"),
+
+        MAIL_SERVER=os.getenv("MAIL_SERVER"),
+        MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
+        MAIL_USE_TLS=os.getenv("MAIL_USE_TLS") == "true",
+        MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+        MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+        MAIL_DEFAULT_SENDER=os.getenv("MAIL_DEFAULT_SENDER"),
+    )
+
+    # 🔑 ESTA LÍNEA ES LA QUE TE FALTA
+    mail.init_app(app)
+
+    return app
 
 
 def track_activity(func):

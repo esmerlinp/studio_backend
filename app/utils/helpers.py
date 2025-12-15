@@ -1,0 +1,46 @@
+from itsdangerous import SignatureExpired, BadSignature, URLSafeTimedSerializer
+from flask_mail import Message
+from flask import render_template, current_app
+from app.extensions import mail
+
+
+def get_serializer():
+    return URLSafeTimedSerializer(
+        secret_key=current_app.config["SECRET_KEY"],
+        salt="password-reset"
+    )
+
+
+def generate_reset_token(user_id: int) -> str:
+    serializer = get_serializer()
+    return serializer.dumps({"user_id": user_id})
+
+
+def verify_reset_token(token: str, max_age=1800):
+    serializer = get_serializer()
+    try:
+        data = serializer.loads(
+            token,
+            max_age=max_age
+        )
+        return data["user_id"]
+    except SignatureExpired:
+        return "expired"
+    except BadSignature:
+        return None
+
+
+def send_reset_email(email: str, token: str, userName = ""):
+    reset_url = f"{current_app.config['FRONTEND_URL']}/reset-password?token={token}"
+
+    msg = Message(
+        subject="Cambio de contraseña",
+        recipients=[email]
+    )
+
+    msg.html = render_template(
+        "emails/es/reset_password_notify.html",
+        reset_url=reset_url, name=userName, expiration_minutes="30"
+    )
+
+    mail.send(msg)

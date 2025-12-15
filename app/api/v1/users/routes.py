@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.api.v1.users.controller import get_user, get_users, create_user, me, get_user_by_name, change_password
+from app.api.v1.users.controller import get_user, get_users, create_user, me, get_user_by_name, change_password, forgot_password
 
 
 users_bp = Blueprint('users', __name__, url_prefix='/api/v1/users')
@@ -13,3 +13,4 @@ users_bp.get("/me")(me)
 # POSTS
 users_bp.post("/")(create_user) 
 users_bp.post("/changepassword")(change_password) 
+users_bp.post("/forgot-password")(forgot_password) 

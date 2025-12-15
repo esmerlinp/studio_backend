@@ -5,7 +5,8 @@ from app.services import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity
 from app.utils.responses import success, error
-
+from app.utils.helpers import generate_reset_token, send_reset_email
+from flask import current_app
 
 def hashear_password(password):
     return generate_password_hash(password)
@@ -69,6 +70,27 @@ def change_password():
         
     except Exception as e:
         return error(message=str(e), status_code=500)
+
+
+
+
+
+
+def forgot_password():
+    email = request.json.get("email")
+
+    user = user_service.get_user_by_email(email=email)
+    if not user:
+        # No reveles si el usuario existe
+        return {"message": "Si el correo existe, se enviará un enlace"}, 200
+
+    token = generate_reset_token(user.userId)
+    print(f"Generated token: {token}")
+    #reset_url = f"{current_app.config['FRONTEND_URL']}/reset-password?token={token}"
+    
+    send_reset_email(email="epaniagua@camsoft.com.do", token=token, userName=user.firstName)
+
+    return {"message": "Si el correo existe, se enviará un enlace"}, 200
 
 
 @jwt_required()
