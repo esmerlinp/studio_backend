@@ -50,6 +50,26 @@ def get_user_by_name(userName):
     return success(data=user, message="User retrieved successfully", status_code=200)
 
 
+@jwt_required()
+@track_activity
+def change_password():
+    try:
+        new_password = request.json.get('new_password')
+        sessionId = request.json.get('sessionId')
+        
+        identity = get_jwt_identity()     # recupera el mismo identity guardado en el refresh token
+        result = user_service.change_user_password(user_id=int(identity), new_password=new_password, sessionId=sessionId)
+        if not result:
+            return error(message="User not found or password not changed", status_code=404)
+        
+        return success(data=result, message="Password changed successfully", status_code=200)
+    
+       
+        
+        
+    except Exception as e:
+        return error(message=str(e), status_code=500)
+
 
 @jwt_required()
 @track_activity

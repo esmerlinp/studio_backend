@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import request
 from app.services import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity
@@ -7,7 +7,6 @@ from app.utils.responses import success, error
 
 @jwt_required()
 def sessions():
-    
     try:
         user_id = get_jwt_identity()
         sessions = user_service.get_open_sessions(user_id=int(user_id))
@@ -52,3 +51,5 @@ def refresh_token():
         return success(data=result, message="Token refreshed successfully", status_code=200)
     except Exception as e:
         return error(message=str(e), status_code=500)
+    
+    

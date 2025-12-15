@@ -3,6 +3,7 @@ from app.models.user_model import UserModel
 from typing import Optional
 from app.database import db
 from flask import request
+from werkzeug.security import  generate_password_hash
 
 def get_user_by_user_name_with_passwd(user_name) -> Optional[UserModel]:
     user = db.fetch_one(
@@ -32,6 +33,20 @@ def get_user_by_user_name_with_passwd(user_name) -> Optional[UserModel]:
         recoveryToken=user.get("stokenrecuperacion"),
         username=user.get("susuario")
     )
+
+
+def change_user_password(user_id:int, new_password:int, sessionId:int) -> Optional[UserModel]:
+    password_hashed = generate_password_hash(password=new_password)
+    
+    value = db.execute_non_query("UPDATE usuarios SET scontrasena = %s WHERE idusuario = %s", (password_hashed, user_id, ))
+    if value == 0:
+        return None
+    #forzar cierre de sesiones abiertas excepto la actual
+    close_all_session_except_current(sessionId=sessionId, user_id=user_id)
+    
+    
+    return get_user_by_id(user_id=user_id)
+
 
 
 
@@ -151,4 +166,20 @@ def close_session(sessionId, user_id:int) -> dict:
         return {"sessionId": 0}
     
     return {"sessionId": sessionId}
+
+def close_all_session_except_current(sessionId, user_id:int) -> dict:
+    """Cierra todas las sesiones activas de un usuario excepto la actual"""
+    value = db.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion <> %s AND idusuario = %s", (sessionId, int(user_id), ))
+    if value == 0:
+        return {"sessionId": 0}
+    
+    return {"sessionId": sessionId}
+
+def close_all_session(user_id:int) -> dict:
+    """Cierra todas las sesiones activas de un usuario"""
+    value = db.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuario = %s", (int(user_id), ))
+    if value == 0:
+        return {"sessionId": 0}
+    
+    return {"sessionId": value}
 

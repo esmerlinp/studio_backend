@@ -79,24 +79,23 @@ def fetch_one(query, params=None, as_dict=True):
             db_pool.putconn(conn)
 
 
-def execute_non_query(query, params=None):
-    """
-    Ejecuta INSERT, UPDATE, DELETE.
-    Retorna cantidad de filas afectadas.
-    
-    Example:
-        filas = execute_non_query(
-            "UPDATE clientes SET status = %s WHERE client_id = %s",
-            ("INACTIVO", 15)
-        )
-        print(f"Filas afectadas: {filas}")
-    """
+def execute_non_query(query, params=None, return_id=False):
     conn = None
     try:
         conn = get_connection()
 
         with conn.cursor() as cur:
             cur.execute(query, params)
+
+            if return_id:
+                if cur.description:  # ← solo si hay RETURNING
+                    row = cur.fetchone()
+                    conn.commit()
+                    return row[0] if row else None
+                else:
+                    conn.commit()
+                    return None
+
             conn.commit()
             return cur.rowcount
 
@@ -104,11 +103,13 @@ def execute_non_query(query, params=None):
         print(f"[execute_non_query] Error: {e}")
         if conn:
             conn.rollback()
-        return 0
+        return None if return_id else 0
 
     finally:
         if conn:
             db_pool.putconn(conn)
+
+
 
 
 

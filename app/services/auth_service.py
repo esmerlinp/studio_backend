@@ -39,10 +39,10 @@ def validar_login_payload(data):
 # -----------------------------
 def login():
     data = request.json
-    error = validar_login_payload(data)
+    error_data = validar_login_payload(data)
 
-    if error:
-        return jsonify({"error": error}), 400
+    if error_data:
+        return jsonify({"error": error_data}), 400
 
     username = data["username"]
     password = data["password"]
@@ -59,12 +59,12 @@ def login():
         return error("Invalid username or password", status_code=401)
 
     # TODO: Activar cuando las claves estén encriptadas en la BD
-    # if not verificar_password(user['scontrasena'], password):
-    #     return jsonify({"error": "Credenciales inválidas"}), 401
+    if not verificar_password(user.password, password):
+        return jsonify({"error": "Credenciales inválidas"}), 401
 
     # TEMPORAL — Contraseñas sin hash
-    if password != user.password:
-        return error("Invalid password", status_code=401)
+    # if password != user.password:
+    #     return error("Invalid password", status_code=401)
 
     # Crear Access Token con datos NO sensibles
     # identity = {
@@ -95,6 +95,10 @@ def login():
         VALUES (%s, %s, NOW() + INTERVAL '%s minutes')
     """, (user.userId, refresh_token, INACTIVITY_MINUTES))
     
+    session_id = db.fetch_one("""select idusuariosesion from usuariossesiones 
+                                where idusuario=%s and srefreshtoken=%s""",
+                                (user.userId, refresh_token))
+    
     #TODO: usar este cuando se cree el campo ip en la tabla de sesiones
     # db.execute_non_query("""
     #     INSERT INTO usuariossesiones (idusuario, srefreshtoken, dfechaexpiracion, ssessionip)
@@ -105,6 +109,7 @@ def login():
     del response_data['password']
     response_data['accessToken'] = access_token
     response_data['refresh_token'] = refresh_token
+    response_data['sessionId'] = session_id['idusuariosesion']
 
     return success(data=response_data, message="Login successful", status_code=200)
 
