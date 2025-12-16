@@ -6,6 +6,7 @@ from app.api.v1.clients.routes import client_bp
 from app.services.user_service import change_user_password
 from app import create_app
 from app.models.user_model import User
+from app.utils import i18n
 
 app = create_app()
 
@@ -15,6 +16,13 @@ jwt = JWTManager(app)
 app.register_blueprint(users_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(client_bp)
+
+
+# ------------------------------
+# Configuración de idioma
+# ------------------------------
+culture = "es-DO"
+i18n.setup_gettext("es")
 
 
 # @app.route('/')

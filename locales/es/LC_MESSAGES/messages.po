@@ -1,0 +1,34 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: es\n"
+
+
+msgid "common.open_sessions_retrieved_successfully"
+msgstr "Sesiones abiertas obtenidas correctamente"
+
+msgid "common.session_closed_successfully"
+msgstr "Sesión cerrada correctamente"
+
+msgid "common.token_refreshed_successfully"
+msgstr "Token actualizado correctamente"
+
+
+msgid "common.auth.reset_password_email_sent_if_exists"
+msgstr "Si el correo existe, se enviará un enlace"
+
+msgid "common.users.created_successfully"
+msgstr "Usuario creado correctamente"
+
+msgid "common.auth.password_changed_successfully"
+msgstr "Contraseña cambiada correctamente"
+
+msgid "common.users.not_found_or_password_not_changed"
+msgstr "Usuario no encontrado o la contraseña no fue cambiada"
+
+msgid "common.users.retrieved_successfully"
+msgstr "Usuario obtenido correctamente"
+
+msgid "common.users.not_found"
+msgstr "Usuario no encontrado"

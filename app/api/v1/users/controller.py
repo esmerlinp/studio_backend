@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity
 from app.utils.responses import success, error
 from app.utils.helpers import generate_reset_token, send_reset_email
-
+from app.utils import i18n
 
 def hashear_password(password):
     return generate_password_hash(password)
@@ -18,9 +18,9 @@ def me():
     user_id = get_jwt_identity()  # devuelve lo que enviaste como identity
     user = user_service.get_user_by_id(user_id=int(user_id))
     if not user:
-        return success(data={}, message="User not found", status_code=200)
+        return success(data={}, message=i18n._("common.users.not_found"), status_code=200)
     
-    return success(data=user.to_dict(), message="User retrieved successfully", status_code=200)
+    return success(data=user.to_dict(), message=i18n._("common.users.retrieved_successfully"), status_code=200)
 
 
 
@@ -33,7 +33,7 @@ def get_users():
     if users:
         result = [user.to_dict() for user in users]
         #return jsonify({"result": result}), 200
-    return success(data=result, message="Users retrieved successfully", status_code=200)
+    return success(data=result, message=i18n._("common.users.retrieved_successfully"), status_code=200)
 
 
 
@@ -42,18 +42,18 @@ def get_users():
 def get_user(userId):
     user = user_service.get_user_by_id(user_id=userId)
     if not user:
-        return success(data={}, message="User not found", status_code=200)
+        return success(data={}, message=i18n._("common.users.not_found"), status_code=200)
     
-    return success(data=user.to_dict(), message="User retrieved successfully", status_code=200)
+    return success(data=user.to_dict(), message=i18n._("common.users.retrieved_successfully"), status_code=200)
 
 @jwt_required()
 @track_activity
 def get_user_by_name(userName):
     user = user_service.get_user_by_user_name(user_name=userName)
     if not user:
-        return success(data={}, message="User not found", status_code=200)
+        return success(data={}, message=i18n._("common.users.not_found"), status_code=200)
     
-    return success(data=user.to_dict(), message="User retrieved successfully", status_code=200)
+    return success(data=user.to_dict(), message=i18n._("common.users.retrieved_successfully"), status_code=200)
 
 
 @jwt_required()
@@ -66,11 +66,10 @@ def change_password():
         identity = get_jwt_identity()     # recupera el mismo identity guardado en el refresh token
         user = user_service.change_user_password(user_id=int(identity), new_password=new_password, sessionId=sessionId)
         if not user:
-            return error(message="User not found or password not changed", status_code=404)
-        
-        return success(data=user.to_dict(), message="Password changed successfully", status_code=200)
-    
-       
+            return error(message=i18n._("common.users.not_found_or_password_not_changed"), status_code=404)
+
+        return success(data=user.to_dict(), message=i18n._("common.auth.password_changed_successfully"), status_code=200)
+
         
         
     except Exception as e:
@@ -87,19 +86,19 @@ def forgot_password():
     user = user_service.get_user_by_email(email=email)
     if not user:
         # No reveles si el usuario existe
-        return success(data={}, message="Si el correo existe, se enviará un enlace", status_code=200)
+        return success(data={}, message=i18n._("common.auth.reset_password_email_sent_if_exists"), status_code=200)
 
     token = generate_reset_token(user.userId)
     send_reset_email(email=user.email, token=token, userName=user.firstName)
 
-    return success(data={}, message="Si el correo existe, se enviará un enlace", status_code=200)
+    return success(data={}, message=i18n._("common.auth.reset_password_email_sent_if_exists"), status_code=200)
 
 
 @jwt_required()
 @track_activity
 def create_user():
     data = request.json
-    return success(data=data, message="User created successfully", status_code=201)
+    return success(data=data, message=i18n._("common.users.created_successfully"), status_code=201)
 
 
 
