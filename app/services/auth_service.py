@@ -2,7 +2,6 @@ from flask import  request, jsonify
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 from datetime import timedelta
-from app.database import db   # conexión a BD
 from app.services.user_service import get_user_by_user_name_with_passwd, get_user_by_id
 from app.services.session_service import close_session, create_session, get_session_active_by_refresh_token
 from app.utils.responses import success, error

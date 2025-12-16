@@ -1,12 +1,11 @@
-from flask import request, jsonify
+from flask import request
 from werkzeug.security import generate_password_hash
-from app.database import db
 from app.services import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity
 from app.utils.responses import success, error
 from app.utils.helpers import generate_reset_token, send_reset_email
-from flask import current_app
+
 
 def hashear_password(password):
     return generate_password_hash(password)
@@ -100,54 +99,7 @@ def forgot_password():
 @track_activity
 def create_user():
     data = request.json
-    password_encriptada = hashear_password(data['password'])
-    
-    filas = db.execute_non_query(
-        """
-        INSERT INTO usuarios (
-            bactivo,
-            bbloqueado,
-            bcambiarcontrasena,
-            busuarioconfirmado,
-            dexpiraciontoken,
-            dfechabloqueo,
-            dfechaultcambiocont,
-            dultimologin,
-            iintentoslogin,
-            sapellidos,
-            scontrasena,
-            scorreoelectronico,
-            sfoto,
-            snombres,
-            stokenrecuperacion,
-            susuario
-        )
-        VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, %s, %s, %s, %s
-        )
-        RETURNING idusuario
-        """,
-        (
-            data["activo"],
-            data["bloqueado"],
-            data["cambiarcontrasena"],
-            data["usuarioconfirmado"],
-            data["expiraciontoken"],     # null → None
-            data["fechabloqueo"],        # null → None
-            data["fechaultcambiocont"],
-            data["ultimologin"],         # null → None
-            data["intentoslogin"],
-            data["apellidos"],
-            password_encriptada,
-            data["correoelectronico"],
-            data["foto"],                # null → None
-            data["nombres"],
-            data["tokenrecuperacion"],   # null → None
-            data["usuario"]
-        )
-    )
-    return filas
+    return success(data=data, message="User created successfully", status_code=201)
 
 
 

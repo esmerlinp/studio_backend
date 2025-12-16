@@ -1,8 +1,6 @@
 from functools import wraps
 from flask import jsonify
 from flask_jwt_extended import get_jwt_identity
-from datetime import  timedelta
-from app.database import db as database
 from flask import Flask
 from dotenv import load_dotenv
 import os
@@ -30,7 +28,7 @@ def create_app():
     load_dotenv()
 
     app = Flask(__name__)
-    app.config["JWT_SECRET_KEY"] = "super-secret-key-123"  # cámbiala por una segura
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")  # cámbiala por una segura
     
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
