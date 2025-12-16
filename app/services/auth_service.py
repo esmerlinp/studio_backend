@@ -3,7 +3,8 @@ from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 from datetime import timedelta
 from app.database import db   # conexión a BD
-from app.services.user_service import get_user_by_user_name_with_passwd, get_user_by_id, close_session
+from app.services.user_service import get_user_by_user_name_with_passwd, get_user_by_id
+from app.services.session_service import close_session, create_session, get_session_active_by_refresh_token
 from app.utils.responses import success, error
 
 
@@ -90,25 +91,20 @@ def login():
     
     
 
-    db.execute_non_query("""
-        INSERT INTO usuariossesiones (idusuario, srefreshtoken, dfechaexpiracion)
-        VALUES (%s, %s, NOW() + INTERVAL '%s minutes')
-    """, (user.userId, refresh_token, INACTIVITY_MINUTES))
-    
-    session_id = db.fetch_one("""select idusuariosesion from usuariossesiones 
-                                where idusuario=%s and srefreshtoken=%s""",
-                                (user.userId, refresh_token))
-    
-    #TODO: usar este cuando se cree el campo ip en la tabla de sesiones
     # db.execute_non_query("""
-    #     INSERT INTO usuariossesiones (idusuario, srefreshtoken, dfechaexpiracion, ssessionip)
-    #     VALUES (%s, %s, NOW() + INTERVAL '%s minutes', %s)
-    # """, (user.userId, refresh_token, INACTIVITY_MINUTES, request.remote_addr))
+    #     INSERT INTO usuariossesiones (idusuario, srefreshtoken, dfechaexpiracion)
+    #     VALUES (%s, %s, NOW() + INTERVAL '%s minutes')
+    # """, (user.userId, refresh_token, INACTIVITY_MINUTES))
+    session = create_session(userId=user.userId, refreshToken=refresh_token, inactivity_minutes=INACTIVITY_MINUTES)
+    if session is None:
+        return error("Error creating user session", status_code=500)
+    
+    session_create = get_session_active_by_refresh_token(refreshToken=refresh_token)
 
     response_data = user.to_dict()
     response_data['accessToken'] = access_token
     response_data['refresh_token'] = refresh_token
-    response_data['sessionId'] = session_id['idusuariosesion']
+    response_data['sessionId'] = session_create.sessionId
 
     return success(data=response_data, message="Login successful", status_code=200)
 

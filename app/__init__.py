@@ -1,12 +1,13 @@
 from functools import wraps
-from flask import jsonify, request
+from flask import jsonify
 from flask_jwt_extended import get_jwt_identity
-from datetime import datetime, timedelta
+from datetime import  timedelta
 from app.database import db as database
 from flask import Flask
 from dotenv import load_dotenv
 import os
 from .extensions import mail, db
+from app.services.session_service import get_session_active_by_user_id, invalidar_sesiones_por_id_session, actualizar_actividad_sesion
 
 
 
@@ -62,11 +63,13 @@ def track_activity(func):
         try:
             user_id = get_jwt_identity()
             # Buscar la sesión activa del usuario
-            session = database.fetch_one("""
-                SELECT * FROM usuariossesiones
-                WHERE idusuario = %s AND bactivo = TRUE
-                ORDER BY idusuariosesion DESC LIMIT 1
-            """, (user_id,))
+            # session = database.fetch_one("""
+            #     SELECT * FROM usuariossesiones
+            #     WHERE idusuario = %s AND bactivo = TRUE
+            #     ORDER BY idusuariosesion DESC LIMIT 1
+            # """, (user_id,))
+            
+            session = get_session_active_by_user_id(userId=user_id)
 
             if not session:
                 return jsonify({"msg": "Sesión inválida"}), 440
@@ -75,21 +78,23 @@ def track_activity(func):
             from datetime import datetime, timezone
             now = datetime.now(timezone.utc)
             # Si expiró por inactividad
-            if session["dfechaexpiracion"] < now:
-                database.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion = %s", (session["idusuariosesion"],))
+            if session.expirationDate < now:
+                invalidar_sesiones_por_id_session(sessionId=session.sessionId)
+                #database.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion = %s", (session["idusuariosesion"],))
                 return jsonify({"msg": "Sesión expirada por inactividad"}), 440
 
             # Actualizar actividad
-            database.execute_non_query("""
-                UPDATE usuariossesiones 
-                SET dultimoacceso = %s,
-                    dfechaexpiracion = %s
-                WHERE idusuariosesion = %s
-            """, (
-                now,
-                now + timedelta(minutes=INACTIVITY_MINUTES),
-                session["idusuariosesion"]
-            ))
+            actualizar_actividad_sesion(sessionId=session.sessionId, inactivity_minutes=INACTIVITY_MINUTES)
+            # database.execute_non_query("""
+            #     UPDATE usuariossesiones 
+            #     SET dultimoacceso = %s,
+            #         dfechaexpiracion = %s
+            #     WHERE idusuariosesion = %s
+            # """, (
+            #     now,
+            #     now + timedelta(minutes=INACTIVITY_MINUTES),
+            #     session["idusuariosesion"]
+            # ))
 
             return func(*args, **kwargs)
 

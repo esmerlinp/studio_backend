@@ -1,5 +1,5 @@
 from flask import request
-from app.services import user_service
+from app.services import user_service, session_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity
 from app.services import auth_service
@@ -9,8 +9,9 @@ from app.utils.responses import success, error
 def sessions():
     try:
         user_id = get_jwt_identity()
-        sessions = user_service.get_open_sessions(user_id=int(user_id))
-        return success(data=sessions, message="Open sessions retrieved successfully", status_code=200)
+        sessions = session_service.get_open_sessions(user_id=int(user_id))
+        data = [s.to_dict() for s in sessions]
+        return success(data=data, message="Open sessions retrieved successfully", status_code=200)
     except Exception as e:
         return error(message=str(e), status_code=500)
 
@@ -20,7 +21,7 @@ def sessions():
 def close_session(sessionId):
     try:
         user_id = get_jwt_identity()
-        sessions = user_service.close_session(sessionId=sessionId, user_id=int(user_id))
+        sessions = session_service.close_session(sessionId=sessionId, user_id=int(user_id))
         return success(data=sessions, message="Session closed successfully", status_code=200)
     except Exception as e:
         return error(message=str(e), status_code=500)
@@ -35,7 +36,7 @@ def login():
 def logout(sessionId):
     try:
         user_id = get_jwt_identity()
-        sessions = user_service.close_session(sessionId=sessionId, user_id=int(user_id))
+        sessions = session_service.close_session(sessionId=sessionId, user_id=int(user_id))
         return success(data=sessions, message="Session closed successfully", status_code=200)
     except Exception as e:
         return error(message=str(e), status_code=500)
