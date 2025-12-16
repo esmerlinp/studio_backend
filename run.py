@@ -1,13 +1,11 @@
-from flask import Flask, request
+from flask import request
 from flask_jwt_extended import JWTManager
-from dotenv import load_dotenv
 from app.api.v1.users.routes import users_bp
 from app.api.v1.auth.routes import auth_bp
 from app.api.v1.clients.routes import client_bp
 from app.services.user_service import change_user_password
-import os
 from app import create_app
-
+from app.models.user_model import User
 
 app = create_app()
 
@@ -19,9 +17,14 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(client_bp)
 
 
-@app.route('/')
-def hola_mundo():
-    return '¡Hola desde Flask!'
+# @app.route('/')
+# def hola_mundo():
+#     return '¡Hola desde Flask!'
+
+@app.route("/")
+def index():
+    users = User.query.all()
+    return {"users": [u.email for u in users]}
 
 
 
@@ -64,4 +67,5 @@ def get_ip():
 
 
 if __name__ == '__main__':
+        
     app.run(debug=True)

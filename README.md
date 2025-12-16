@@ -1,1 +1,1 @@
-# cpstudio
+# cpstudio python 3.12

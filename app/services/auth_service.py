@@ -105,8 +105,7 @@ def login():
     #     VALUES (%s, %s, NOW() + INTERVAL '%s minutes', %s)
     # """, (user.userId, refresh_token, INACTIVITY_MINUTES, request.remote_addr))
 
-    response_data = user.__dict__
-    del response_data['password']
+    response_data = user.to_dict()
     response_data['accessToken'] = access_token
     response_data['refresh_token'] = refresh_token
     response_data['sessionId'] = session_id['idusuariosesion']

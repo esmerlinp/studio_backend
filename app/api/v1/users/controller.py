@@ -19,9 +19,9 @@ def me():
     user_id = get_jwt_identity()  # devuelve lo que enviaste como identity
     user = user_service.get_user_by_id(user_id=int(user_id))
     if not user:
-        return error("User not found", status_code=404)
+        return success(data={}, message="User not found", status_code=200)
     
-    return success(data=user, message="User retrieved successfully", status_code=200)
+    return success(data=user.to_dict(), message="User retrieved successfully", status_code=200)
 
 
 
@@ -32,7 +32,7 @@ def get_users():
     users = user_service.get_all_users()
     result = []
     if users:
-        result = [user.__dict__ for user in users]
+        result = [user.to_dict() for user in users]
         #return jsonify({"result": result}), 200
     return success(data=result, message="Users retrieved successfully", status_code=200)
 
@@ -42,13 +42,19 @@ def get_users():
 @track_activity
 def get_user(userId):
     user = user_service.get_user_by_id(user_id=userId)
-    return success(data=user, message="User retrieved successfully", status_code=200)
+    if not user:
+        return success(data={}, message="User not found", status_code=200)
+    
+    return success(data=user.to_dict(), message="User retrieved successfully", status_code=200)
 
 @jwt_required()
 @track_activity
 def get_user_by_name(userName):
     user = user_service.get_user_by_user_name(user_name=userName)
-    return success(data=user, message="User retrieved successfully", status_code=200)
+    if not user:
+        return success(data={}, message="User not found", status_code=200)
+    
+    return success(data=user.to_dict(), message="User retrieved successfully", status_code=200)
 
 
 @jwt_required()
@@ -59,11 +65,11 @@ def change_password():
         sessionId = request.json.get('sessionId')
         
         identity = get_jwt_identity()     # recupera el mismo identity guardado en el refresh token
-        result = user_service.change_user_password(user_id=int(identity), new_password=new_password, sessionId=sessionId)
-        if not result:
+        user = user_service.change_user_password(user_id=int(identity), new_password=new_password, sessionId=sessionId)
+        if not user:
             return error(message="User not found or password not changed", status_code=404)
         
-        return success(data=result, message="Password changed successfully", status_code=200)
+        return success(data=user.to_dict(), message="Password changed successfully", status_code=200)
     
        
         
@@ -82,15 +88,12 @@ def forgot_password():
     user = user_service.get_user_by_email(email=email)
     if not user:
         # No reveles si el usuario existe
-        return {"message": "Si el correo existe, se enviará un enlace"}, 200
+        return success(data={}, message="Si el correo existe, se enviará un enlace", status_code=200)
 
     token = generate_reset_token(user.userId)
-    print(f"Generated token: {token}")
-    #reset_url = f"{current_app.config['FRONTEND_URL']}/reset-password?token={token}"
-    
     send_reset_email(email=user.email, token=token, userName=user.firstName)
 
-    return {"message": "Si el correo existe, se enviará un enlace"}, 200
+    return success(data={}, message="Si el correo existe, se enviará un enlace", status_code=200)
 
 
 @jwt_required()
