@@ -29,11 +29,16 @@ i18n.setup_gettext("es")
 # def hola_mundo():
 #     return '¡Hola desde Flask!'
 
-@app.route("/")
-def index():
-    users = User.query.all()
-    return {"users": [u.email for u in users]}
+# @app.route("/")
+# def index():
+#     users = User.query.all()
+#     return {"users": [u.email for u in users]}
 
+@app.route('/')
+def home():
+    host = request.host  # Ej: "localhost:5000"
+    url_completa = request.host_url  # Ej: "http://localhost:5000/"
+    return f"URL del servidor: {url_completa} - {host}"
 
 
 from flask import render_template

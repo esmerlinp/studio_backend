@@ -1,6 +1,6 @@
 from itsdangerous import SignatureExpired, BadSignature, URLSafeTimedSerializer
 from flask_mail import Message
-from flask import render_template, current_app
+from flask import render_template, current_app, request
 from app.extensions import mail
 
 
@@ -31,7 +31,7 @@ def verify_reset_token(token: str, max_age=1800):
 
 
 def send_reset_email(email: str, token: str, userName = ""):
-    reset_url = f"{current_app.config['FRONTEND_URL']}/reset-password?token={token}"
+    reset_url = f"{request.host_url}/reset-password?token={token}"
 
     msg = Message(
         subject="Cambio de contraseña",
