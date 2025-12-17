@@ -16,7 +16,7 @@ jwt = JWTManager(app)
 app.register_blueprint(users_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(client_bp)
-
+#TODO: Agregar el blueprint de Notificaciones cuando se cree la tabla
 
 # ------------------------------
 # Configuración de idioma

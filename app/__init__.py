@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 from .extensions import mail, db
 from app.services.session_service import get_session_active_by_user_id, invalidar_sesiones_por_id_session, actualizar_actividad_sesion
+from app.services.log_service import log_action
 
 
 
@@ -101,3 +102,45 @@ def track_activity(func):
             return jsonify({"msg": "Error en seguimiento de sesión"}), 500
 
     return wrapper
+
+
+
+
+
+
+
+def audit_log(
+    action: str,
+    resource_type: str,
+    resource_id_arg: str | None = None,
+    description: str | None = None,
+):
+    """
+    Decorador para registrar acciones en el audit log.
+
+    Args:
+        action: create | update | delete | read
+        resource_type: nombre del recurso (employee, payroll, etc)
+        resource_id_arg: nombre del argumento de la función que contiene el ID
+    """
+
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            response = fn(*args, **kwargs)
+
+            resource_id = None
+            if resource_id_arg and resource_id_arg in kwargs:
+                resource_id = kwargs.get(resource_id_arg)
+
+            log_action(
+                action=action,
+                resource_type=resource_type,
+                resource_id=resource_id,
+                description=description
+            )
+
+            return response
+
+        return wrapper
+    return decorator
