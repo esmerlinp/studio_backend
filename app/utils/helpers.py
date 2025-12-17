@@ -46,7 +46,7 @@ def send_reset_email(email: str, token: str, userName = ""):
     mail.send(msg)
     
     
-def send_email(subject:str, to:list[str], path_template, **kwargs):
+def send_email_template(subject:str, to:list[str], path_template, **kwargs):
  
     msg = Message(
         subject=subject,
@@ -57,5 +57,16 @@ def send_email(subject:str, to:list[str], path_template, **kwargs):
         path_template,
         kwargs
     )
+
+    mail.send(msg)
+    
+def send_email(subject:str, to:list[str], message):
+ 
+    msg = Message(
+        subject=subject,
+        recipients=to,
+        body=message
+    )
+
 
     mail.send(msg)
