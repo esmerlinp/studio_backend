@@ -114,22 +114,23 @@ def update_user_preferences():
             user_id=user_id,
             language=data.get("language"),
             theme=data.get("theme"),
-            timezone_=data.get("timezone"),
-            date_format=data.get("date_format"),
-            receive_not_email=data.get("receive_not_email"),
-            push_notifications=data.get("push_notifications")
+            timezone_=data.get("timeZone"),
+            hour_format=data.get("hourFormat"),
+            date_format=data.get("dateFormat"),
+            receive_not_email=data.get("email"),
+            push_notifications=data.get("push")
         )
         return success(prefs.to_dict())
     except Exception as e:
-        error("an error has occure")
+        return error("an error has occure")
     
 
 @jwt_required()
 @track_activity
-def add_user_preferences():
+def add_default_user_preferences():
     user_id = get_jwt_identity() 
     try:
-        prefs = user_service.add_user_preference(
+        prefs = user_service.add_default_user_preferences(
             user_id=user_id,
         )
         return success(prefs.to_dict())

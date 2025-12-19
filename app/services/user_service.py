@@ -32,7 +32,7 @@ def get_user_preferences(user_id) -> Optional[UserPreference]:
     return prefs
 
 
-def add_user_preference(user_id:int,language="es", theme="light", timezone="America/Santo_Domingo", date_format="DD/MM/YYYY", 
+def add_default_user_preferences(user_id:int,language="es", theme="light", timezone="America/Santo_Domingo", date_format="DD/MM/YYYY", 
                         receive_not_email = True, 
                         push_notifications = False, 
                         hour_format = "24"):
@@ -74,11 +74,8 @@ def update_user_preference(
 
     # Crear si no existe
     if not prefs:
-        prefs = UserPreference(
-            userId=user_id,
-            preferences={}
-        )
-        db.session.add(prefs)
+        prefs = add_default_user_preferences(user_id=user_id)
+
 
     # Asegurar que preferences sea un dict
     if prefs.preferences is None:
@@ -87,7 +84,8 @@ def update_user_preference(
     # Actualizar solo lo que venga
     if language is not None:
         prefs.preferences["language"] = language
-        
+    
+
     if hour_format is not None:
         prefs.preferences["hourFormat"] = hour_format
 
@@ -107,7 +105,7 @@ def update_user_preference(
         prefs.preferences['notifications']["push"] = push_notifications
 
     prefs.updatedAt = datetime.now(timezone.utc)
-
+    #TODO: No esta actualizando en la base de datos VERIFICAR
     db.session.commit()
 
     return prefs
