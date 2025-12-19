@@ -75,9 +75,17 @@ def track_activity(func):
 
             #now = datetime.now()
             from datetime import datetime, timezone
-            now = datetime.now(timezone.utc)
+            # now = datetime.now(timezone.utc)
             # Si expiró por inactividad
-            if session.expirationDate < now:
+            
+            expiration = session.expirationDate
+
+            if expiration.tzinfo is None:
+                expiration = expiration.replace(tzinfo=timezone.utc)
+
+            now = datetime.now(timezone.utc)
+
+            if expiration < now:
                 invalidar_sesiones_por_id_session(sessionId=session.sessionId)
                 #database.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion = %s", (session["idusuariosesion"],))
                 return jsonify({"msg": "Sesión expirada por inactividad"}), 440

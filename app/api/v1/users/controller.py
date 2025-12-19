@@ -104,7 +104,38 @@ def create_user():
 
 
 
+@jwt_required()
+@track_activity
+def update_user_preferences():
+    data = request.json
+    user_id = get_jwt_identity() 
+    try:
+        prefs = user_service.update_user_preference(
+            user_id=user_id,
+            language=data.get("language"),
+            theme=data.get("theme"),
+            timezone_=data.get("timezone"),
+            date_format=data.get("date_format"),
+            receive_not_email=data.get("receive_not_email"),
+            push_notifications=data.get("push_notifications")
+        )
+        return success(prefs.to_dict())
+    except Exception as e:
+        error("an error has occure")
+    
 
+@jwt_required()
+@track_activity
+def add_user_preferences():
+    user_id = get_jwt_identity() 
+    try:
+        prefs = user_service.add_user_preference(
+            user_id=user_id,
+        )
+        return success(prefs.to_dict())
+    except Exception as e:
+        return error(f"an error has occure {e}")
+    
 
 
 

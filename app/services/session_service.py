@@ -6,13 +6,15 @@ from ..extensions import db
 from datetime import datetime, timezone
 
 
-def create_session(userId: int, refreshToken: str, inactivity_minutes:int) -> Session:
+def create_session(userId: int, refreshToken: str, inactivity_minutes:int, ipAddress:str, userAgent:str = None) -> Session:
     now = datetime.now(timezone.utc)
     session = Session(
         userId=userId,
         refreshToken=refreshToken,
         expirationDate=now + timedelta(minutes=inactivity_minutes),
         lastAccessDate=now,
+        ipAddress = ipAddress,
+        userAgent = userAgent,
         isActive=True
     )
     db.session.add(session)

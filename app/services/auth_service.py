@@ -2,7 +2,7 @@ from flask import  request, jsonify
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 from datetime import timedelta
-from app.services.user_service import get_user_by_user_name_with_passwd, get_user_by_id
+from app.services.user_service import get_user_by_user_name_with_passwd, get_user_by_id, get_user_preferences
 from app.services.session_service import close_session, create_session, get_session_active_by_refresh_token
 from app.utils.responses import success, error
 
@@ -58,22 +58,10 @@ def login():
     if not user:
         return error("Invalid username or password", status_code=401)
 
-    # TODO: Activar cuando las claves estén encriptadas en la BD
     if not verificar_password(user.password, password):
         return jsonify({"error": "Credenciales inválidas"}), 401
 
-    # TEMPORAL — Contraseñas sin hash
-    # if password != user.password:
-    #     return error("Invalid password", status_code=401)
 
-    # Crear Access Token con datos NO sensibles
-    # identity = {
-    #     "userId": user["idusuario"],
-    #     "userName": user["susuario"],
-    #     "email": user["scorreoelectronico"],
-    #     "uuidToken": token_uuid
-    # }
-    
     identity = str(user.userId)   # identity debe ser string
 
     # ACCESS TOKEN con claims adicionales
@@ -89,22 +77,20 @@ def login():
     refresh_token = create_refresh_token(identity=identity)
     
     
-
-    # db.execute_non_query("""
-    #     INSERT INTO usuariossesiones (idusuario, srefreshtoken, dfechaexpiracion)
-    #     VALUES (%s, %s, NOW() + INTERVAL '%s minutes')
-    # """, (user.userId, refresh_token, INACTIVITY_MINUTES))
-    session = create_session(userId=user.userId, refreshToken=refresh_token, inactivity_minutes=INACTIVITY_MINUTES)
+    session = create_session(userId=user.userId, refreshToken=refresh_token, inactivity_minutes=INACTIVITY_MINUTES, ipAddress=request.remote_addr, userAgent=request.user_agent.string)
     if session is None:
         return error("Error creating user session", status_code=500)
     
     session_create = get_session_active_by_refresh_token(refreshToken=refresh_token)
+    preferences = get_user_preferences(user_id=user.userId)
+    
+    
 
     response_data = user.to_dict()
     response_data['accessToken'] = access_token
     response_data['refresh_token'] = refresh_token
     response_data['sessionId'] = session_create.sessionId
-
+    response_data['preferences'] = preferences.preferences
     return success(data=response_data, message="Login successful", status_code=200)
 
 
@@ -113,7 +99,7 @@ def login():
 
 
 def logout(user_id:int, sessionId:int):
-    # TODO: gestionar invalidación del token en tabla de sesiones
+
     result = close_session(sessionId=sessionId, user_id=user_id)
     if sessionId != result.get("sessionId", 0):
         return error("Session not found or already closed", status_code=404)

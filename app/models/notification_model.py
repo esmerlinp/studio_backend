@@ -3,6 +3,7 @@ import datetime
 
 class Notification(db.Model):
     __tablename__ = "notifications"
+    __table_args__ = {"schema": "master"}
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False, index=True)

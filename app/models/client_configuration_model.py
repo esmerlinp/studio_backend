@@ -4,6 +4,7 @@ from app import db
 
 class ClienteConfiguracion(db.Model):
     __tablename__ = "cliente_configuracion"
+    __table_args__ = {"schema": "master"}
 
     id = db.Column(db.Integer, primary_key=True)
 

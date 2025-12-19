@@ -4,6 +4,7 @@ from app import db
 
 class AuditLog(db.Model):
     __tablename__ = "audit_logs"
+    __table_args__ = {"schema": "master"}
 
     id = db.Column(db.Integer, primary_key=True)
 
