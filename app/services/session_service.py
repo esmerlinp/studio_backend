@@ -1,5 +1,5 @@
 
-from app.models.session_model import Session
+from app.models.master.session_model import Session
 from typing import Optional
 from datetime import  timedelta
 from ..extensions import db 

@@ -72,8 +72,12 @@ def change_password():
 
         
         
+    except ValueError as e:
+        return error(message=e.args[0], status_code=400)
+        
     except Exception as e:
         return error(message=str(e), status_code=500)
+    
 
 
 

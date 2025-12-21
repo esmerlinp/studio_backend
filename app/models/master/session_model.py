@@ -1,5 +1,5 @@
 
-from ..extensions import db
+from ...extensions import db
 import datetime
 class Session(db.Model):
     __tablename__ = "usuariossesiones"

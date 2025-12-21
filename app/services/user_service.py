@@ -1,12 +1,15 @@
 
-from app.models.user_model import User
-from app.models.user_preferences_model import UserPreference
+from app.models.master.user_model import User
+from app.models.client.user_preferences_model import UserPreference
 from typing import Optional, List
 from werkzeug.security import  generate_password_hash
 from ..extensions import db 
 from app import audit_log
-
+from app.models.client.password_policy_model import PasswordPolicy
+from app.services.password_service import validate_password_policy
 from datetime import datetime, timezone
+from app.utils.responses import success, error
+
 
 ACTION_CREATE = "create"
 ACTION_UPDATE = "update"
@@ -118,6 +121,18 @@ def get_user_by_user_name_with_passwd(user_name) -> Optional[User]:
 
 @audit_log(action=ACTION_UPDATE, resource_type="usuarios",description="Cambio de contraseña")
 def change_user_password(user_id:int, new_password:int, sessionId=None) -> Optional[User]:
+    
+    
+    policy = PasswordPolicy.query.first()
+
+    if policy:
+        is_valid, errors = validate_password_policy(new_password, policy)
+
+        if not is_valid:
+            raise ValueError(errors)  # 👈 solo lógica de negocio
+
+
+    
     password_hashed = generate_password_hash(password=new_password)
     
     user = User.query.filter_by(userId=user_id).first()
@@ -125,6 +140,7 @@ def change_user_password(user_id:int, new_password:int, sessionId=None) -> Optio
         return None 
     
     user.password = password_hashed
+    user.lastPasswordChangeDate = datetime.now(timezone.utc)
     db.session.commit()
     
     return user

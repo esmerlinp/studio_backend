@@ -1,6 +1,6 @@
 from sqlalchemy.dialects.postgresql import JSONB
 from datetime import datetime, timezone
-from ..extensions import db
+from ...extensions import db
 
 class UserPreference(db.Model):
     __tablename__ = "usuariospreferencias"

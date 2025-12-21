@@ -1,6 +1,6 @@
 
 
-from app.models.notification_model import Notification
+from app.models.client.notification_model import Notification
 from typing import Optional
 from ..extensions import db 
 from app.utils.helpers import send_email
