@@ -72,11 +72,11 @@ def set_schema():
 
 
 
-@app.route('/')
-def home():
-    host = request.host  # Ej: "localhost:5000"
-    url_completa = request.host_url  # Ej: "http://localhost:5000/"
-    return f"URL del servidor: {url_completa} - {host}"
+# @app.route('/')
+# def home():
+#     host = request.host  # Ej: "localhost:5000"
+#     url_completa = request.host_url  # Ej: "http://localhost:5000/"
+#     return f"URL del servidor: {url_completa} - {host}"
 
 
 
@@ -94,6 +94,14 @@ def reset_password_page():
 def client_form():
     return render_template('es/create_client_page.html', 
                             submit_url='/login')
+    
+@app.route("/plans")
+def plans():
+    return render_template('es/plans.html', 
+                            app_name=os.getenv("APP_NAME"))
+@app.route("/")
+def main_page():
+    return render_template('es/main.html')
 
 
 @app.post("/auth/reset-password")
