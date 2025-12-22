@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style type="text/css">
+        /* RESET STYLES */
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        
+        /* CLIENT-SPECIFIC STYLES */
+        .wrapper { width: 100% !important; max-width: 600px !important; }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4f46e5;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        @media screen and (max-width: 600px) {
+            .content { padding: 20px !important; }
+            .button { width: 100%; box-sizing: border-box; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
+    <tr>
+        <td align="center" style="padding: 40px 10px;">
+            <table class="wrapper" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                
+                <tr>
+                    <td style="background-color: #4f46e5; padding: 3px;"></td>
+                </tr>
+
+                <tr>
+                    <td class="content" style="padding: 40px;">
+                        
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td style="padding-bottom: 20px;">
+                                    <div style="font-size: 32px; margin-bottom: 10px;">🔔</div>
+                                    <h1 style="margin: 0; color: #111827; font-size: 24px; font-weight: 700; line-height: 1.2;">
+                                        {{ title }}
+                                    </h1>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin: 0 0 30px 0; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                            {{ message }}
+                        </p>
+
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td align="left" style="padding-bottom: 35px;">
+                                    <a href="{{ target_url }}" target="_blank" class="button">
+                                        View Activity
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top: 1px solid #e5e7eb; padding-top: 25px;">
+                            <tr>
+                                <td style="color: #6b7280; font-size: 13px; line-height: 1.5;">
+                                    You received this notification due to recent activity or an important update regarding your <strong>{{ app_name }}</strong> account.
+                                    <br><br>
+                                    If the button above doesn't work, copy and paste this link into your browser:<br>
+                                    <a href="{{ target_url }}" style="color: #4f46e5; word-break: break-all; text-decoration: none;">{{ target_url }}</a>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td align="center" style="padding: 25px; color: #9ca3af; font-size: 12px; line-height: 1.4;">
+                        &copy; 2025 {{ app_name }}. All rights reserved.<br>
+                        This is an automated message, please do not reply directly to this email.
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

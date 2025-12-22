@@ -3,6 +3,7 @@ from flask_jwt_extended import JWTManager
 from app.api.v1.users.routes import users_bp
 from app.api.v1.auth.routes import auth_bp
 from app.api.v1.clients.routes import client_bp
+from app.api.v1.notifications.routes import notification_bp
 from app.services.user_service import change_user_password, update_user
 from app import create_app
 from app.models.master.user_model import User
@@ -26,6 +27,7 @@ jwt = JWTManager(app)
 app.register_blueprint(users_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(client_bp)
+app.register_blueprint(notification_bp)
 #TODO: Agregar el blueprint de Notificaciones cuando se cree la tabla
 
 # ------------------------------

@@ -3,9 +3,11 @@
 from app.models.client.notification_model import Notification
 from typing import Optional
 from ..extensions import db 
-from app.utils.helpers import send_email
+from app.utils.helpers import send_email, send_email_template
 from app.services.user_service import get_user_preferences, get_user_by_id
-
+from dotenv import load_dotenv
+import os
+from flask import request
 
 def create_notification(
     user_id: int,
@@ -70,7 +72,7 @@ def create_notification(
         ...     target_url="/employees/123"
         ... )
     """
-
+    load_dotenv()
     notif = Notification(
         user_id=user_id,
         title=title,
@@ -87,19 +89,22 @@ def create_notification(
         prefs = get_user_preferences(user_id=user_id)
         if prefs.preferences["notifications"]["email"] == True:
             user = get_user_by_id(user_id=user_id)
-            send_email(subject=title, to=[user.email], message=message)
+            
+            full_url = f"{request.host_url}{target_url}"
+            send_email_template(subject=title, to=[user.email], path_template="emails/es/notification_email.html",
+                                title=title, message=message, target_url=full_url, app_name=os.getenv("APP_NAME"))
+            
 
         return notif
-    except Exception:
+    except Exception as e:
         db.session.rollback()
-        return None
+        raise e
 
 
 
 def get_all_notifications(user_id) -> list[Optional[Notification]]:
     notifs = Notification.query.filter_by(
         user_id=user_id,
-        read=False
     ).order_by(Notification.created_at.desc()).all()
 
     return notifs

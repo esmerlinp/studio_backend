@@ -1,24 +1,23 @@
 from ...extensions import db
-import datetime
+from datetime import datetime
 
 class Notification(db.Model):
-    __tablename__ = "notifications"
-    __table_args__ = {"schema": "master"}
+    __tablename__ = "notificaciones"
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False, index=True)
+    id = db.Column("idnotificacion", db.Integer, primary_key=True)
+    user_id = db.Column("idusuario", db.Integer, nullable=False, index=True)
 
-    title = db.Column(db.String(150), nullable=False)
-    message = db.Column(db.Text, nullable=False)
+    title = db.Column("stitulo", db.String(150), nullable=False)
+    message = db.Column("smensaje", db.Text, nullable=False)
 
     # 👉 CONTEXTO
-    resource_type = db.Column(db.String(50), nullable=True)   # employee
-    resource_id = db.Column(db.Integer, nullable=True)        # 123
-    action = db.Column(db.String(50), nullable=True)          # created
-    target_url = db.Column(db.String(255), nullable=True)     # /employees/123
+    resource_type = db.Column("stiporecurso", db.String(50), nullable=True)   # employee
+    resource_id = db.Column("idrecurso", db.Integer, nullable=True)        # 123
+    action = db.Column("saccion", db.String(50), nullable=True)          # created
+    target_url = db.Column("surltarget", db.String(255), nullable=True)     # /employees/123
 
-    read = db.Column(db.Boolean, default=False, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    read = db.Column("bleida", db.Boolean, default=False, nullable=False)
+    created_at = db.Column("dfechacreacion", db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
         return {

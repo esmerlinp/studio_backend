@@ -22,10 +22,15 @@ def create():
     user_id = get_jwt_identity()
     title = request.json.get("title", None)
     message = request.json.get("message", None)
+    resource_type = request.json.get("resource_type", None)
+    resource_id = request.json.get("resource_id", None)
+    target_url = request.json.get("target_url", None)
+    
     if not title or not message:
         return error(message=i18n._("api.notifications.missing_title_or_message"), status_code=400)
     
-    data = notification_service.create_notification(user_id=user_id, title=title, message=message)
+    data = notification_service.create_notification(user_id=user_id, title=title, message=message,
+    resource_type=resource_type, resource_id=resource_id, target_url=target_url)
     return success(data=data.to_dict(), message=i18n._("api.notifications.create_successfully"), status_code=200)
 
     
