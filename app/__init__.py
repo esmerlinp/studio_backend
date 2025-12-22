@@ -45,6 +45,9 @@ def create_app():
         MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
         MAIL_DEFAULT_SENDER=os.getenv("MAIL_DEFAULT_SENDER"),
     )
+    
+    
+    
 
     # 🔑 ESTA LÍNEA ES LA QUE TE FALTA
     mail.init_app(app)

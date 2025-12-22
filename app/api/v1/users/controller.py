@@ -6,7 +6,7 @@ from app import track_activity
 from app.utils.responses import success, error
 from app.utils.helpers import generate_reset_token, send_reset_email
 from app.utils import i18n
-
+from uuid import uuid4
 def hashear_password(password):
     return generate_password_hash(password)
 
@@ -83,6 +83,37 @@ def change_password():
 
 
 
+def create_user():
+    try:
+        
+        username = request.json.get('userName')
+        firstName = request.json.get('firstName')
+        lastName = request.json.get('lastName')
+        email = request.json.get('email')
+        uuid = str(uuid4())
+        password = request.json.get('password')
+        
+        user = user_service.insert_user(
+            username=username,
+            first_name=firstName,
+            last_name=lastName,
+            email=email,
+            uuid=uuid,
+            password=password,
+        )
+
+        return success(data=user.to_dict(), message=i18n._("common.users.created_successfully"), status_code=200)
+
+        
+        
+    except ValueError as e:
+        return error(message=e.args[0], status_code=400)
+        
+    except Exception as e:
+        return error(message=str(e), status_code=500)
+
+
+
 
 def forgot_password():
     email = request.json.get("email")
@@ -98,11 +129,7 @@ def forgot_password():
     return success(data={}, message=i18n._("common.auth.reset_password_email_sent_if_exists"), status_code=200)
 
 
-@jwt_required()
-@track_activity
-def create_user():
-    data = request.json
-    return success(data=data, message=i18n._("common.users.created_successfully"), status_code=201)
+
 
 
 

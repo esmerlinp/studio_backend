@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmar Tu Cuenta</title>
+    <style type="text/css">
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+        .button {
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #4f46e5; /* Índigo moderno */
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            mso-padding-alt: 0; /* Outlook fix */
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f7f7f7; font-family: Arial, Helvetica, sans-serif;">
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="min-width: 100%; background-color: #f7f7f7;">
+    <tr>
+        <td align="center" style="padding: 40px 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" role="presentation">
+                <tr>
+                    <td style="padding: 30px 40px 30px 40px; color: #333333; font-size: 16px; line-height: 1.5;">
+
+                        <h2 style="font-size: 24px; color: #1f2937; margin-top: 0; margin-bottom: 20px; text-align: center;">
+                            🚀 ¡Bienvenido a {{ app_name }}!
+                        </h2>
+
+                        <p style="margin-top: 0; margin-bottom: 15px;">
+                            Hola {{ name }},
+                        </p>
+
+                        <p style="margin-bottom: 25px;">
+                            Estamos muy emocionados de tenerte con nosotros. Para comenzar a usar tu cuenta, por favor confirma tu dirección de correo electrónico haciendo clic en el botón de abajo:
+                        </p>
+
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <table border="0" cellspacing="0" cellpadding="0" role="presentation" style="margin: 0 auto;">
+                                <tr>
+                                    <td align="center" style="border-radius: 8px; background-color: #4f46e5; padding: 0;" >
+                                        <a href="{{ confirmation_url }}" target="_blank" class="button">
+                                            <span style="color: #ffffff; text-decoration: none; line-height: 1.5; padding: 12px 20px; display: block;">
+                                                Confirmar mi cuenta
+                                            </span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <p style="font-size: 14px; text-align: center; color: #6b7280; margin-bottom: 30px;">
+                            Si el botón no funciona, también puedes copiar y pegar el siguiente enlace en tu navegador:<br>
+                            <a href="{{ confirmation_url }}" style="color: #4f46e5; word-break: break-all;">{{ confirmation_url }}</a>
+                        </p>
+
+                        <p style="font-size: 14px; color: #6b7280; margin-top: 0; padding-top: 15px; border-top: 1px solid #eeeeee;">
+                            Si no creaste una cuenta en {{ app_name }}, puedes ignorar este mensaje sin problemas. Alguien pudo haber ingresado tu correo por error.
+                        </p>
+
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

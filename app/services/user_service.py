@@ -9,7 +9,8 @@ from app.models.client.password_policy_model import PasswordPolicy
 from app.services.password_service import validate_password_policy
 from datetime import datetime, timezone
 from app.utils.responses import success, error
-
+from app.utils.helpers import send_email_template, generate_reset_token
+from flask import request
 
 ACTION_CREATE = "create"
 ACTION_UPDATE = "update"
@@ -119,7 +120,7 @@ def get_user_by_user_name_with_passwd(user_name) -> Optional[User]:
     return user
 
 
-@audit_log(action=ACTION_UPDATE, resource_type="usuarios",description="Cambio de contraseña")
+@audit_log(action=ACTION_UPDATE, resource_type="usuarios",description="Change password")
 def change_user_password(user_id:int, new_password:int, sessionId=None) -> Optional[User]:
     
     
@@ -139,12 +140,15 @@ def change_user_password(user_id:int, new_password:int, sessionId=None) -> Optio
     if not user:
         return None 
     
-    user.password = password_hashed
-    user.lastPasswordChangeDate = datetime.now(timezone.utc)
-    db.session.commit()
-    
-    return user
-    
+    try:
+        user.password = password_hashed
+        user.lastPasswordChangeDate = datetime.now(timezone.utc)
+        db.session.commit()
+        
+        return user
+    except Exception as e:
+        db.session.rollback()
+        raise e
 
 def get_user_by_user_name(user_name) -> Optional[User]:
     user = User.query.filter_by(username=user_name).first()
@@ -162,11 +166,158 @@ def get_user_by_id(user_id:int) -> Optional[User]:
     
 
 
-
-
 def get_all_users() -> List[User]:
     users = User.query.all()        
     return users
     
 
 
+
+@audit_log(action=ACTION_CREATE, resource_type="usuarios",description="Create an user")
+def insert_user(
+    *,
+    username: str,
+    first_name: str,
+    last_name: str,
+    email: str,
+    uuid: str,
+    password: str,
+    photo: Optional[str] = None,
+    is_active: bool = True,
+    is_confirmed_user: bool = False,
+    must_change_password: bool = False,
+) -> User:
+    """
+    Inserta un usuario en el esquema master
+    """
+    
+    #Valida politicas de la contrasena
+    
+    policy = PasswordPolicy.query.first()
+
+    if policy:
+        is_valid, errors = validate_password_policy(password, policy)
+
+        if not is_valid:
+            raise ValueError(errors)  # 👈 solo lógica de negocio
+        
+
+    user = User(
+        username=username,
+        firstName=first_name,
+        lastName=last_name,
+        email=email,
+        uuid=uuid,
+        photo=photo,
+        isActive=is_active,
+        isConfirmedUser=is_confirmed_user,
+        mustChangePassword=must_change_password,
+        loginAttempts=0,
+        isBlocked=False,
+        blockedDate=None,
+        lastLoginDate=None,
+        recoveryToken=None,
+        tokenExpirationDate=None,
+        lastPasswordChangeDate=datetime.now(timezone.utc),
+        password=generate_password_hash(password),
+    )
+
+    try:
+        db.session.add(user)
+        db.session.commit()
+        
+        #Enviar Email de confirmacion.
+        token = generate_reset_token(user.userId)
+        confirmation_url = f"{request.host_url}/confirmation-account?token={token}"
+        
+        send_email_template(subject="Confirmation Account", 
+                            to=[email],
+                            path_template="emails/es/confirmation_email.html",
+                            confirmation_url=confirmation_url, app_name="Akadmia", name=user.firstName
+                            )
+        
+        return user
+
+    except Exception as e:
+        db.session.rollback()
+        raise e
+
+    
+
+
+
+@audit_log(
+    action=ACTION_UPDATE,
+    resource_type="usuarios",
+    description="Update user"
+)
+def update_user(
+    *,
+    user_id: int,
+    username: Optional[str] = None,
+    first_name: Optional[str] = None,
+    last_name: Optional[str] = None,
+    email: Optional[str] = None,
+    photo: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    is_confirmed_user: Optional[bool] = None,
+    must_change_password: Optional[bool] = None,
+    password: Optional[str] = None,
+) -> User:
+    """
+    Actualiza un usuario en el esquema master.
+    Solo se actualizan los campos enviados.
+    """
+
+    user = User.query.filter_by(userId=user_id).first()
+    if not user:
+        raise ValueError("Usuario no encontrado")
+
+    # ----------------------------------
+    # Cambio de contraseña (opcional)
+    # ----------------------------------
+    if password:
+        policy = PasswordPolicy.query.first()
+        if policy:
+            is_valid, errors = validate_password_policy(password, policy)
+            if not is_valid:
+                raise ValueError(errors)
+
+        user.password = generate_password_hash(password)
+        user.lastPasswordChangeDate = datetime.now(timezone.utc)
+        user.mustChangePassword = False
+
+    # ----------------------------------
+    # Actualización de campos simples
+    # ----------------------------------
+    if username is not None:
+        user.username = username
+
+    if first_name is not None:
+        user.firstName = first_name
+
+    if last_name is not None:
+        user.lastName = last_name
+
+    if email is not None:
+        user.email = email
+
+    if photo is not None:
+        user.photo = photo
+
+    if is_active is not None:
+        user.isActive = is_active
+
+    if is_confirmed_user is not None:
+        user.isConfirmedUser = is_confirmed_user
+
+    if must_change_password is not None:
+        user.mustChangePassword = must_change_password
+
+    try:
+        db.session.commit()
+        return user
+
+    except Exception as e:
+        db.session.rollback()
+        raise e

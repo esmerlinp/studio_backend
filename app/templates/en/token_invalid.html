@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invalid Link | {{ app_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { background-color: #f7f7f7; font-family: 'Inter', sans-serif; }
+        .card { max-width: 450px; width: 90%; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="card p-8 text-center">
+        
+        <div class="mb-6 text-2xl font-bold text-indigo-600">
+            {{ app_name }}
+        </div>
+
+        <div id="invalid-token-content">
+            <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Invalid or Expired Link</h1>
+            
+            <p class="text-gray-600 mb-8">
+                We're sorry, the confirmation link you used is invalid, has expired, or has already been processed.
+            </p>
+
+            <div class="space-y-3">
+                <a href="{{ resend_url }}" class="inline-block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-sm">
+                    Request a new link
+                </a>
+                
+                <a href="{{ login_url }}" class="inline-block w-full

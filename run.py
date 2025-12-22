@@ -3,13 +3,17 @@ from flask_jwt_extended import JWTManager
 from app.api.v1.users.routes import users_bp
 from app.api.v1.auth.routes import auth_bp
 from app.api.v1.clients.routes import client_bp
-from app.services.user_service import change_user_password
+from app.services.user_service import change_user_password, update_user
 from app import create_app
 from app.models.master.user_model import User
 from app.utils import i18n
 
-from flask import g
+import os
+from dotenv import load_dotenv
+
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+
+load_dotenv()
 
 app = create_app()
 
@@ -100,6 +104,36 @@ def reset_password():
             return {"error": "Usuario no encontrado"}, 404
 
         return {"message": "Contraseña actualizada correctamente"}
+    except ValueError as e:
+        return {
+            "success": False,
+            "errors": e.args[0]
+        }, 400
+
+    except LookupError:
+        return {
+            "success": False,
+            "message": "Usuario no encontrado"
+        }, 404
+        
+        
+@app.route("/confirmation-account")
+def confirmation_account():
+    try:
+        token = request.args.get("token")
+        user_id = verify_reset_token(token, max_age=24*60*60) #24 horas de expiracion
+        if not token or user_id in (None, "expired"):
+            return render_template('es/token_invalid.html', 
+                                        status='error', 
+                                        app_name=os.getenv("APP_NAME"), 
+                                        resend_url='/resend-email')
+
+    
+        update_user(user_id=user_id, is_confirmed_user=True)
+        return render_template('es/landing_page.html', 
+                                status='success', 
+                                app_name=os.getenv("APP_NAME"), 
+                                login_url='/login')
     except ValueError as e:
         return {
             "success": False,

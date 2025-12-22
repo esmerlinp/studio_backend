@@ -55,7 +55,7 @@ def send_email_template(subject:str, to:list[str], path_template, **kwargs):
 
     msg.html = render_template(
         path_template,
-        kwargs
+        **kwargs
     )
 
     mail.send(msg)
