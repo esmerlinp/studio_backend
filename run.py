@@ -7,6 +7,7 @@ from app.services.user_service import change_user_password, update_user
 from app import create_app
 from app.models.master.user_model import User
 from app.utils import i18n
+from app.services.client_service import create_client
 
 import os
 from dotenv import load_dotenv
@@ -147,9 +148,6 @@ def confirmation_account():
         }, 404
 
 
-@app.route('/ip')
-def get_ip():
-    return f'Tu IP es: {request.remote_addr}'
 
 
 
