@@ -1,12 +1,13 @@
 from flask_jwt_extended import jwt_required
 from app import track_activity
-from app.services.client_service import get_client_preferences
+from app.services.client_service import get_client_preferences, get_client_logs
 from app.utils.responses import success
 from app.services.client_service import create_client
 from flask import request
 from app.utils.responses import success, error
 #Consumir rutas protegidas con el JWT
 #El cliente debe enviar el token en el header: Authorization: Bearer <token>
+
 
 @jwt_required()
 @track_activity
@@ -17,8 +18,15 @@ def get_client_preferences():
     return success(data=preferences, message="Client preferences retrieved successfully", status_code=200)
 
 
-from flask import request, jsonify
-from app.services.client_service import create_client
+@jwt_required()
+@track_activity
+def get_logs():
+
+    logs = get_client_logs()
+    return success(data=[log.to_dict() for log in logs])
+
+
+
 
 def new_cliente():
     data = request.get_json()

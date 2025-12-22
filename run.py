@@ -8,6 +8,8 @@ from app import create_app
 from app.models.master.user_model import User
 from app.utils import i18n
 from app.services.client_service import create_client
+from flask import render_template
+from app.utils.helpers import verify_reset_token
 
 import os
 from dotenv import load_dotenv
@@ -75,8 +77,7 @@ def home():
     return f"URL del servidor: {url_completa} - {host}"
 
 
-from flask import render_template
-from app.utils.helpers import verify_reset_token
+
 @app.route("/reset-password")
 def reset_password_page():
     token = request.args.get("token")
@@ -87,11 +88,16 @@ def reset_password_page():
     return render_template("emails/es/reset_password.html")
 
 
+@app.route("/create-client")
+def client_form():
+    return render_template('es/create_client_page.html', 
+                            submit_url='/login')
+
 
 @app.post("/auth/reset-password")
 def reset_password():
     try:
-        data = request.json
+        data = request.json 
         token = data.get("token")
         password = data.get("password")
 
