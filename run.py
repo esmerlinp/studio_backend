@@ -3,12 +3,11 @@ from flask_jwt_extended import JWTManager
 from app.api.v1.users.routes import users_bp
 from app.api.v1.auth.routes import auth_bp
 from app.api.v1.clients.routes import client_bp
+from app.api.v1.plan.routes import plans_bp
 from app.api.v1.notifications.routes import notification_bp
 from app.services.user_service import change_user_password, update_user
 from app import create_app
-from app.models.master.user_model import User
 from app.utils import i18n
-from app.services.client_service import create_client
 from flask import render_template
 from app.utils.helpers import verify_reset_token
 
@@ -28,6 +27,7 @@ app.register_blueprint(users_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(client_bp)
 app.register_blueprint(notification_bp)
+app.register_blueprint(plans_bp)
 #TODO: Agregar el blueprint de Notificaciones cuando se cree la tabla
 
 # ------------------------------
@@ -64,6 +64,7 @@ def set_schema():
     #TODO: Tomar el scheme de la tabla de clientes y pasarlo a la variable
     #User.query.filter_by(userId = user_id)
     #User.schema_name
+ 
     schema_name = "cliente"
     db.session.execute(
         text(f"SET search_path TO {schema_name}, public")
@@ -99,9 +100,11 @@ def client_form():
 def plans():
     return render_template('es/plans.html', 
                             app_name=os.getenv("APP_NAME"))
+    
 @app.route("/")
 def main_page():
     return render_template('es/main.html')
+
 
 
 @app.post("/auth/reset-password")

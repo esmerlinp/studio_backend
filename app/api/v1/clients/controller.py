@@ -1,6 +1,6 @@
 from flask_jwt_extended import jwt_required
 from app import track_activity
-from app.services.client_service import get_client_preferences, get_client_logs
+from app.services.client_service import get_client_preferences, get_client_logs, onboard_client_service
 from app.utils.responses import success
 from app.services.client_service import create_client
 from flask import request
@@ -51,3 +51,28 @@ def new_cliente():
     )
 
     return success(data=client.to_dict())
+
+
+def onboard_client():
+    try:
+        data = request.get_json()
+        client_data = data.get("client_data", None)
+        admin_user_data = data.get("user_data", None)
+        plan_id = data.get("plan_id", None)
+        price_list_id = data.get("price_list_id", None)
+
+        response_data = onboard_client_service(client_data=client_data,
+                            admin_user_data=admin_user_data,
+                            plan_id=plan_id,
+                            price_list_id=price_list_id)
+        return success(data=response_data.to_dict())
+    except ValueError as e:
+        # ❗ Errores de negocio (validaciones)
+        return error(str(e), 400)
+
+    except Exception as e:
+        # ❗ Error inesperado
+        
+        return error(f"Error interno del servidor {e}", 500)
+    
+    

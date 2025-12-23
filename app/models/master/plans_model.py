@@ -7,22 +7,24 @@ from ...extensions import db
 # ('PREMIUM', 'Premium Plan', 'DEDICATED');
 
 class Plan(db.Model):
-    __tablename__ = "plans"
+    __tablename__ = "planes"
+    __table_args__ = {"schema": "master"}
 
-    id = db.Column(db.Integer, primary_key=True)
 
-    code = db.Column(db.String(50), nullable=False, unique=True)  # BASIC, STANDARD, PREMIUM
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=True)
+    id = db.Column("idplan", db.Integer, primary_key=True)
 
-    max_users = db.Column(db.Integer, nullable=True)
-    max_storage_gb = db.Column(db.Integer, nullable=True)
+    code = db.Column("scodigoplan", db.String(50), nullable=False, unique=True)  # BASIC, STANDARD, PREMIUM
+    name = db.Column("snombreplan", db.String(100), nullable=False)
+    description = db.Column("sdescripcionplan", db.Text, nullable=True)
 
-    support_level = db.Column(db.String(50), nullable=True)       # Basic, Priority, 24/7
-    environment_type = db.Column(db.String(30), nullable=True)    # SHARED, DEDICATED
+    max_users = db.Column("imaxusuarios", db.Integer, nullable=True)
+    max_storage_gb = db.Column("imaxalmacenamientogb", db.Integer, nullable=True)
 
-    is_active = db.Column(db.Boolean, default=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    support_level = db.Column("snivelsoporteplan", db.String(50), nullable=True)       # Basic, Priority, 24/7
+    environment_type = db.Column("stipoambienteplan", db.String(30), nullable=True)    # SHARED, DEDICATED
+
+    is_active = db.Column("bactivo", db.Boolean, default=True, nullable=False)
+    created_at = db.Column("dcreacion", db.DateTime, default=datetime.utcnow, nullable=False)
 
     def __repr__(self):
         return f"<Plan {self.code}>"

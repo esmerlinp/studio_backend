@@ -4,15 +4,18 @@ from app import db
 from app.models.master.client_plans_model import ClientPlan
 from app.models.master.plans_model import Plan
 from app.models.master.price_list_model import PriceList
+from dateutil.relativedelta import relativedelta
 
 
-def assign_plan_to_client(
+
+
+def assign_plan_to_client_onboard(
     *,
     client_id: int,
     plan_id: int,
     price_list_id: int,
     start_date: date,
-    end_date: Optional[date] = None
+    end_date: Optional[date] = None,
 ) -> ClientPlan:
 
     # Validar plan
@@ -28,6 +31,65 @@ def assign_plan_to_client(
     if price_list.plan_id != plan_id:
         raise ValueError("Price list does not belong to the selected plan")
 
+
+    if plan.code == "TRIAL":
+        end_date = start_date + relativedelta(months=6)
+        
+    # Evitar dos planes activos simultáneos
+    active_plan = ClientPlan.query.filter(
+        ClientPlan.client_id == client_id,
+        ClientPlan.status == "ACTIVE",
+        ClientPlan.start_date <= start_date,
+        db.or_(
+            ClientPlan.end_date.is_(None),
+            ClientPlan.end_date >= start_date
+        )
+    ).first()
+
+    if active_plan:
+        raise ValueError("Client already has an active plan for this period")
+
+    client_plan = ClientPlan(
+        client_id=client_id,
+        plan_id=plan_id,
+        price_list_id=price_list_id,
+        start_date=start_date,
+        end_date=end_date,
+        status="ACTIVE"
+    )
+
+
+    db.session.add(client_plan)
+    return client_plan
+
+
+def assign_plan_to_client(
+    *,
+    client_id: int,
+    plan_id: int,
+    price_list_id: int,
+    start_date: date,
+    end_date: Optional[date] = None,
+    commit: bool = True
+) -> ClientPlan:
+
+    # Validar plan
+    plan = Plan.query.get(plan_id)
+    if not plan or not plan.is_active:
+        raise ValueError("Invalid or inactive plan")
+
+    # Validar lista de precios
+    price_list = PriceList.query.get(price_list_id)
+    if not price_list or not price_list.is_active:
+        raise ValueError("Invalid or inactive price list")
+
+    if price_list.plan_id != plan_id:
+        raise ValueError("Price list does not belong to the selected plan")
+
+
+    if plan.code == "TRIAL":
+        end_date = start_date + relativedelta(months=6)
+        
     # Evitar dos planes activos simultáneos
     active_plan = ClientPlan.query.filter(
         ClientPlan.client_id == client_id,
@@ -53,11 +115,15 @@ def assign_plan_to_client(
 
     try:
         db.session.add(client_plan)
-        db.session.commit()
+        if commit:
+            db.session.commit()
+        else:
+            db.session.flush()
         return client_plan
-    except Exception:
-        db.session.rollback()
-        raise
+    except Exception as e:
+        if commit:
+            db.session.rollback()
+        raise e
 
 
 

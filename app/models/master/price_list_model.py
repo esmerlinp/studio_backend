@@ -3,61 +3,72 @@ from ...extensions import db
 
 
 class PriceList(db.Model):
-    __tablename__ = "price_lists"
+    __tablename__ = "listasprecios"
+    __table_args__ = {"schema": "master"}
 
-    id = db.Column(db.Integer, primary_key=True)
 
-    plan_id = db.Column(
+    id = db.Column("idlistaprecio", db.Integer, primary_key=True)
+
+    plan_id = db.Column("idplan",
         db.Integer,
-        db.ForeignKey("plans.id"),
+        db.ForeignKey("master.planes.idplan"),
         nullable=False
     )
 
     billing_cycle = db.Column(
+        "sciclopago", 
         db.String(20),
         nullable=False
     )  # MONTHLY, ANNUAL
 
     price = db.Column(
+        "nprecio", 
         db.Numeric(12, 2),
         nullable=False
     )
 
     currency = db.Column(
+        "smoneda", 
         db.String(10),
         default="USD",
         nullable=False
     )
 
     price_per_user = db.Column(
+        "bprecioportusuario",
         db.Boolean,
-        default=True,
+        default=False,
         nullable=False
     )
 
     min_users = db.Column(
+        "iminusuarios", 
         db.Integer,
         default=1,
         nullable=False
     )
 
     valid_from = db.Column(
+        "dvalidodesde",
         db.Date,
         nullable=False
     )
 
     valid_to = db.Column(
+        "dvalidohasta",
         db.Date,
         nullable=True
     )
 
     is_active = db.Column(
+        "bactivo",
         db.Boolean,
         default=True,
         nullable=False
     )
 
     created_at = db.Column(
+        "dcreacion",
         db.DateTime,
         default=datetime.utcnow,
         nullable=False

@@ -11,6 +11,9 @@ from datetime import datetime, timezone
 from app.utils.responses import success, error
 from app.utils.helpers import send_email_template, generate_reset_token
 from flask import request
+from dotenv import load_dotenv
+import os
+
 
 ACTION_CREATE = "create"
 ACTION_UPDATE = "update"
@@ -173,6 +176,90 @@ def get_all_users() -> List[User]:
 
 
 
+
+def insert_user_onboard(
+    *,
+    username: str,
+    first_name: str,
+    last_name: str,
+    email: str,
+    uuid: str,
+    password: str,
+    photo: Optional[str] = None,
+    is_active: bool = True,
+    is_confirmed_user: bool = False,
+    must_change_password: bool = False,
+    send_confirm_email = False,
+    default_password = False
+) -> User:
+    """
+    Inserta un usuario en el esquema master
+    """
+    
+    #Valida politicas de la contrasena
+    load_dotenv()
+    
+    if not default_password:
+        policy = PasswordPolicy.query.first()
+
+        if policy:
+            is_valid, errors = validate_password_policy(password, policy)
+
+            if not is_valid:
+                raise ValueError(errors)  # 👈 solo lógica de negocio
+    else:
+        password = "aosU-18fh-stys-3Get"
+        
+    u = get_user_by_user_name(user_name=username)    
+    if u:
+        raise ValueError("Usuario ya existe")
+    
+    u = get_user_by_email(email=email)
+    if u:
+        raise ValueError("email ya existe")
+    
+    
+    new_user = User(
+        username=username,
+        firstName=first_name,
+        lastName=last_name,
+        email=email,
+        uuid=uuid,
+        photo=photo,
+        isActive=is_active,
+        isConfirmedUser=is_confirmed_user,
+        mustChangePassword=must_change_password,
+        loginAttempts=0,
+        isBlocked=False,
+        blockedDate=None,
+        lastLoginDate=None,
+        recoveryToken=None,
+        tokenExpirationDate=None,
+        lastPasswordChangeDate=datetime.now(timezone.utc),
+        password=generate_password_hash(password),
+    )
+
+
+    db.session.add(new_user)
+
+    
+    #Enviar Email de confirmacion.
+    user = get_user_by_user_name(user_name=username)
+    if send_confirm_email:
+        token = generate_reset_token(user.userId)
+        confirmation_url = f"{request.host_url}/confirmation-account?token={token}"
+        
+        send_email_template(subject="Confirmation Account", 
+                            to=[email],
+                            path_template="emails/es/confirmation_email.html",
+                            confirmation_url=confirmation_url, app_name=os.getenv("APP_NAME"), name=user.firstName
+                            )
+    
+    return user
+
+
+
+
 @audit_log(action=ACTION_CREATE, resource_type="usuarios",description="Create an user")
 def insert_user(
     *,
@@ -186,23 +273,38 @@ def insert_user(
     is_active: bool = True,
     is_confirmed_user: bool = False,
     must_change_password: bool = False,
+    commit:bool = True,
+    send_confirm_email = False,
+    default_password = False
 ) -> User:
     """
     Inserta un usuario en el esquema master
     """
     
     #Valida politicas de la contrasena
+    load_dotenv()
     
-    policy = PasswordPolicy.query.first()
+    if not default_password:
+        policy = PasswordPolicy.query.first()
 
-    if policy:
-        is_valid, errors = validate_password_policy(password, policy)
+        if policy:
+            is_valid, errors = validate_password_policy(password, policy)
 
-        if not is_valid:
-            raise ValueError(errors)  # 👈 solo lógica de negocio
+            if not is_valid:
+                raise ValueError(errors)  # 👈 solo lógica de negocio
+    else:
+        password = "aosU-18fh-stys-3Get"
         
-
-    user = User(
+    u = get_user_by_user_name(user_name=username)    
+    if u:
+        raise ValueError("Usuario ya existe")
+    
+    u = get_user_by_email(email=email)
+    if u:
+        raise ValueError("email ya existe")
+    
+    
+    new_user = User(
         username=username,
         firstName=first_name,
         lastName=last_name,
@@ -223,23 +325,29 @@ def insert_user(
     )
 
     try:
-        db.session.add(user)
-        db.session.commit()
+        db.session.add(new_user)
+        if commit:
+            db.session.commit()
+        else:
+            db.session.flush()
         
         #Enviar Email de confirmacion.
-        token = generate_reset_token(user.userId)
-        confirmation_url = f"{request.host_url}/confirmation-account?token={token}"
-        
-        send_email_template(subject="Confirmation Account", 
-                            to=[email],
-                            path_template="emails/es/confirmation_email.html",
-                            confirmation_url=confirmation_url, app_name="Akadmia", name=user.firstName
-                            )
+        user = get_user_by_user_name(user_name=username)
+        if send_confirm_email:
+            token = generate_reset_token(user.userId)
+            confirmation_url = f"{request.host_url}/confirmation-account?token={token}"
+            
+            send_email_template(subject="Confirmation Account", 
+                                to=[email],
+                                path_template="emails/es/confirmation_email.html",
+                                confirmation_url=confirmation_url, app_name=os.getenv("APP_NAME"), name=user.firstName
+                                )
         
         return user
 
     except Exception as e:
-        db.session.rollback()
+        if commit:
+            db.session.rollback()
         raise e
 
     

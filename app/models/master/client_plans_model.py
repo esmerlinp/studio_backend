@@ -3,39 +3,47 @@ from ...extensions import db
 
 
 class ClientPlan(db.Model):
-    __tablename__ = "client_plans"
+    __tablename__ = "planesclientes"
+    __table_args__ = {"schema": "master"}
 
-    id = db.Column(db.Integer, primary_key=True)
+
+    id = db.Column("idplancliente", db.Integer, primary_key=True)
 
     client_id = db.Column(
+        "idcliente",
         db.Integer,
         nullable=False,
         index=True
     )
 
     plan_id = db.Column(
+        "idplan", 
         db.Integer,
-        db.ForeignKey("plans.id"),
+        db.ForeignKey("master.planes.idplan"),
         nullable=False
     )
 
     price_list_id = db.Column(
+        "idlistaprecio",
         db.Integer,
-        db.ForeignKey("price_lists.id"),
+        db.ForeignKey("master.listasprecios.idlistaprecio"),
         nullable=False
     )
 
     start_date = db.Column(
+        "dinicio",
         db.Date,
         nullable=False
     )
 
     end_date = db.Column(
+        "dfin",
         db.Date,
         nullable=True
     )
 
     status = db.Column(
+        "sestadoplancliente", 
         db.String(20),
         default="ACTIVE",
         nullable=False
