@@ -1,5 +1,5 @@
 from flask_jwt_extended import jwt_required
-from app import track_activity
+from app import track_activity, require_role
 from app.services.client_service import get_client_preferences, get_client_logs, onboard_client_service
 from app.utils.responses import success
 from app.services.client_service import create_client
@@ -13,6 +13,7 @@ from app.utils.responses import success, error
 
 @jwt_required()
 @track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
 def get_client_preferences():
     preferences = get_client_preferences()
     if not preferences:
@@ -22,12 +23,15 @@ def get_client_preferences():
 
 @jwt_required()
 @track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
 def get_logs():
 
     logs = get_client_logs()
     return success(data=[log.to_dict() for log in logs])
 
-
+@jwt_required()
+@track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
 def new_cliente():
     data = request.get_json()
 

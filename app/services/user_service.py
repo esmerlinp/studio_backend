@@ -39,6 +39,31 @@ def get_user_preferences(user_id) -> Optional[UserPreference]:
     return prefs
 
 
+def add_default_user_preferences_onboard(user_id:int,language="es", theme="light", timezone="America/Santo_Domingo", date_format="DD/MM/YYYY", 
+                        receive_not_email = True, 
+                        push_notifications = False, 
+                        hour_format = "24"):
+    DEFAULT_PREFERENCES = {
+        "language": language,
+        "theme": theme,
+        "hourFormat": hour_format,
+        "timeZone":timezone,
+        "dateFormat": date_format,
+        "notifications": {
+            "email": receive_not_email,
+            "push": push_notifications
+        }
+    }
+
+    prefs = UserPreference(
+        userId=user_id,
+        preferences=DEFAULT_PREFERENCES
+    )
+
+    db.session.add(prefs)
+
+    return prefs
+
 def add_default_user_preferences(user_id:int,language="es", theme="light", timezone="America/Santo_Domingo", date_format="DD/MM/YYYY", 
                         receive_not_email = True, 
                         push_notifications = False, 
@@ -245,6 +270,7 @@ def insert_user_onboard(
     
     #Enviar Email de confirmacion.
     user = get_user_by_user_name(user_name=username)
+    add_default_user_preferences_onboard(user.userId)
     if send_confirm_email:
         token = generate_reset_token(user.userId)
         confirmation_url = f"{request.host_url}/confirmation-account?token={token}"

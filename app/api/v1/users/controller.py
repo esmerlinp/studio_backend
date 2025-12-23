@@ -2,7 +2,7 @@ from flask import request
 from werkzeug.security import generate_password_hash
 from app.services import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import track_activity
+from app import track_activity, require_role
 from app.utils.responses import success, error
 from app.utils.helpers import generate_reset_token, send_reset_email
 from app.utils import i18n
@@ -26,6 +26,7 @@ def me():
 
 @jwt_required()
 @track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
 def get_users():
     # data = db.fetch_data('SELECT * FROM usuarios')
     users = user_service.get_all_users()
@@ -39,6 +40,7 @@ def get_users():
 
 @jwt_required()
 @track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
 def get_user(userId):
     user = user_service.get_user_by_id(user_id=userId)
     if not user:
@@ -48,6 +50,7 @@ def get_user(userId):
 
 @jwt_required()
 @track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
 def get_user_by_name(userName):
     user = user_service.get_user_by_user_name(user_name=userName)
     if not user:

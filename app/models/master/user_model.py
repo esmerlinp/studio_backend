@@ -1,6 +1,7 @@
 
 from ...extensions import db
-
+from app.models.master.user_roles import UserRole
+from app.models.master.roles_model import Role
 
 class User(db.Model):
     __tablename__ = "usuarios"
@@ -32,6 +33,7 @@ class User(db.Model):
     #     cascade="all, delete"
     # )
     
+
     def to_dict(self, include_sensitive=False):
         data = {
             "userId": self.userId,

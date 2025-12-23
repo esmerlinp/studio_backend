@@ -8,7 +8,12 @@ from .extensions import mail, db
 from app.services.session_service import get_session_active_by_user_id, invalidar_sesiones_por_id_session, actualizar_actividad_sesion
 from app.services.log_service import log_action
 
-
+from flask import abort
+from sqlalchemy import text
+from app.utils.responses import error
+from app.models.master.user_model import User
+from app.models.master.user_roles import UserRole
+from app.models.master.roles_model import Role
 
 INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 
@@ -114,12 +119,6 @@ def track_activity(func):
 
     return wrapper
 
-
-
-
-
-
-
 def audit_log(
     action: str,
     resource_type: str,
@@ -155,3 +154,56 @@ def audit_log(
 
         return wrapper
     return decorator
+
+
+
+
+
+def require_role(role_codes:list[str]):
+    """
+    Permite acceso si el usuario tiene AL MENOS UNO de los roles indicados.
+    Ej:
+        @require_role(["OWNER"])
+        @require_role(["OWNER", "ADMIN"])
+    """
+    def decorator(fn):
+            @wraps(fn)
+            def wrapper(*args, **kwargs):
+                user_id = get_jwt_identity()
+                
+                if not user_id:
+                    return error("Usuario no autenticado", 401)
+                
+                # Validar que el usuario exista
+                user = User.query.get(user_id)
+                if not user:
+                    return error("Usuario no existe", 403)
+
+                # Obtener los roles válidos desde la tabla Role
+                valid_roles = (
+                    db.session.query(Role.id)
+                    .filter(Role.code.in_(role_codes), Role.is_active == True)
+                    .subquery()
+                )
+
+                # Verificar si el usuario tiene al menos uno de esos roles
+                has_role = (
+                    db.session.query(UserRole)
+                    .filter(
+                        UserRole.user_id == user_id,
+                        UserRole.role_id.in_(valid_roles)
+                    )
+                    .first()
+                )
+
+                if not has_role:
+                    return error(
+                        f"Permisos insuficientes. Se requiere uno de: {', '.join(role_codes)}",
+                        403
+                    )
+
+                return fn(*args, **kwargs)
+            return wrapper
+    return decorator
+
+

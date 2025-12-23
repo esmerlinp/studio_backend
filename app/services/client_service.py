@@ -93,7 +93,7 @@ def onboard_client_service(client_data, admin_user_data, plan_id, price_list_id)
             #       role_id=1,
             #       commit=False
             #   )
-
+            # set_schema("master")
             #asignar el usuario al cliente 
             assign_user_to_client_onboard(
                 user_id=admin_user.userId,

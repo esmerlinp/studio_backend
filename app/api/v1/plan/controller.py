@@ -1,7 +1,7 @@
 from flask import request
 from app.services import plan_service, price_list_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import track_activity
+from app import track_activity, require_role
 from app.utils.responses import success, error
 from app.utils import i18n
 
@@ -12,6 +12,9 @@ def get_plans():
     data = plan_service.get_plans()
     return success(data=[notif.to_dict() for notif in data])
 
+@jwt_required()
+@track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
 def get_prices_list(plan_id: int = None):
     data = price_list_service.get_price_lists(plan_id)
     return success(data=[notif.to_dict() for notif in data])
@@ -20,6 +23,7 @@ def get_prices_list(plan_id: int = None):
 
 @jwt_required()
 @track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
 def create_plan():
     code = request.json.get("code", None)
     name = request.json.get("name", None)
@@ -43,6 +47,7 @@ def create_plan():
 
 @jwt_required()
 @track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
 def add_price_list():
     plan_id = request.json.get("plan_id", None)
     billing_cycle = request.json.get("billing_cycle", None)
@@ -64,13 +69,3 @@ def add_price_list():
     return success(data=data.to_dict())
 
     
-@jwt_required()
-@track_activity
-def mark_read():
-    user_id = get_jwt_identity()
-    notif_id = request.json.get("notif_id", None)
-    if not notif_id:
-        return error(message=i18n._("api.notifications.missing_notif_id"), status_code=400)
-    
-    data = notification_service.mark_read(user_id=user_id, notif_id=notif_id)
-    return success(data=data.to_dict(), message=i18n._("api.notifications.marked_as_read"), status_code=200)
