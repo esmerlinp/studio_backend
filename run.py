@@ -5,14 +5,16 @@ from app.api.v1.auth.routes import auth_bp
 from app.api.v1.clients.routes import client_bp
 from app.api.v1.plan.routes import plans_bp
 from app.api.v1.notifications.routes import notification_bp
-from app.services.user_service import change_user_password, update_user
+from app.services.user_service import change_user_password, update_user, get_user_scheme, get_user_by_id
 from app import create_app
 from app.utils import i18n
 from flask import render_template
 from app.utils.helpers import verify_reset_token
-
+from app.utils.responses import error
 import os
 from dotenv import load_dotenv
+from app.extensions import db
+from sqlalchemy import text
 
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 
@@ -47,28 +49,67 @@ i18n.setup_gettext("es")
 #     return {"users": [u.email for u in users]}
 
 
+PUBLIC_ENDPOINTS = {
+    "main_page",
+    "auth.login",
+    "login",
+    "plans",
+    "dashboard",
+    "users.forgot_password",
+    "confirmation_account",
+    "reset_password",
+    "reset_password_page",
+    "clients.onboard_client"
+}
 
 
 @app.before_request
 def set_schema():
-    from app.extensions import db
-    from sqlalchemy import text
-    
-    # Intenta validar JWT si existe (NO obligatorio)
-    verify_jwt_in_request(optional=True)
-    
-    user_id = get_jwt_identity()
 
-    if not user_id:
+
+    # 🔎 Endpoint actual
+    endpoint = request.endpoint
+    print(endpoint)
+
+    # 🔓 Endpoints públicos → NO validación de usuario
+    if endpoint in PUBLIC_ENDPOINTS:
+        db.session.execute(
+            text("SET search_path TO public")
+        )
         return
-    #TODO: Tomar el scheme de la tabla de clientes y pasarlo a la variable
-    #User.query.filter_by(userId = user_id)
-    #User.schema_name
- 
-    schema_name = "cliente"
+
+    # 🔐 A partir de aquí TODO requiere usuario
+    verify_jwt_in_request()
+
+    user_id = get_jwt_identity()
+    if not user_id:
+        return error("No autenticado", 401)
+
+    user = get_user_by_id(user_id=user_id)
+    if not user:
+        return error("Usuario no existe", 401)
+
+    if not user.isConfirmedUser:
+        return error(
+            "La cuenta no está confirmada. Revisa tu correo electrónico para activarla.",
+            403
+        )
+
+    if user.mustChangePassword:
+        return error(
+            "Debes cambiar tu contraseña antes de continuar.",
+            403
+        )
+
+    # 🔀 Cambiar schema del cliente
+    schema_name = get_user_scheme(user_id=user_id)
     db.session.execute(
         text(f"SET search_path TO {schema_name}, public")
     )
+
+
+
+
 
 
 
@@ -78,6 +119,20 @@ def set_schema():
 #     host = request.host  # Ej: "localhost:5000"
 #     url_completa = request.host_url  # Ej: "http://localhost:5000/"
 #     return f"URL del servidor: {url_completa} - {host}"
+
+
+@app.route("/")
+def main_page():
+    return render_template('es/main.html')
+
+
+@app.route("/login")
+def login():
+    return render_template("es/login.html")
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("es/dashboard.html")
 
 
 
@@ -101,24 +156,29 @@ def plans():
     return render_template('es/plans.html', 
                             app_name=os.getenv("APP_NAME"))
     
-@app.route("/")
-def main_page():
-    return render_template('es/main.html')
+
 
 
 
 @app.post("/auth/reset-password")
 def reset_password():
+    from app.extensions import db
     try:
         data = request.json 
         token = data.get("token")
         password = data.get("password")
 
-        user_id = verify_reset_token(token)
+        user_id = verify_reset_token(token, max_age=3600)
 
         if user_id in (None, "expired"):
             return {"error": "Token inválido o expirado"}, 400
 
+
+        schema_name = get_user_scheme(user_id=user_id)
+        db.session.execute(
+            text(f"SET search_path TO {schema_name}, public")
+        )
+        
         user = change_user_password(user_id=user_id, new_password=password)
         if not user:
             return {"error": "Usuario no encontrado"}, 404
@@ -139,32 +199,12 @@ def reset_password():
         
 @app.route("/confirmation-account")
 def confirmation_account():
-    try:
-        token = request.args.get("token")
-        user_id = verify_reset_token(token, max_age=24*60*60) #24 horas de expiracion
-        if not token or user_id in (None, "expired"):
-            return render_template('es/token_invalid.html', 
-                                        status='error', 
-                                        app_name=os.getenv("APP_NAME"), 
-                                        resend_url='/resend-email')
+    token = request.args.get("token")
 
-    
-        update_user(user_id=user_id, is_confirmed_user=True)
-        return render_template('es/landing_page.html', 
-                                status='success', 
-                                app_name=os.getenv("APP_NAME"), 
-                                login_url='/login')
-    except ValueError as e:
-        return {
-            "success": False,
-            "errors": e.args[0]
-        }, 400
+    if not token or verify_reset_token(token) in (None, "expired"):
+        return render_template("errors/token_invalid.html"), 400
 
-    except LookupError:
-        return {
-            "success": False,
-            "message": "Usuario no encontrado"
-        }, 404
+    return render_template("es/confirmation_template.html")
 
 
 
@@ -172,4 +212,7 @@ def confirmation_account():
 
 if __name__ == '__main__':
         
-    app.run(debug=True)
+    #app.run(debug=True)
+    # Usa la variable de entorno PORT si existe, de lo contrario 8080
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)

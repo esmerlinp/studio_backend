@@ -6,6 +6,8 @@ from werkzeug.security import  generate_password_hash
 from ..extensions import db 
 from app import audit_log
 from app.models.client.password_policy_model import PasswordPolicy
+from app.models.master.client_model import Client
+from app.models.master.user_client_model import UsuarioCliente
 from app.services.password_service import validate_password_policy
 from datetime import datetime, timezone
 from app.utils.responses import success, error
@@ -21,6 +23,18 @@ ACTION_DELETE = "delete"
 ACTION_READ   = "read"
 
 
+def get_user_scheme(user_id:int)-> Optional[str]:
+    relacion = UsuarioCliente.query.filter_by(user_id=user_id).first()
+    if relacion:
+        cliente = Client.query.filter_by(uuid=relacion.client_uuid).first()
+    
+        if cliente:
+            return cliente.schemaName
+        
+    return None
+    
+    
+    
 def get_user_preferences(user_id) -> Optional[UserPreference]:
     prefs = UserPreference.query.filter_by(userId=user_id).first()
     # TODO: No enviar DEFAULT_PREFERENCES cuando cueli elimine la opcion de agregar preferencias en la base de datos
@@ -171,6 +185,8 @@ def change_user_password(user_id:int, new_password:int, sessionId=None) -> Optio
     try:
         user.password = password_hashed
         user.lastPasswordChangeDate = datetime.now(timezone.utc)
+        user.mustChangePassword = False
+        user.isConfirmedUser = True
         db.session.commit()
         
         return user

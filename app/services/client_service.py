@@ -3,22 +3,16 @@
 from sqlalchemy import text
 from ..extensions import db
 import re
-
-from datetime import date, datetime
 from sqlalchemy.exc import IntegrityError
 from app.models.master.client_model import Client
 from app.models.client.log_model import AuditLog
-from sqlalchemy.exc import SQLAlchemyError
-from app.services.client_plan_service import assign_plan_to_client, assign_plan_to_client_onboard
-from app.services.plan_service import get_plans
-from app.services.price_list_service import get_price_lists
-from app.services.user_role_service import assign_role_to_user
-from app.services.user_service import insert_user, insert_user_onboard
-from app.services.user_client_service import assign_user_to_client, assign_user_to_client_onboard
-from typing import Optional
+from app.services.client_plan_service import assign_plan_to_client_onboard
+from app.services.user_service import  insert_user_onboard
+from app.services.user_client_service import  assign_user_to_client_onboard
 from uuid import uuid4
-
-
+from datetime import date
+from app.utils.helpers import send_confirmation_account_email
+import uuid
 def set_schema(schema_name: str):
     db.session.execute(
         text('SET search_path TO :schema, public'),
@@ -53,9 +47,18 @@ def schema_exists(schema_name: str) -> bool:
 
 def onboard_client_service(client_data, admin_user_data, plan_id, price_list_id):
 
-    schema_name = client_data["schema_name"]
+    #schema_name = client_data["schema_name"]
+    
 
+    def deterministic_short_uuid(value, length=8):
+        return uuid.uuid5(uuid.NAMESPACE_DNS, str(value)).hex[:length]
+
+
+    sname = deterministic_short_uuid(f"{client_data['document_number']}_{client_data['business_name']}")
+    schema_name = f"scheme_{sname}"
     try:
+
+
         # 1️⃣ Crear schema (NO transaccional)
         if not schema_exists(schema_name):
             create_client_schema(schema_name)
@@ -64,6 +67,7 @@ def onboard_client_service(client_data, admin_user_data, plan_id, price_list_id)
         with db.session.begin():  # ← NO usar commit/rollback manual
             
             #Crear el cliente
+            client_data["schema_name"] = schema_name
             client = create_client(
                 **client_data,
                 commit=False
@@ -102,6 +106,10 @@ def onboard_client_service(client_data, admin_user_data, plan_id, price_list_id)
 
 
         # ✅ Si llega aquí, todo se confirmó automáticamente
+        
+        #Enviar email de confirmacion.
+        send_confirmation_account_email(admin_user.userId, client.contactName, admin_user.email)
+        
         return client
 
     except Exception as e:
@@ -111,92 +119,6 @@ def onboard_client_service(client_data, admin_user_data, plan_id, price_list_id)
             drop_schema(schema_name)
 
         raise e
-
-
-def onboard_client_service_old(client_data, admin_user_data, plan_id, price_list_id) -> Optional[Client]:
-    """
-    Flujo de onboarding completo para un cliente:
-    - Crear cliente
-    - Asignar plan y price_list
-    - Crear schema
-    - Crear usuario admin
-    - Asigna rol owner a usuario
-    - Asociar usuario al cliente
-    """
-    try:
-        # 3️⃣ Crear schema si no existe
-        if not schema_exists(client_data["schema_name"]):
-            create_client_schema(client_data["schema_name"])
-        
-        if schema_exists(client_data["schema_name"]):      
-          with db.session.begin():  # 🔥 TRANSACCIÓN REAL
-            # 1️⃣ Crear cliente
-            client = create_client_onboard(
-                name=client_data["name"],
-                contact_name=client_data["contact_name"],
-                phone_type_id=client_data["phone_type_id"],
-                contact_phone=client_data["contact_phone"],
-                document_type_id=client_data["document_type_id"],
-                document_number=client_data["document_number"],
-                business_name=client_data["business_name"],
-                billing_country_id=client_data["billing_country_id"],
-                billing_city_id=client_data["billing_city_id"],
-                billing_sector_id=client_data["billing_sector_id"],
-                billing_address=client_data["billing_address"],
-                billing_email=client_data["billing_email"],
-                service_start_date=client_data.get("service_start_date"),
-                comment=client_data.get("comment"),
-                schema_name=client_data["schema_name"],
-                is_active=client_data.get("is_active", True)
-            )
-
-            # 2️⃣ Asignar plan y price list
-            assign_plan_to_client(
-                client_id=client.clientId,
-                plan_id=plan_id,
-                price_list_id=price_list_id,
-                start_date=datetime.now().date(),
-                commit=False
-            )
-
-
-            # 4️⃣ Crear usuario admin
-            admin_user = insert_user(
-                username=admin_user_data["username"],
-                first_name=admin_user_data["first_name"],
-                last_name=admin_user_data["last_name"],
-                email=admin_user_data["email"],
-                uuid=client.uuid,
-                password=admin_user_data["password"],
-                is_active=True,
-                is_confirmed_user=True,
-                must_change_password=True,
-                commit=False
-            )
-            
-            # Agregar el rol del usuario en la tabla de roles
-            assign_role_to_user(admin_user.userId, 1, commit=False) #TODO: rol 1 administrador general falta tabla de roles en scheme master
-
-            # 5️⃣ Asociar usuario al cliente
-            assign_user_to_client(
-                user_id=admin_user.userId,
-                client_uuid=client.uuid,
-                commit=False
-            )
-            
-        
-
-          return client
-        else:
-          return None
-    except Exception as e:
-        db.session.rollback()
-        # Si el schema fue creado parcialmente, borrarlo
-        if schema_exists(client_data["schema_name"]):
-            drop_schema(schema_name=client_data['schema_name'])
-        raise e
-     
-     
 
 
 
@@ -297,7 +219,7 @@ def create_client(
         billingSectorId=billing_sector_id,
         billingAddress=billing_address,
         billingEmail=billing_email,
-        serviceStartDate=service_start_date,
+        serviceStartDate=date.today(),
         comment=comment,
         isActive=is_active,
         schemaName=schema_name,

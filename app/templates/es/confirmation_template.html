@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmar Cuenta - Activa tu perfil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        /* Variables y Reset Básico */
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-color: #1f2937;
+            --text-muted: #6b7280;
+            --background-color: #f9fafb;
+            --card-background: white;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-background);
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        /* Icono de éxito */
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            background: #d1fae5;
+            color: var(--success-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 30px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 24px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        #message {
+            margin-top: 20px;
+            min-height: 40px;
+        }
+        
+        .error {
+            color: var(--error-color);
+            font-size: 0.9rem;
+            padding: 10px;
+            background-color: #fee2e2;
+            border-radius: 6px;
+        }
+
+        .success {
+            color: var(--success-color);
+            font-size: 0.9rem;
+            padding: 10px;
+            background-color: #d1fae5;
+            border-radius: 6px;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="setup-view">
+        <div class="success-icon">✓</div>
+        <h2>¡Cuenta creada!</h2>
+        <p class="subtitle">Para terminar de activar tu cuenta, por favor establece una contraseña segura.</p>
+
+        <form id="confirmForm">
+            <input
+                type="password"
+                id="password"
+                placeholder="Crea tu contraseña"
+                required
+            />
+
+            <input
+                type="password"
+                id="confirmPassword"
+                placeholder="Confirma tu contraseña"
+                required
+            />
+
+            <button type="submit" id="submitBtn">Activar mi cuenta</button>
+        </form>
+    </div>
+
+    <div id="message"></div>
+</div>
+
+<script>
+    const form = document.getElementById("confirmForm");
+    const message = document.getElementById("message");
+    const setupView = document.getElementById("setup-view");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // Obtener token desde la URL (?token=xyz)
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (!token) {
+        message.innerHTML = "<p class='error'>El enlace de activación no es válido o ha expirado.</p>";
+        setupView.classList.add("hidden");
+    }
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        // Validaciones locales
+        if (password.length < 8) {
+            message.innerHTML = "<p class='error'>La contraseña debe tener al menos 8 caracteres</p>";
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            message.innerHTML = "<p class='error'>Las contraseñas no coinciden</p>";
+            return;
+        }
+
+        // Estado de carga
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Procesando...";
+        message.innerHTML = "";
+
+        try {
+            const response = await fetch("/auth/reset-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    token: token,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Error al activar la cuenta");
+            }
+
+            // Éxito
+            setupView.innerHTML = `
+                <div class="success-icon">✓</div>
+                <h2>¡Todo listo!</h2>
+                <p class="subtitle">Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesión.</p>
+                <button onclick="window.location.href='/'">Ir al Inicio de Sesión</button>
+            `;
+
+        } catch (error) {
+            message.innerHTML = `<p class='error'>${error.message}</p>`;
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Activar mi cuenta";
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -2,7 +2,8 @@ from itsdangerous import SignatureExpired, BadSignature, URLSafeTimedSerializer
 from flask_mail import Message
 from flask import render_template, current_app, request
 from app.extensions import mail
-
+import os
+from dotenv import load_dotenv
 
 def get_serializer():
     return URLSafeTimedSerializer(
@@ -30,6 +31,18 @@ def verify_reset_token(token: str, max_age=1800):
         return None
 
 
+def send_confirmation_account_email(user_id, user_name, email):
+    load_dotenv()
+    token = generate_reset_token(user_id)
+    confirmation_url = f"{request.host_url}/confirmation-account?token={token}"
+    
+    send_email_template(subject="Confirmation Account", 
+                        to=[email],
+                        path_template="emails/es/confirmation_email.html",
+                        confirmation_url=confirmation_url, app_name=os.getenv("APP_NAME"), name=user_name
+                        )
+            
+            
 def send_reset_email(email: str, token: str, userName = ""):
     reset_url = f"{request.host_url}/reset-password?token={token}"
 
