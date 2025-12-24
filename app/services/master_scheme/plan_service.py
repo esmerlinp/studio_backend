@@ -1,6 +1,6 @@
 from typing import List, Optional
 from app import db
-from app.models.master.plans_model import Plan
+from app.models.master_scheme.plans_model import Plan
 
 
 def create_plan(
@@ -44,7 +44,7 @@ def get_plans(active_only: bool = True) -> List[Plan]:
 
     if active_only:
         query = query.filter_by(is_active=True)
-
+    
     return query.order_by(Plan.created_at.desc()).all()
 
 

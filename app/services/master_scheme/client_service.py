@@ -1,14 +1,14 @@
 
 
 from sqlalchemy import text
-from ..extensions import db
+from ...extensions import db
 import re
 from sqlalchemy.exc import IntegrityError
-from app.models.master.client_model import Client
-from app.models.client.log_model import AuditLog
-from app.services.client_plan_service import assign_plan_to_client_onboard
-from app.services.user_service import  insert_user_onboard
-from app.services.user_client_service import  assign_user_to_client_onboard
+from app.models.master_scheme.client_model import Client
+from app.models.client_scheme.log_model import AuditLog
+from app.services.master_scheme.client_plan_service import assign_plan_to_client_onboard
+from app.services.master_scheme.user_service import  insert_user_onboard
+from app.services.master_scheme.user_client_service import  assign_user_to_client_onboard
 from uuid import uuid4
 from datetime import date
 from app.utils.helpers import send_confirmation_account_email
@@ -45,7 +45,7 @@ def schema_exists(schema_name: str) -> bool:
      
   
 
-def onboard_client_service(client_data, admin_user_data, plan_id, price_list_id):
+def onboard_client_service(client_data, admin_user_data):
 
     #schema_name = client_data["schema_name"]
     
@@ -54,7 +54,7 @@ def onboard_client_service(client_data, admin_user_data, plan_id, price_list_id)
         return uuid.uuid5(uuid.NAMESPACE_DNS, str(value)).hex[:length]
 
 
-    sname = deterministic_short_uuid(f"{client_data['document_number']}_{client_data['business_name']}")
+    sname = deterministic_short_uuid(f"{admin_user_data['email']}_{client_data['business_name']}")
     schema_name = f"scheme_{sname}"
     try:
 
@@ -67,22 +67,29 @@ def onboard_client_service(client_data, admin_user_data, plan_id, price_list_id)
         with db.session.begin():  # ← NO usar commit/rollback manual
             
             #Crear el cliente
-            client_data["schema_name"] = schema_name
-            client = create_client(
-                **client_data,
-                commit=False
+            # client_data["schema_name"] = schema_name
+            contact_name = f"{admin_user_data['first_name']} {admin_user_data['last_name']}"
+            client = create_client_onboard(
+              contact_name=contact_name,
+              contact_phone=client_data["contact_phone"],
+              business_name=client_data["business_name"],
+              billing_email=admin_user_data["email"],
+              schema_name=schema_name
             )
             #asignarle un plan 
             assign_plan_to_client_onboard(
                 client_id=client.clientId,
-                plan_id=plan_id,
-                price_list_id=price_list_id,
+                plan_id=1, #TRIAL
+                price_list_id=1, #TRIAL
                 start_date=date.today(),
             )
             
             #crear el usuario owner
             admin_user = insert_user_onboard(
-                **admin_user_data,
+                username=admin_user_data["email"],
+                first_name=admin_user_data["first_name"],
+                last_name=admin_user_data["last_name"],
+                email=admin_user_data["email"],
                 uuid=client.uuid,
                 default_password=True,
             )
@@ -131,22 +138,12 @@ def validate_schema_name(schema: str):
 
 def create_client_onboard(
     *,
-    name: str,
-    contact_name: str,
-    phone_type_id: int,
+    contact_name: str| None = None,
+    phone_type_id: int = 1,
     contact_phone: str,
-    document_type_id: int,
-    document_number: str,
     business_name: str,
-    billing_country_id: int,
-    billing_city_id: int,
-    billing_sector_id: int,
-    billing_address: str,
     schema_name: str,
     billing_email: str | None = None,
-    service_start_date: date | None = None,
-    comment: str | None = None,
-    is_active: bool = True,
 ) -> Client:
     """
     Crea un cliente en master.clientes y su esquema de base de datos
@@ -154,21 +151,14 @@ def create_client_onboard(
     uuid = str(uuid4())
     new_client = Client(
         uuid=uuid,
-        name=name,
+        name=business_name,
         contactName=contact_name,
         phoneTypeId=phone_type_id,
         contactPhone=contact_phone,
-        documentTypeId=document_type_id,
-        documentNumber=document_number,
         businessName=business_name,
-        billingCountryId=billing_country_id,
-        billingCityId=billing_city_id,
-        billingSectorId=billing_sector_id,
-        billingAddress=billing_address,
         billingEmail=billing_email,
-        serviceStartDate=service_start_date,
-        comment=comment,
-        isActive=is_active,
+        serviceStartDate=date.today(),
+        isActive=True,
         schemaName=schema_name,
     )
   

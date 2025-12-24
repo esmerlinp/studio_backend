@@ -5,15 +5,15 @@ from flask import Flask
 from dotenv import load_dotenv
 import os
 from .extensions import mail, db
-from app.services.session_service import get_session_active_by_user_id, invalidar_sesiones_por_id_session, actualizar_actividad_sesion
-from app.services.log_service import log_action
+from app.services.master_scheme.session_service import get_session_active_by_user_id, invalidar_sesiones_por_id_session, actualizar_actividad_sesion
+from app.services.master_scheme.log_service import log_action
 
 from flask import abort
 from sqlalchemy import text
 from app.utils.responses import error
-from app.models.master.user_model import User
-from app.models.master.user_roles import UserRole
-from app.models.master.roles_model import Role
+from app.models.master_scheme.user_model import User
+from app.models.master_scheme.user_roles_model import UserRole
+from app.models.master_scheme.roles_model import Role
 
 INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 

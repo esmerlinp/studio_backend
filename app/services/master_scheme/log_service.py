@@ -1,7 +1,7 @@
 from flask import request
 from flask_jwt_extended import get_jwt_identity
-from app.models.client.log_model import AuditLog
-from ..extensions import db
+from app.models.client_scheme.log_model import AuditLog
+from ...extensions import db
 
 
 def log_action(

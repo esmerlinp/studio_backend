@@ -4,8 +4,9 @@ from app.api.v1.users.routes import users_bp
 from app.api.v1.auth.routes import auth_bp
 from app.api.v1.clients.routes import client_bp
 from app.api.v1.plan.routes import plans_bp
+from app.api.v1.student.routes import students_bp
 from app.api.v1.notifications.routes import notification_bp
-from app.services.user_service import change_user_password, update_user, get_user_scheme, get_user_by_id
+from app.services.master_scheme.user_service import change_user_password, update_user, get_user_scheme, get_user_by_id
 from app import create_app
 from app.utils import i18n
 from flask import render_template
@@ -30,6 +31,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(client_bp)
 app.register_blueprint(notification_bp)
 app.register_blueprint(plans_bp)
+app.register_blueprint(students_bp)
 #TODO: Agregar el blueprint de Notificaciones cuando se cree la tabla
 
 # ------------------------------
@@ -53,7 +55,8 @@ PUBLIC_ENDPOINTS = {
     "main_page",
     "auth.login",
     "login",
-    "plans",
+    "plans_page",
+    "plans.get_plans",
     "dashboard",
     "users.forgot_password",
     "confirmation_account",
@@ -70,6 +73,9 @@ def set_schema():
     # 🔎 Endpoint actual
     endpoint = request.endpoint
     print(endpoint)
+    # Si la ruta no existe (404), no intentes validar JWT
+    if endpoint is None:
+        return
 
     # 🔓 Endpoints públicos → NO validación de usuario
     if endpoint in PUBLIC_ENDPOINTS:
@@ -152,7 +158,7 @@ def client_form():
                             submit_url='/login')
     
 @app.route("/plans")
-def plans():
+def plans_page():
     return render_template('es/plans.html', 
                             app_name=os.getenv("APP_NAME"))
     
@@ -212,7 +218,7 @@ def confirmation_account():
 
 if __name__ == '__main__':
         
-    #app.run(debug=True)
+    app.run(debug=True)
     # Usa la variable de entorno PORT si existe, de lo contrario 8080
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+    #port = int(os.environ.get("PORT", 8080))
+    #app.run(host="0.0.0.0", port=port)

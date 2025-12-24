@@ -1,8 +1,8 @@
 from flask_jwt_extended import jwt_required
 from app import track_activity, require_role
-from app.services.client_service import get_client_preferences, get_client_logs, onboard_client_service
+from app.services.master_scheme.client_service import get_client_preferences, get_client_logs, onboard_client_service
 from app.utils.responses import success
-from app.services.client_service import create_client
+from app.services.master_scheme.client_service import create_client
 from flask import request
 from app.utils.responses import success, error
 
@@ -62,13 +62,10 @@ def onboard_client():
         data = request.get_json()
         client_data = data.get("client_data", None)
         admin_user_data = data.get("user_data", None)
-        plan_id = data.get("plan_id", None)
-        price_list_id = data.get("price_list_id", None)
+
 
         response_data = onboard_client_service(client_data=client_data,
-                            admin_user_data=admin_user_data,
-                            plan_id=plan_id,
-                            price_list_id=price_list_id)
+                            admin_user_data=admin_user_data)
         return success(data=response_data.to_dict())
     except ValueError as e:
         # ❗ Errores de negocio (validaciones)

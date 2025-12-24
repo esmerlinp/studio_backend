@@ -40,13 +40,13 @@ class Client(db.Model):
     documentTypeId = db.Column(
         "idtipodocumento",
         db.SmallInteger,
-        nullable=False
+        nullable=True
     )
 
     documentNumber = db.Column(
         "sdocumento",
         db.String(50),
-        nullable=False
+        nullable=True
     )
 
     businessName = db.Column(
@@ -58,25 +58,25 @@ class Client(db.Model):
     billingCountryId = db.Column(
         "idpaisfacturacion",
         db.Integer,
-        nullable=False
+        nullable=True
     )
 
     billingCityId = db.Column(
         "idciudadfacturacion",
         db.Integer,
-        nullable=False
+        nullable=True
     )
 
     billingSectorId = db.Column(
         "idsectorfacturacion",
         db.Integer,
-        nullable=False
+        nullable=True
     )
 
     billingAddress = db.Column(
         "sdireccionfacturacion",
         db.String(500),
-        nullable=False
+        nullable=True
     )
 
     billingEmail = db.Column(

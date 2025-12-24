@@ -1,7 +1,8 @@
 from flask import request
-from app.services import plan_service, price_list_service
+from app.services.master_scheme import price_list_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity, require_role
+from app.services.master_scheme import plan_service
 from app.utils.responses import success, error
 from app.utils import i18n
 

@@ -2,8 +2,8 @@ from flask import  request, jsonify
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 from datetime import timedelta
-from app.services.user_service import get_user_by_user_name_with_passwd, get_user_by_id, get_user_preferences
-from app.services.session_service import close_session, create_session, get_session_active_by_refresh_token
+from app.services.master_scheme.user_service import get_user_by_user_name_with_passwd, get_user_by_id, get_user_preferences
+from app.services.master_scheme.session_service import close_session, create_session, get_session_active_by_refresh_token
 from app.utils.responses import success, error
 
 

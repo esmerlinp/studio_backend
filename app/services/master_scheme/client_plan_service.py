@@ -1,9 +1,9 @@
 from typing import Optional, List
 from datetime import date
 from app import db
-from app.models.master.client_plans_model import ClientPlan
-from app.models.master.plans_model import Plan
-from app.models.master.price_list_model import PriceList
+from app.models.master_scheme.client_plans_model import ClientPlan
+from app.models.master_scheme.plans_model import Plan
+from app.models.master_scheme.price_list_model import PriceList
 from dateutil.relativedelta import relativedelta
 
 

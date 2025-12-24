@@ -1,6 +1,6 @@
 from flask import request
 from werkzeug.security import generate_password_hash
-from app.services import user_service
+from app.services.master_scheme import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity, require_role
 from app.utils.responses import success, error

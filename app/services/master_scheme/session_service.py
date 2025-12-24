@@ -1,8 +1,8 @@
 
-from app.models.master.session_model import Session
+from app.models.master_scheme.session_model import Session
 from typing import Optional
 from datetime import  timedelta
-from ..extensions import db 
+from ...extensions import db 
 from datetime import datetime, timezone
 
 

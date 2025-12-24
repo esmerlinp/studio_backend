@@ -1,10 +1,10 @@
 
 
-from app.models.client.notification_model import Notification
+from app.models.client_scheme.notification_model import Notification
 from typing import Optional
-from ..extensions import db 
+from ...extensions import db 
 from app.utils.helpers import send_email, send_email_template
-from app.services.user_service import get_user_preferences, get_user_by_id
+from app.services.master_scheme.user_service import get_user_preferences, get_user_by_id
 from dotenv import load_dotenv
 import os
 from flask import request

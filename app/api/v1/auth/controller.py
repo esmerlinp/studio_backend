@@ -1,8 +1,8 @@
 from flask import request
-from app.services import user_service, session_service
+from app.services.master_scheme import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity
-from app.services import auth_service
+from app.services.master_scheme import auth_service, session_service
 from app.utils.responses import success, error
 from app.utils import i18n
 

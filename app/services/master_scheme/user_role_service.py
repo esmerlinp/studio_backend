@@ -1,6 +1,6 @@
 from typing import List, Optional
-from ..extensions import db
-from app.models.client.user_role_model import UserRole
+from ...extensions import db
+from app.models.client_scheme.user_role_model import UserRole
 
 # ========================
 # CREATE

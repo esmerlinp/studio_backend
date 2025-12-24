@@ -1,14 +1,14 @@
 
-from app.models.master.user_model import User
-from app.models.client.user_preferences_model import UserPreference
+from app.models.master_scheme.user_model import User
+from app.models.master_scheme.user_preferences_model import UserPreference
 from typing import Optional, List
 from werkzeug.security import  generate_password_hash
-from ..extensions import db 
+from ...extensions import db 
 from app import audit_log
-from app.models.client.password_policy_model import PasswordPolicy
-from app.models.master.client_model import Client
-from app.models.master.user_client_model import UsuarioCliente
-from app.services.password_service import validate_password_policy
+from app.models.client_scheme.password_policy_model import PasswordPolicy
+from app.models.master_scheme.client_model import Client
+from app.models.master_scheme.user_client_model import UsuarioCliente
+from app.services.master_scheme.password_service import validate_password_policy
 from datetime import datetime, timezone
 from app.utils.responses import success, error
 from app.utils.helpers import send_email_template, generate_reset_token
@@ -225,11 +225,11 @@ def insert_user_onboard(
     last_name: str,
     email: str,
     uuid: str,
-    password: str,
+    password: str="aosU-18fh-stys-3Get",
     photo: Optional[str] = None,
     is_active: bool = True,
     is_confirmed_user: bool = False,
-    must_change_password: bool = False,
+    must_change_password: bool = True,
     send_confirm_email = False,
     default_password = False
 ) -> User:
@@ -248,8 +248,6 @@ def insert_user_onboard(
 
             if not is_valid:
                 raise ValueError(errors)  # 👈 solo lógica de negocio
-    else:
-        password = "aosU-18fh-stys-3Get"
         
     u = get_user_by_user_name(user_name=username)    
     if u:

@@ -1,5 +1,5 @@
 from flask import request
-from app.services import notification_service
+from app.services.client_scheme import notification_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity
 from app.utils.responses import success, error
