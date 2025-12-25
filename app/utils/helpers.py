@@ -4,6 +4,8 @@ from flask import render_template, current_app, request
 from app.extensions import mail
 import os
 from dotenv import load_dotenv
+from app.models.client_scheme.dynamic_field_model import DynamicField
+
 
 def get_serializer():
     return URLSafeTimedSerializer(
@@ -83,3 +85,57 @@ def send_email(subject:str, to:list[str], message):
 
 
     mail.send(msg)
+
+
+
+
+
+
+def validate_custom_attributes(entity_type, attributes_dict):
+    """
+    Verifica que cada llave enviada en el JSON exista 
+    en la tabla de definiciones para esa entidad.
+    """
+    # 1. Traer los nombres de campos permitidos desde 'master.dynamic_fields'
+    allowed_fields = [
+        f.name for f in DynamicField.query.filter_by(entity_type=entity_type).all()
+    ]
+    
+    # 2. Comparar con lo que viene del frontend
+    for key in attributes_dict.keys():
+        if key not in allowed_fields:
+            raise Exception(f"El campo '{key}' no está definido para {entity_type}. Por favor, regístralo primero.")
+
+# En tu create_student llamarías a esta función:
+# validate_custom_attributes('STUDENT', data.get('custom_attributes', {}))
+
+
+
+
+
+def get_file_size(file_storage, unit="MB"):
+    """
+    Calcula el tamaño de un objeto FileStorage de Flask.
+    
+    :param file_storage: El objeto recuperado de request.files
+    :param unit: 'B', 'KB', 'MB' o 'GB'
+    :return: float con el tamaño en la unidad especificada
+    """
+    # 1. Mover el puntero al final del archivo para medir su longitud
+    file_storage.seek(0, os.SEEK_END)
+    size_in_bytes = file_storage.tell()
+    
+    # 2. IMPORTANTE: Regresar el puntero al inicio 
+    # Si no haces esto, el archivo se subirá con 0 bytes a la nube
+    file_storage.seek(0)
+    
+    # 3. Conversión de unidades
+    units = {
+        "B": 1,
+        "KB": 1024,
+        "MB": 1024**2,
+        "GB": 1024**3
+    }
+    
+    size = size_in_bytes / units.get(unit.upper(), 1024**2)
+    return round(size, 4)

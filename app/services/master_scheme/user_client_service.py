@@ -2,6 +2,7 @@
 from uuid import UUID
 from app import db
 from app.models.master_scheme.user_client_model import UsuarioCliente
+from app.models.master_scheme.client_model import Client
 from sqlalchemy.exc import IntegrityError
 from typing import List
 
@@ -55,6 +56,14 @@ def get_clients_by_user(user_id: int) -> list[UsuarioCliente]:
     """
     
     return UsuarioCliente.query.filter_by(user_id=user_id).all()
+
+def get_client_by_user(user_id: int) -> Client:
+    """
+    Retorna el cliente del usuario.
+    """
+    relacion = UsuarioCliente.query.filter_by(user_id=user_id).first()
+    cliente = Client.query.filter_by(uuid=relacion.client_uuid).first()
+    return cliente
 
 
 def get_users_by_client(client_uuid: UUID) -> List[UsuarioCliente]:
