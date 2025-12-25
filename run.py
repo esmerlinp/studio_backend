@@ -4,6 +4,7 @@ from app.api.v1.users.routes import users_bp
 from app.api.v1.auth.routes import auth_bp
 from app.api.v1.clients.routes import client_bp
 from app.api.v1.plan.routes import plans_bp
+from app.api.v1.payments.routes import payment_bp
 from app.api.v1.student.routes import students_bp
 from app.api.v1.dynamics.routes import dynamic_fields_bp
 from app.api.v1.notifications.routes import notification_bp
@@ -34,6 +35,7 @@ app.register_blueprint(notification_bp)
 app.register_blueprint(plans_bp)
 app.register_blueprint(students_bp)
 app.register_blueprint(dynamic_fields_bp)
+app.register_blueprint(payment_bp)
 #TODO: Agregar el blueprint de Notificaciones cuando se cree la tabla
 
 # ------------------------------
@@ -65,7 +67,9 @@ PUBLIC_ENDPOINTS = {
     "confirmation_account",
     "reset_password",
     "reset_password_page",
-    "clients.onboard_client"
+    "clients.onboard_client",
+    "payments.payment_success",
+    "payments.cancel"
 }
 
 

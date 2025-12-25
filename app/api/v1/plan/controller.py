@@ -8,7 +8,6 @@ from app.utils import i18n
 
 
 
-
 def get_plans():
     data = plan_service.get_plans()
     return success(data=[notif.to_dict() for notif in data])
@@ -70,3 +69,5 @@ def add_price_list():
     return success(data=data.to_dict())
 
     
+
+
