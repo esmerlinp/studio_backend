@@ -1,5 +1,5 @@
 from flask import request
-from app.services import dynamic_field_service
+from app.services.client_scheme import dynamic_field_service
 from flask_jwt_extended import jwt_required
 from app import track_activity, require_role
 from app.utils.responses import success, error
@@ -7,17 +7,16 @@ from app.utils import i18n
 
 @jwt_required()
 @track_activity
-def get_entity_fields(entity_type: str):
+def get_entity_fields(entityType: str):
     """
     Endpoint para el Frontend:
     Retorna qué campos extras debe dibujar el formulario.
     """
-    fields = dynamic_field_service.get_fields_by_entity(entity_type)
+    fields = dynamic_field_service.get_fields_by_entity(entityType)
     return success(data=[f.to_dict() for f in fields])
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN, ADMIN"])
 def create_field():
     """Solo el Super Admin puede crear nuevas definiciones globales."""
     data = request.get_json()

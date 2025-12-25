@@ -413,6 +413,11 @@ def has_available_storage(client_id: int, new_file_size_mb: float) -> tuple[bool
 
 from sqlalchemy import func
 
+def storage_info(client_id) -> ClientStorage:
+    storage = ClientStorage.query.filter_by(client_id=client_id).first()
+    return storage
+    
+
 def update_client_storage_usage(client_id: int, size_mb: float, operation: str = "add"):
     """
     Actualiza el contador de almacenamiento consumido por un cliente.

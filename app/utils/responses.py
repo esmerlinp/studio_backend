@@ -11,5 +11,5 @@ def success(data, message="OK", status_code=200):
 def error(message, status_code=400):
     return jsonify({
         "success": False,
-        "message": message
+        "msg": message
     }), status_code

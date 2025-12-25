@@ -5,6 +5,7 @@ from app.api.v1.auth.routes import auth_bp
 from app.api.v1.clients.routes import client_bp
 from app.api.v1.plan.routes import plans_bp
 from app.api.v1.student.routes import students_bp
+from app.api.v1.dynamics.routes import dynamic_fields_bp
 from app.api.v1.notifications.routes import notification_bp
 from app.services.master_scheme.user_service import change_user_password, update_user, get_user_scheme, get_user_by_id
 from app import create_app
@@ -32,6 +33,7 @@ app.register_blueprint(client_bp)
 app.register_blueprint(notification_bp)
 app.register_blueprint(plans_bp)
 app.register_blueprint(students_bp)
+app.register_blueprint(dynamic_fields_bp)
 #TODO: Agregar el blueprint de Notificaciones cuando se cree la tabla
 
 # ------------------------------
@@ -41,9 +43,9 @@ culture = "es-DO"
 i18n.setup_gettext("es")
 
 
-# @app.route('/')
-# def hola_mundo():
-#     return '¡Hola desde Flask!'
+@app.route('/health')
+def health():
+    return 'OK', 200
 
 # @app.route("/")
 # def index():
@@ -52,6 +54,7 @@ i18n.setup_gettext("es")
 
 
 PUBLIC_ENDPOINTS = {
+    "health",
     "main_page",
     "auth.login",
     "login",
@@ -114,17 +117,6 @@ def set_schema():
     )
 
 
-
-
-
-
-
-
-# @app.route('/')
-# def home():
-#     host = request.host  # Ej: "localhost:5000"
-#     url_completa = request.host_url  # Ej: "http://localhost:5000/"
-#     return f"URL del servidor: {url_completa} - {host}"
 
 
 @app.route("/")

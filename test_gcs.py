@@ -2,7 +2,7 @@ import os
 from google.cloud import storage
 
 # 1. Configura la ruta a tu JSON manualmente para esta prueba
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './app/akadmia-1b52b58e2bdd.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './app/google/akadmia-1b52b58e2bdd.json'
 
 def test_connection():
     try:

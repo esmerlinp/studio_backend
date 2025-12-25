@@ -2,7 +2,7 @@ from typing import List, Optional, Dict, Any
 from ...extensions import db
 from app.models.client_scheme.student_model import Student # Ajusta el import según tu estructura
 from sqlalchemy.exc import SQLAlchemyError
-
+from datetime import datetime
 def get_all_students() -> List[Student]:
     """Retorna todos los estudiantes del esquema actual."""
     return Student.query.all()
@@ -20,31 +20,47 @@ def create_student(data: Dict[str, Any]) -> Student:
     Crea un nuevo estudiante.
     'data' puede contener tanto campos fijos como el diccionario 'custom_attributes'.
     """
+    
+
+
+    # Función auxiliar para convertir strings a objetos date si es necesario
+    def parse_date(date_str):
+        if not date_str:
+            return None
+        try:
+            # Ajusta el formato '%Y-%m-%d' según cómo envíes la fecha desde el frontend
+            return datetime.strptime(date_str, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            return None
     try:
         new_student = Student(
-            request_id=data.get('request_id'),
-            student_code=data.get('student_code'),
-            enrollment_date=data.get('enrollment_date'),
-            last_name1=data.get('last_name1'),
-            last_name2=data.get('last_name2'),
-            first_name1=data.get('first_name1'),
-            first_name2=data.get('first_name2'),
-            gender_id=data.get('gender_id'),
-            living_situation=data.get('living_situation'),
-            birth_date=data.get('birth_date'),
-            country_id=data.get('country_id'),
-            city_id=data.get('city_id'),
-            sector_id=data.get('sector_id'),
+            requestId=data.get('requestId'),
+            studentCode=data.get('studentCode'),
+            # Convertimos strings a objetos date
+            enrollmentDate=parse_date(data.get('enrollmentDate')) or datetime.utcnow().date(),
+            birthDate=parse_date(data.get('birthDate')),
+            
+            # Nombres corregidos
+            firstName=data.get('firstName'),
+            middleName=data.get('middleName'),
+            lastName=data.get('lastName'),
+            secondLastName=data.get('secondLastName'),
+            
+            genderId=data.get('genderId'),
+            livingSituation=data.get('livingSituation'),
+            countryId=data.get('countryId'),
+            cityId=data.get('cityId'),
+            sectorId=data.get('sectorId'),
             address=data.get('address'),
-            previous_school_id=data.get('previous_school_id'),
-            entry_reason=data.get('entry_reason'),
+            previousSchoolId=data.get('previousSchoolId'),
+            entryReason=data.get('entryReason'),
             status=data.get('status', 1),
-            family_id=data.get('family_id'),
-            blood_type_id=data.get('blood_type_id'),
-            # Los campos dinámicos se guardan aquí
+            familyId=data.get('familyId'),
+            bloodTypeId=data.get('bloodTypeId'),
+            
+            # El campo dinámico que mantuvimos en snake_case
             custom_attributes=data.get('custom_attributes', {})
         )
-        
         db.session.add(new_student)
         db.session.commit()
         return new_student

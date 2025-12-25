@@ -4,16 +4,16 @@ from app.models.client_scheme.dynamic_field_model import DynamicField # Importa 
 
 def get_fields_by_entity(entity_type: str) -> List[DynamicField]:
     """Obtiene las definiciones de campos para una entidad (STUDENT, TEACHER, etc.)"""
-    return DynamicField.query.filter_by(entity_type=entity_type.upper()).all()
+    return DynamicField.query.filter_by(entityType=entity_type.upper()).all()
 
 def create_dynamic_field(data: Dict[str, Any]) -> DynamicField:
     """Registra una nueva definición de campo en el esquema master."""
     new_field = DynamicField(
-        entity_type=data.get('entity_type').upper(),
+        entityType=data.get('entityType').upper(),
         label=data.get('label'),
         name=data.get('name'), # ej: 'talla_camisa'
-        field_type=data.get('field_type'), # TEXT, SELECT, DATE
-        is_required=data.get('is_required', False),
+        fieldType=data.get('fieldType'), # TEXT, SELECT, DATE
+        isRequired=data.get('isRequired', False),
         options=data.get('options') # Lista de opciones si es SELECT
     )
     db.session.add(new_field)

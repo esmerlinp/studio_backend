@@ -1,8 +1,8 @@
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity, require_role
-from app.services.master_scheme.client_service import get_client_preferences, get_client_logs, onboard_client_service
+from app.services.master_scheme.client_service import get_client_preferences, get_client_logs, onboard_client_service, storage_info, create_client
+from app.services.master_scheme.user_client_service import get_client_by_user
 from app.utils.responses import success
-from app.services.master_scheme.client_service import create_client
 from flask import request
 from app.utils.responses import success, error
 
@@ -28,6 +28,15 @@ def get_logs():
 
     logs = get_client_logs()
     return success(data=[log.to_dict() for log in logs])
+
+@jwt_required()
+@track_activity
+def get_storage_info():
+    identity = get_jwt_identity()  
+    client = get_client_by_user(user_id=identity)
+    storage = storage_info(client_id=client.clientId)
+    return success(data=storage.to_dict())
+
 
 @jwt_required()
 @track_activity
