@@ -6,7 +6,7 @@ __pycache__/
 # C extensions
 *.so
 
-akadmia-1b52b58e2bdd.json
+app/google/
 
 # Distribution / packaging
 .Python

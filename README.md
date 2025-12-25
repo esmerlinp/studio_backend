@@ -67,7 +67,7 @@ Bash
 
 gcloud run deploy flask-service \
     --image us-central1-docker.pkg.dev/akadmia/akdmia-repo/flask-app \
-    --set-env-vars "JWT_SECRET_KEY=Myvhyp-wustuj-noqky4,APP_NAME=Akdmia,DATABASE_URL=postgresql://neondb_owner:npg_fFT1cLH8gjuy@ep-morning-wildflower-addmvwux.c-2.us-east-1.aws.neon.tech:5432/AKDMIA?sslmode=require,SECRET_KEY=kacHex-xottak-2tahty,FRONTEND_URL=https://flask-service-akadmia.a.run.app,MAIL_SERVER=smtp.gmail.com, MAIL_PORT=587,MAIL_USE_TLS=true,MAIL_USERNAME=esmerlinep@gmail.com,MAIL_PASSWORD=xqgkhsipfpmtqbau,MAIL_DEFAULT_SENDER=Akdmia <esmerlinep@gmail.com>,SQLALCHEMY_DATABASE_URI=postgresql://neondb_owner:npg_fFT1cLH8gjuy@ep-morning-wildflower-addmvwux.c-2.us-east-1.aws.neon.tech:5432/AKDMIA?sslmode=require,GOOGLE_APPLICATION_CREDENTIALS=./app/akadmia-1b52b58e2bdd.json,GCS_BUCKET_NAME=akadmia_cloudbuild" \
+    --set-env-vars "JWT_SECRET_KEY=Myvhyp-wustuj-noqky4,APP_NAME=Akdmia,DATABASE_URL=postgresql://neondb_owner:npg_fFT1cLH8gjuy@ep-morning-wildflower-addmvwux.c-2.us-east-1.aws.neon.tech:5432/AKDMIA?sslmode=require,SECRET_KEY=kacHex-xottak-2tahty,FRONTEND_URL=https://flask-service-akadmia.a.run.app,MAIL_SERVER=smtp.gmail.com, MAIL_PORT=587,MAIL_USE_TLS=true,MAIL_USERNAME=esmerlinep@gmail.com,MAIL_PASSWORD=xqgkhsipfpmtqbau,MAIL_DEFAULT_SENDER=Akdmia <esmerlinep@gmail.com>,SQLALCHEMY_DATABASE_URI=postgresql://neondb_owner:npg_fFT1cLH8gjuy@ep-morning-wildflower-addmvwux.c-2.us-east-1.aws.neon.tech:5432/AKDMIA?sslmode=require,GOOGLE_APPLICATION_CREDENTIALS=./app/google/akadmia-1b52b58e2bdd.json,GCS_BUCKET_NAME=akadmia_cloudbuild" \
     --region us-central1 \
     --allow-unauthenticated
 
