@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
+akadmia-1b52b58e2bdd.json
+
 # Distribution / packaging
 .Python
 build/
