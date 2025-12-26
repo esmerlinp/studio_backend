@@ -115,7 +115,8 @@ def track_activity(func):
 
         except Exception as e:
             print("track_activity error:", str(e))
-            return jsonify({"msg": "Error en seguimiento de sesión"}), 500
+            return error(message=f"Error en seguimiento de sesión {str(e)}", status_code=500)
+
 
     return wrapper
 

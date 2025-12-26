@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recibo de Pago - {{ invoice.invoiceNumber }}</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background-color: #f4f7f6; margin: 0; padding: 0; }
+        .receipt-container { max-width: 600px; margin: 50px auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
+        .header h1 { color: #2ecc71; margin: 0; font-size: 24px; }
+        .header p { color: #777; margin: 5px 0 0; }
+        .details { margin-bottom: 30px; line-height: 1.6; }
+        .details div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
+        .details span:first-child { font-weight: bold; color: #555; }
+        .total-box { background: #f8fdfa; padding: 20px; border-radius: 6px; text-align: center; border: 1px solid #e0f2f1; }
+        .total-box h2 { margin: 0; color: #2c3e50; font-size: 32px; }
+        .actions { margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
+        .btn { padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; }
+        .btn-print { background-color: #3498db; color: white; }
+        .btn-print:hover { background-color: #2980b9; }
+        .btn-home { background-color: #ecf0f1; color: #333; }
+        .btn-home:hover { background-color: #bdc3c7; }
+        
+        @media print {
+            .actions { display: none; }
+            body { background: white; }
+            .receipt-container { box-shadow: none; margin: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="receipt-container">
+    <div class="header">
+        <h1>¡Pago Completado!</h1>
+        <p>Gracias por confiar en {{ app_name }}</p>
+    </div>
+
+    <div class="details">
+        <div>
+            <span>Nro. Factura:</span>
+            <span>{{ invoice.invoiceNumber }}</span>
+        </div>
+        <div>
+            <span>Referencia:</span>
+            <span>{{ transaction.sreferencia_interna }}</span>
+        </div>
+        <div>
+            <span>Fecha:</span>
+            <span>{{ invoice.issueDate.strftime('%d/%m/%Y %H:%M') }}</span>
+        </div>
+        <div>
+            <span>Estado:</span>
+            <span style="color: #27ae60;">● {{ transaction.status }}</span>
+        </div>
+        <div>
+            <span>Método de Pago:</span>
+            <span>Tarjeta de Crédito / Débito</span>
+        </div>
+    </div>
+
+    <div class="total-box">
+        <p style="margin-bottom: 5px; color: #666;">Total Pagado</p>
+        <h2>{{ "{:,.2f}".format(invoice.totalAmount) }} {{ transaction.smoneda }}</h2>
+    </div>
+
+    <div class="actions">
+        <button onclick="window.print()" class="btn btn-print">Imprimir Recibo</button>
+        <a href="/" class="btn btn-home">Ir al Dashboard</a>
+    </div>
+</div>
+
+</body>
+</html>

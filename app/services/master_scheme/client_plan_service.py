@@ -141,6 +141,19 @@ def get_active_client_plan(client_id: int) -> Optional[ClientPlan]:
 
 
 
+def get_active_plan(id: int) -> Optional[ClientPlan]:
+    today = date.today()
+
+    return ClientPlan.query.filter(
+        ClientPlan.id == id,
+        ClientPlan.status == "ACTIVE",
+        ClientPlan.start_date <= today,
+        db.or_(
+            ClientPlan.end_date.is_(None),
+            ClientPlan.end_date >= today)
+    ).order_by(ClientPlan.start_date.desc()).first()
+    
+
 def get_client_plan_history(client_id: int) -> List[ClientPlan]:
     return ClientPlan.query.filter_by(
         client_id=client_id
@@ -181,7 +194,7 @@ def change_client_plan(
     client_id: int,
     new_plan_id: int,
     new_price_list_id: int,
-    change_date: date
+    change_date: date = date.today()
 ) -> ClientPlan:
 
     current_plan = get_active_client_plan(client_id)

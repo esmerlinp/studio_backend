@@ -69,6 +69,7 @@ PUBLIC_ENDPOINTS = {
     "reset_password_page",
     "clients.onboard_client",
     "payments.payment_success",
+    "payments.stripe_webhook",
     "payments.cancel"
 }
 

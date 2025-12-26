@@ -18,7 +18,7 @@ from app.models.master_scheme.client_model import Client
 from app.models.master_scheme.plans_model import Plan
 from app.models.master_scheme.client_storage_model import ClientStorage
 from app.utils.responses import error
-
+from typing import Optional
 
 
 
@@ -359,13 +359,13 @@ def get_client_logs()-> list[AuditLog]:
     logs = AuditLog.query.all()
     return logs
   
-def get_client()-> list[Client]:    
+def get_clients()-> list[Client]:    
     clients = Client.query.all()
     return clients
   
-def get_client_by_id(client_id)-> Client:    
-    clients = Client.query.filter_by(clientId = client_id)
-    return clients
+def get_client_by_id(clientId)-> Optional[Client]:    
+    client = Client.query.get(clientId)
+    return client
   
 def get_client_by_uuid(uuid)-> Client:    
     client = Client.query.filter_by(uuid = uuid).first()
@@ -373,7 +373,7 @@ def get_client_by_uuid(uuid)-> Client:
 
 
 
-from typing import Optional
+
 def has_available_storage(client_id: int, new_file_size_mb: float) -> tuple[bool, Optional[str]]:
     """
     Verifica si el cliente tiene espacio suficiente en su plan contratado.
