@@ -227,7 +227,7 @@ def insert_user_onboard(
     uuid: str,
     password: str="aosU-18fh-stys-3Get",
     photo: Optional[str] = None,
-    is_active: bool = True,
+    is_active: bool = False,
     is_confirmed_user: bool = False,
     must_change_password: bool = True,
     send_confirm_email = False,

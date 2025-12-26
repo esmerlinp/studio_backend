@@ -2,7 +2,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity, require_role
 from app.services.master_scheme.client_service import get_client_preferences, get_client_logs, onboard_client_service, storage_info, create_client, get_clients, get_client_by_id, get_client_by_uuid
 from app.services.master_scheme.user_client_service import get_client_by_user   
-from app.services.master_scheme.client_plan_service import get_active_client_plan, assign_plan_to_client, change_client_plan
+from app.services.master_scheme.client_plan_service import get_active_client_plan, assign_plan_to_client, change_client_plan, get_client_plan_history
 from app.utils.responses import success
 from flask import request
 from app.utils.responses import success, error
@@ -33,6 +33,14 @@ def get_logs():
 @jwt_required()
 @track_activity
 @require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
+def get_client_plans(clientId):
+
+    logs = get_client_plan_history(client_id=clientId)
+    return success(data=[log.to_dict() for log in logs])
+
+@jwt_required()
+@track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
 def get_plan(clientId):
     plan = get_active_client_plan(client_id=clientId)
     
@@ -49,7 +57,7 @@ def get_plan(clientId):
 @require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
 def change_plan():
     data = request.get_json()
-    plan = change_client_plan(**data)
+    plan = change_client_plan(client_id=data.get("client_id"), new_plan_id=data.get("new_plan_id"), new_price_list_id=data.get("new_price_list_id"))
         
     return success(data=plan.to_dict())
 
@@ -65,7 +73,7 @@ def get_client(clientId):
 @jwt_required()
 @track_activity
 @require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
-def get_clients():
+def get_all_clients():
     data = get_clients()
     return success(data=[d.to_dict() for d in data])
 
@@ -115,7 +123,7 @@ def onboard_client():
 
         response_data = onboard_client_service(client_data=client_data,
                             admin_user_data=admin_user_data)
-        return success(data=response_data.to_dict())
+        return success(data=response_data)
     except ValueError as e:
         # ❗ Errores de negocio (validaciones)
         return error(str(e), 400)

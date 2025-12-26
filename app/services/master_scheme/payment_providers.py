@@ -9,17 +9,10 @@ class StripeProvider:
         
         stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
-    def create_checkout(self, amount, currency, order_id, client_email, plan_period="month"):
-        """
-        Crea una sesión de pago en Stripe y devuelve la URL.
-        trimestral, semestral, anual, trial
-        """
+    def create_checkout(self, amount, currency, order_id, client_email, plan_period="month", is_trial_plan=False, trial_days=14):
         try:
-            # Stripe maneja montos en centavos (ej: 100.00 DOP = 10000)
-
-            # 1. Lógica de mapeo de tu plan a parámetros de Stripe
+            # 1. Configuración del Ciclo
             interval = "month"
-            #interval = "day"
             interval_count = 1
             
             if plan_period == 'trimestral':
@@ -30,8 +23,14 @@ class StripeProvider:
                 interval = "year"
                 interval_count = 1
             
-        
+            # 2. Preparar subscription_data SOLO si es un plan trial
+            sub_data = {}
+            if is_trial_plan:
+                sub_data['trial_period_days'] = trial_days
+
             amount_in_cents = int(float(amount) * 100)
+            
+            # 3. Creación de la Sesión
             session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
                 line_items=[{
@@ -43,16 +42,18 @@ class StripeProvider:
                         'unit_amount': amount_in_cents,
                         'recurring': {
                             'interval': interval,
-                            'interval_count': interval_count, # <--- AQUÍ defines el ciclo
+                            'interval_count': interval_count,
                         },
                     },
                     'quantity': 1,
                 }],
                 mode='subscription',
-                client_reference_id=order_id, # Tu ID interno para reconocerlo luego
+                # Pasamos el diccionario que preparamos arriba
+                subscription_data=sub_data, 
+                client_reference_id=order_id,
                 customer_email=client_email,
-                success_url=f"{request.host_url}/api/v1/payments/success?session_id={{CHECKOUT_SESSION_ID}}",
-                cancel_url=f"{request.host_url}/api/v1/payments/cancel",
+                success_url=f"{request.host_url}api/v1/payments/success?session_id={{CHECKOUT_SESSION_ID}}",
+                cancel_url=f"{request.host_url}api/v1/payments/cancel",
             )
             
             return {

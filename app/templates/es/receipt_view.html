@@ -3,25 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recibo de Pago - {{ invoice.invoiceNumber }}</title>
+    <title>Recibo - {{ app_name }}</title>
     <style>
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background-color: #f4f7f6; margin: 0; padding: 0; }
         .receipt-container { max-width: 600px; margin: 50px auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
         .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
-        .header h1 { color: #2ecc71; margin: 0; font-size: 24px; }
         .header p { color: #777; margin: 5px 0 0; }
+        
+        /* Clases de estado dinámicas */
+        .text-trial { color: #4f46e5 !important; }
+        .text-payment { color: #2ecc71 !important; }
+        
         .details { margin-bottom: 30px; line-height: 1.6; }
         .details div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
         .details span:first-child { font-weight: bold; color: #555; }
-        .total-box { background: #f8fdfa; padding: 20px; border-radius: 6px; text-align: center; border: 1px solid #e0f2f1; }
+        
+        /* Cajas de total */
+        .total-box { padding: 20px; border-radius: 6px; text-align: center; }
+        .bg-trial { background: #f5f7ff; border: 1px solid #c7d2fe; }
+        .bg-payment { background: #f8fdfa; border: 1px solid #e0f2f1; }
+        
         .total-box h2 { margin: 0; color: #2c3e50; font-size: 32px; }
+        
         .actions { margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
         .btn { padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; }
         .btn-print { background-color: #3498db; color: white; }
         .btn-print:hover { background-color: #2980b9; }
-        .btn-home { background-color: #ecf0f1; color: #333; }
-        .btn-home:hover { background-color: #bdc3c7; }
+        .btn-home { background-color: #4f46e5; color: white; }
+        .btn-home:hover { opacity: 0.9; }
         
+        .badge-trial {
+            background-color: #dcfce7;
+            color: #166534;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
         @media print {
             .actions { display: none; }
             body { background: white; }
@@ -33,36 +54,49 @@
 
 <div class="receipt-container">
     <div class="header">
-        <h1>¡Pago Completado!</h1>
-        <p>Gracias por confiar en {{ app_name }}</p>
+        {% if is_trial %}
+            <h1 class="text-trial">¡Periodo de Prueba Activado!</h1>
+            <p>Tu acceso a <strong>{{ app_name }}</strong> ha comenzado con éxito.</p>
+        {% else %}
+            <h1 class="text-payment">¡Pago Completado!</h1>
+            <p>Gracias por confiar en <strong>{{ app_name }}</strong></p>
+        {% endif %}
     </div>
 
     <div class="details">
         <div>
-            <span>Nro. Factura:</span>
-            <span>{{ invoice.invoiceNumber }}</span>
+            <span>Nro. Comprobante:</span>
+            <span>{{ invoice.invoiceNumber if invoice else 'Generando factura...' }}</span>
         </div>
         <div>
             <span>Referencia:</span>
-            <span>{{ transaction.sreferencia_interna }}</span>
+            <span>{{ transaction.internalReference }}</span>
         </div>
         <div>
             <span>Fecha:</span>
-            <span>{{ invoice.issueDate.strftime('%d/%m/%Y %H:%M') }}</span>
+            <span>{{ transaction.paymentDate.strftime('%d/%m/%Y %H:%M') }}</span>
         </div>
         <div>
             <span>Estado:</span>
-            <span style="color: #27ae60;">● {{ transaction.status }}</span>
+            <span style="color: #27ae60;">● {{ 'PROCESADO' if is_trial else transaction.status }}</span>
         </div>
         <div>
-            <span>Método de Pago:</span>
-            <span>Tarjeta de Crédito / Débito</span>
+            <span>Plan:</span>
+            <span>{{ plan_name or 'Suscripción Estándar' }}</span>
         </div>
     </div>
 
-    <div class="total-box">
-        <p style="margin-bottom: 5px; color: #666;">Total Pagado</p>
-        <h2>{{ "{:,.2f}".format(invoice.totalAmount) }} {{ transaction.smoneda }}</h2>
+    <div class="total-box {{ 'bg-trial' if is_trial else 'bg-payment' }}">
+        {% if is_trial %}
+            <p style="margin-bottom: 5px; color: #666;">Cargo realizado hoy</p>
+            <h2>0.00 {{ transaction.currency }} <span class="badge-trial">TRIAL</span></h2>
+            <p style="font-size: 0.85em; color: #4f46e5; margin-top: 10px;">
+                Tu primer cobro se realizará al finalizar el periodo de prueba.
+            </p>
+        {% else %}
+            <p style="margin-bottom: 5px; color: #666;">Total Pagado</p>
+            <h2>{{ "{:,.2f}".format(invoice.totalAmount if invoice else transaction.amount) }} {{ transaction.currency }}</h2>
+        {% endif %}
     </div>
 
     <div class="actions">

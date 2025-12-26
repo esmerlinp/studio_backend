@@ -73,6 +73,20 @@ class PriceList(db.Model):
         default=datetime.utcnow,
         nullable=False
     )
+    
+    is_trial = db.Column(
+        "btrial",
+        db.Boolean,
+        default=False,
+        nullable=False
+    )
+
+    trial_days = db.Column(
+        "itrialdias", 
+        db.Integer,
+        default=0,
+        nullable=False
+    )
 
     # 🔗 Relación con Plan
     plan = db.relationship(
@@ -97,6 +111,8 @@ class PriceList(db.Model):
             "currency": self.currency,
             "price_per_user": self.price_per_user,
             "min_users": self.min_users,
+            "is_trial": self.is_trial,
+            "trial_days": self.trial_days,
             "valid_from": self.valid_from.isoformat(),
             "valid_to": self.valid_to.isoformat() if self.valid_to else None,
             "is_active": self.is_active,

@@ -16,6 +16,7 @@ def assign_plan_to_client_onboard(
     price_list_id: int,
     start_date: date,
     end_date: Optional[date] = None,
+    status= "ACTIVE"
 ) -> ClientPlan:
 
     # Validar plan
@@ -55,7 +56,7 @@ def assign_plan_to_client_onboard(
         price_list_id=price_list_id,
         start_date=start_date,
         end_date=end_date,
-        status="ACTIVE"
+        status=status
     )
 
 
@@ -147,6 +148,18 @@ def get_active_plan(id: int) -> Optional[ClientPlan]:
     return ClientPlan.query.filter(
         ClientPlan.id == id,
         ClientPlan.status == "ACTIVE",
+        ClientPlan.start_date <= today,
+        db.or_(
+            ClientPlan.end_date.is_(None),
+            ClientPlan.end_date >= today)
+    ).order_by(ClientPlan.start_date.desc()).first()
+    
+def get_active_pending(id: int) -> Optional[ClientPlan]:
+    today = date.today()
+
+    return ClientPlan.query.filter(
+        ClientPlan.id == id,
+        ClientPlan.status == "PENDING_PAYMENT",
         ClientPlan.start_date <= today,
         db.or_(
             ClientPlan.end_date.is_(None),
