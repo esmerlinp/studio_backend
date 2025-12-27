@@ -3,72 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 20px auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
-        .header { background-color: #4f46e5; color: #ffffff; padding: 30px; text-align: center; }
-        .content { padding: 30px; }
-        .trial-box { 
-            background-color: #f5f7ff; 
-            border: 1px solid #c7d2fe; 
-            padding: 20px; 
-            border-radius: 8px; 
-            margin: 20px 0;
+    <title>Bienvenido a la prueba gratuita</title>
+    <style type="text/css">
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f1f3f4;
+            font-family: 'Google Sans', Roboto, Segoe UI, Arial, sans-serif;
+        }
+
+        .container-table {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #dadce0;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3);
+            overflow: hidden;
+        }
+
+        .content-td {
+            padding: 40px;
+            color: #3c4043;
+            line-height: 1.6;
+        }
+
+        h2 {
+            color: #202124;
+            font-size: 24px;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .trial-card {
+            background-color: #f8f9fa;
+            border: 1px solid #e8eaed;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 24px 0;
             text-align: center;
         }
-        .trial-date { color: #4f46e5; font-size: 1.2em; font-weight: bold; }
-        .footer { background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; }
-        .btn { 
-            display: inline-block; 
-            background-color: #4f46e5; 
-            color: #ffffff; 
-            padding: 12px 25px; 
-            text-decoration: none; 
-            border-radius: 5px; 
-            font-weight: bold; 
-            margin-top: 10px;
-        }
+
         .badge {
-            background-color: #dcfce7;
-            color: #166534;
+            background-color: #e6f4ea;
+            color: #188038;
             padding: 4px 12px;
-            border-radius: 99px;
+            border-radius: 16px;
+            font-weight: 500;
             font-size: 12px;
-            font-weight: bold;
+            display: inline-block;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .trial-date {
+            color: #1a73e8;
+            font-size: 22px;
+            font-weight: 500;
+            margin: 10px 0;
+        }
+
+        .button {
+            background-color: #1a73e8;
+            color: #ffffff !important;
+            padding: 12px 28px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-block;
+            letter-spacing: 0.25px;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #70757a;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .link-text {
+            color: #1a73e8;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1 style="margin:0;">¡Bienvenido a {{ app_name }}!</h1>
-        </div>
-        
-        <div class="content">
-            <h2>Hola, {{ name }}:</h2>
-            <p>Es un gusto saludarte. Hemos activado correctamente tu periodo de prueba para el plan <strong>{{ plan_name }}</strong>. ¡Ya tienes acceso a todas las herramientas!</p>
-            
-            <div class="trial-box">
-                <span class="badge">Prueba Gratuita Activa</span>
-                <p style="margin: 15px 0 5px 0;">Tu periodo de prueba finaliza el:</p>
-                <div class="trial-date">{{ trial_end_date }}</div>
-                <p style="font-size: 0.9em; color: #666;">No se realizará ningún cargo hasta que termine este periodo.</p>
-            </div>
 
-            <p>Queremos que aproveches al máximo estos días. Puedes comenzar configurando tu espacio de trabajo haciendo clic en el siguiente botón:</p>
-            
-            <div style="text-align: center;">
-                <a href="{{ login_url }}" class="btn">Empezar ahora</a>
-            </div>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
+    <tr>
+        <td align="center" style="padding: 20px;">
+            <table class="container-table" border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
+                <tr>
+                    <td class="content-td">
+                        <div style="font-size: 20px; color: #5f6368; margin-bottom: 30px; font-weight: 500;">
+                            {{ app_name }}
+                        </div>
 
-            <p>Si tienes alguna duda durante tu prueba, simplemente responde a este correo. Nuestro equipo estará encantado de ayudarte.</p>
-        </div>
+                        <h2>¡Tu prueba gratuita ha comenzado!</h2>
+                        <p>Hola {{ name }}, es un gusto saludarte. Hemos activado correctamente tu acceso al plan <strong>{{ plan_name }}</strong>. Ya puedes empezar a explorar todas nuestras herramientas.</p>
 
-        <div class="footer">
-            <p>© {{ current_year }} {{ app_name }}. Todos los derechos reservados.</p>
-            <p>Este correo confirma el inicio de tu suscripción en modo de prueba.</p>
-        </div>
-    </div>
+                        <div class="trial-card">
+                            <span class="badge">Prueba Activa</span>
+                            <p style="margin: 15px 0 5px 0; color: #5f6368; font-size: 14px;">Tu periodo de prueba finaliza el:</p>
+                            <div class="trial-date">{{ trial_end_date }}</div>
+                            <p style="font-size: 12px; color: #70757a; margin: 0;">No se realizará ningún cargo antes de esta fecha.</p>
+                        </div>
+
+                        <p>Para aprovechar estos días al máximo, te recomendamos comenzar configurando tu espacio de trabajo:</p>
+
+                        <table border="0" cellspacing="0" cellpadding="0" role="presentation" style="margin: 30px 0;">
+                            <tr>
+                                <td>
+                                    <a href="{{ login_url }}" target="_blank" class="button">Empezar ahora</a>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="font-size: 14px;">¿Tienes alguna duda? Simplemente responde a este correo y nuestro equipo de soporte te ayudará en lo que necesites.</p>
+
+                        <div class="footer-text">
+                            Atentamente,<br>
+                            El equipo de <strong>{{ app_name }}</strong>
+                            <br><br>
+                            <span style="font-size: 11px;">© 2025 {{ app_name }}. Estás recibiendo este correo porque iniciaste una prueba gratuita.</span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
 </body>
 </html>

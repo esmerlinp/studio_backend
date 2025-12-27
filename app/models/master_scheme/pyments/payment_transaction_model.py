@@ -35,6 +35,7 @@ class PaymentTransaction(db.Model):
             "internalReference": self.internalReference,
             "externalReference": self.externalReference,
             "amount": float(self.amount),
+            "currency": self.currency,
             "status": self.status,
             "paymentDate": self.paymentDate.isoformat() if self.paymentDate else None
         }

@@ -1,35 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activa tu cuenta</title>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f1f3f4;
+            font-family: 'Google Sans', Roboto, 'Segoe UI', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrapper {
+            width: 100%;
+            background-color: #f1f3f4;
+            padding: 40px 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #dadce0;
+            overflow: hidden;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        .header {
+            padding: 32px 40px 0 40px;
+        }
+        .app-logo {
+            font-size: 22px;
+            font-weight: 500;
+            color: #5f6368;
+            letter-spacing: -0.5px;
+        }
+        .content {
+            padding: 24px 40px 40px 40px;
+            color: #3c4043;
+            line-height: 1.6;
+        }
+        h2 {
+            color: #202124;
+            font-size: 24px;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .highlight {
+            color: #202124;
+            font-weight: 500;
+        }
+        .button-wrapper {
+            text-align: left;
+            margin: 35px 0;
+        }
         .button {
-            background-color: #4f46e5;
-            color: white;
-            padding: 14px 25px;
-            text-align: center;
+            background-color: #1a73e8;
+            color: #ffffff !important;
+            padding: 12px 28px;
             text-decoration: none;
             display: inline-block;
-            border-radius: 8px;
-            font-weight: bold;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 0.25px;
         }
-        .container { font-family: sans-serif; max-width: 600px; margin: auto; line-height: 1.6; }
+        .link-text {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link-text:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            padding: 0 40px 40px 40px;
+            font-size: 12px;
+            color: #70757a;
+        }
+        .divider {
+            border-top: 1px solid #e8eaed;
+            margin: 30px 0 20px 0;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>¡Hola {{ name }}! Casi hemos terminado.</h2>
-        <p>Gracias por registrarte en <strong>{{ app_name }}</strong>. Tu cuenta ha sido creada exitosamente, pero falta un último paso para activar tu plan <strong>{{ plan_name }}</strong>.</p>
-        
-        <p>Haz clic en el siguiente botón para completar tu suscripción de forma segura a través de Stripe:</p>
-        
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ checkout_url }}" class="button">Completar Suscripción ahora</a>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="app-logo">{{ app_name }}</div>
+            </div>
+            
+            <div class="content">
+                <h2>¡Hola {{ name }}! Casi hemos terminado.</h2>
+                <p>Gracias por registrarte en <span class="highlight">{{ app_name }}</span>. Tu cuenta ha sido creada exitosamente.</p>
+                
+                <p>Solo falta un último paso para activar tu plan <span class="highlight">{{ plan_name }}</span>. Haz clic en el botón inferior para completar tu suscripción de forma segura a través de <strong>Stripe</strong>.</p>
+                
+                <div class="button-wrapper">
+                    <a href="{{ checkout_url }}" class="button">Completar suscripción ahora</a>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <p style="font-size: 13px; color: #5f6368;">
+                    Si tienes problemas con el botón, también puedes 
+                    <a href="{{ checkout_url }}" class="link-text">completar tu registro haciendo clic aquí</a>.
+                </p>
+            </div>
+
+            <div class="footer">
+                Atentamente,<br>
+                El equipo de <span class="highlight">{{ app_name }}</span>
+                <p style="margin-top: 20px; font-size: 11px; color: #9aa0a6;">
+                    © 2025 {{ app_name }}. Si no reconoces esta actividad, puedes ignorar este mensaje.
+                </p>
+            </div>
         </div>
-        
-        <p>Si tienes algún problema con el enlace, cópialo y pégalo en tu navegador:</p>
-        <p style="font-size: 12px; color: #666;">{{ checkout_url }}</p>
-        
-        <p>Atentamente,<br>El equipo de {{ app_name }}</p>
     </div>
 </body>
 </html>

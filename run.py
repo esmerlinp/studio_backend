@@ -57,6 +57,7 @@ def health():
 
 PUBLIC_ENDPOINTS = {
     "health",
+    "client_form",
     "main_page",
     "auth.login",
     "login",
@@ -131,7 +132,8 @@ def main_page():
 
 @app.route("/login")
 def login():
-    return render_template("es/login.html")
+    app_name = os.getenv("APP_NAME")
+    return render_template("es/login.html", app_name=app_name)
 
 @app.route("/dashboard")
 def dashboard():

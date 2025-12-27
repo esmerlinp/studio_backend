@@ -63,12 +63,32 @@ def payment_success():
     return render_template("es/processing_payment.html", app_name=app_name)
 
 
+# def payment_cancel():
+#     return "<h1>Pago Cancelado</h1><p>No se realizó ningún cargo. Puedes intentarlo de nuevo cuando quieras.</p>"
+
+
+
 def payment_cancel():
-    return "<h1>Pago Cancelado</h1><p>No se realizó ningún cargo. Puedes intentarlo de nuevo cuando quieras.</p>"
+    order_id = request.args.get('order_id')
+    
+    if order_id:
+        try:
+            # 1. Buscar la transacción por su referencia interna
+            transaction = PaymentTransaction.query.filter_by(internalReference=order_id).first()
+            
+            if transaction and transaction.status == "PENDING":
+                # 2. Cambiar el estado a CANCELLED
+                transaction.status = "CANCELLED"
+                db.session.commit()
+                print(f"✅ Orden {order_id} marcada como cancelada por el usuario.")
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ Error al cancelar la orden: {e}")
 
-
-
-
+    # 3. Redirigir a una página de feedback o al login
+    # Puedes usar el template 'payment_cancelled.html' que mencionamos antes
+    return render_template("es/payment_cancelled.html", order_id=order_id)
 
 
 def stripe_webhook():

@@ -1,13 +1,19 @@
 from flask import Blueprint
-from app.api.v1.clients.controller import get_client_preferences, new_cliente, get_logs, onboard_client, get_storage_info, get_all_clients, get_client, get_plan, change_plan, get_client_plans
+from app.api.v1.clients.controller import (get_client_preferences, new_cliente, 
+                                           get_logs, onboard_client, get_storage_info,
+                                           get_all_clients, get_client, get_plan, 
+                                           change_plan, get_client_plans, 
+                                           get_client_payments)
 
 
 client_bp = Blueprint('clients', __name__, url_prefix='/api/v1/clients')
 
 client_bp.get("/")(get_all_clients)
 client_bp.get("/<int:clientId>")(get_client)
-client_bp.get("/<int:clientId>/plan")(get_plan)
-client_bp.get("/<int:clientId>/plan/all")(get_client_plans)
+client_bp.get("/<int:clientId>/plan")(get_plan) #planes activos
+client_bp.get("/<int:clientId>/plan/all")(get_client_plans) #todos los planes 
+
+client_bp.get("/<int:clientId>/payments/orders")(get_client_payments)
 
 
 client_bp.patch("/plan/change")(change_plan)

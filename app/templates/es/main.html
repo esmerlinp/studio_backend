@@ -3,270 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akdmia | Gestión Educativa Integral</title>
+    <title>Akdmia | Gestión Educativa de Nueva Generación</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass-header {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        @keyframes gradient-move {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animated-mesh {
+            background: linear-gradient(-45deg, #6366f1, #a855f7, #ec4899, #3b82f6);
+            background-size: 400% 400%;
+            animation: gradient-move 15s ease infinite;
+        }
+
+        .skewed-bg {
+            position: relative;
+            transform: skewY(-6deg);
+            margin-top: -100px;
+            padding-top: 150px;
+            z-index: 1;
+        }
+        .skewed-content { transform: skewY(6deg); }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .btn-stripe {
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .btn-stripe:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-white text-[#424770]">
 
-    <header class="fixed w-full z-50 glass-header border-b border-slate-200">
-        <nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="text-2xl font-extrabold text-indigo-600 tracking-tight italic">
-                AKDMIA
+    <header class="fixed w-full z-[100] glass-nav border-b border-slate-100">
+        <nav class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="#6366f1" class="transform -rotate-12">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z"/>
+                </svg>
+                <span class="text-xl font-bold tracking-tight text-[#0a2540]">Akdmia</span>
             </div>
-            <div class="hidden md:flex space-x-8 font-medium text-slate-600">
-                <a href="#modulos" class="hover:text-indigo-600 transition">Módulos</a>
-                <a href="#precios" class="hover:text-indigo-600 transition">Precios</a>
-                <a href="#contacto" class="hover:text-indigo-600 transition">Contacto</a>
+            <div class="hidden md:flex space-x-8 font-semibold text-sm">
+                <a href="#modulos" class="hover:text-[#0a2540] transition">Productos</a>
+                <a href="#precios" class="hover:text-[#0a2540] transition">Planes</a>
+                <a href="#contacto" class="hover:text-[#0a2540] transition">Empieza ahora</a>
             </div>
-            <div>
-                <a href="#contacto" class="bg-indigo-600 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-indigo-700 transition shadow-md shadow-indigo-200">
-                    Solicitar Demo
+            <div class="flex items-center gap-4">
+                <a href="#contacto" class="btn-stripe bg-[#6366f1] text-white px-5 py-2 rounded-full text-sm font-bold">
+                    Registrarse
                 </a>
             </div>
         </nav>
     </header>
 
-    <section class="pt-32 pb-20 px-6">
-        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+    <section class="relative pt-48 pb-64 overflow-hidden">
+        <div class="absolute inset-0 animated-mesh opacity-10 blur-3xl"></div>
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 relative z-10 text-center lg:text-left">
             <div>
-                <h1 class="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight text-slate-900">
-                    El control total de tu centro <span class="text-indigo-600">educativo</span>
+                <h1 class="text-5xl md:text-7xl font-extrabold text-[#0a2540] leading-tight tracking-tight mb-8">
+                    El sistema operativo de tu <span class="text-[#6366f1]">colegio</span>
                 </h1>
-                <p class="mt-6 text-xl text-slate-600 leading-relaxed">
-                    Akdmia centraliza la vida del estudiante: desde su registro inicial hasta su graduación. Gestiona lo académico, financiero y bienestar en una sola plataforma robusta.
+                <p class="text-xl text-[#424770] leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0">
+                    Akdmia unifica la gestión académica, administrativa y financiera en una plataforma diseñada para instituciones modernas.
                 </p>
-                <div class="mt-10 flex flex-col sm:flex-row gap-4">
-                    <a href="#contacto" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-slate-800 transition text-lg text-center">
-                        Empezar ahora
+                <div class="flex flex-wrap justify-center lg:justify-start gap-4">
+                    <a href="#contacto" class="btn-stripe bg-[#0a2540] text-white px-8 py-3.5 rounded-full font-bold text-lg">
+                        Empezar ahora →
                     </a>
-                    <button class="flex items-center justify-center gap-2 border border-slate-300 px-8 py-4 rounded-xl font-bold hover:bg-slate-100 transition text-lg">
-                        Ver Vídeo Tour
-                    </button>
                 </div>
             </div>
-            <div class="relative">
-                <div class="absolute -inset-4 bg-indigo-500/10 rounded-3xl blur-2xl"></div>
-                <img src="https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=800&q=80" alt="Dashboard Akdmia" class="relative rounded-2xl shadow-2xl border border-white">
-            </div>
-        </div>
-    </section>
-
-    <section id="modulos" class="py-24 bg-white">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-3xl font-bold sm:text-4xl">Ecosistema Completo de Gestión</h2>
-                <p class="mt-4 text-slate-600">Diseñado específicamente para cubrir cada área crítica de un colegio moderno.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="p-8 border border-slate-100 rounded-3xl bg-slate-50 hover:border-indigo-200 transition">
-                    <div class="text-3xl mb-4">🎓</div>
-                    <h3 class="text-xl font-bold mb-3">Módulo Académico</h3>
-                    <p class="text-slate-600">Control de calificaciones, boletines digitales y seguimiento conductual.</p>
-                </div>
-                <div class="p-8 border border-slate-100 rounded-3xl bg-slate-50 hover:border-indigo-200 transition">
-                    <div class="text-3xl mb-4">💰</div>
-                    <h3 class="text-xl font-bold mb-3">Finanzas</h3>
-                    <p class="text-slate-600">Facturación automática, pagos en línea y control de morosidad.</p>
-                </div>
-                <div class="p-8 border border-slate-100 rounded-3xl bg-slate-50 hover:border-indigo-200 transition">
-                    <div class="text-3xl mb-4">📱</div>
-                    <h3 class="text-xl font-bold mb-3">App de Padres</h3>
-                    <p class="text-slate-600">Comunicación directa y supervisión del progreso desde el móvil.</p>
-                </div>
-                <div class="p-8 border border-slate-100 rounded-3xl bg-slate-50 hover:border-indigo-200 transition">
-                    <div class="text-3xl mb-4">🍔</div>
-                    <h3 class="text-xl font-bold mb-3">Cafetería</h3>
-                    <p class="text-slate-600">Monedero electrónico y control nutricional de los estudiantes.</p>
-                </div>
-                <div class="p-8 border border-slate-100 rounded-3xl bg-slate-50 hover:border-indigo-200 transition">
-                    <div class="text-3xl mb-4">🏥</div>
-                    <h3 class="text-xl font-bold mb-3">Enfermería</h3>
-                    <p class="text-slate-600">Historial clínico escolar y registro de medicamentos.</p>
-                </div>
-                <div class="p-8 border border-slate-100 rounded-3xl bg-slate-50 hover:border-indigo-200 transition">
-                    <div class="text-3xl mb-4">📝</div>
-                    <h3 class="text-xl font-bold mb-3">Admisiones</h3>
-                    <p class="text-slate-600">Digitaliza todo el proceso de inscripción y expediente histórico.</p>
+            <div class="relative hidden lg:block">
+                <div class="bg-white/40 backdrop-blur-md p-2 rounded-3xl border border-white/50 shadow-2xl">
+                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80" alt="Dashboard" class="rounded-2xl shadow-lg">
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="precios" class="py-24 bg-slate-50">
+    <section id="modulos" class="skewed-bg bg-[#f6f9fc]">
+        <div class="skewed-content max-w-7xl mx-auto px-6 pb-32">
+            <div class="grid lg:grid-cols-2 gap-20 items-center">
+                <div>
+                    <h2 class="text-blue-600 font-bold uppercase tracking-widest text-sm mb-4">Módulos integrados</h2>
+                    <h3 class="text-4xl font-extrabold text-[#0a2540] mb-6">Todo lo que necesitas en un solo lugar.</h3>
+                    <p class="text-lg text-[#424770] mb-8">Nuestra arquitectura permite centralizar la información de padres, alumnos y administración en una base de datos única y segura.</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+                    <div class="h-3 w-32 bg-slate-200 rounded-full mb-6"></div>
+                    <div class="space-y-3">
+                        <div class="h-2 w-full bg-slate-50 rounded-full"></div>
+                        <div class="h-2 w-full bg-slate-50 rounded-full"></div>
+                        <div class="h-2 w-2/3 bg-slate-50 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="precios" class="py-32">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold">Planes diseñados para crecer</h2>
-                <p class="text-slate-600 mt-4">Desde pequeñas escuelas hasta grandes redes de colegios.</p>
+            <div class="mb-20">
+                <h2 class="text-[#6366f1] font-bold mb-4 uppercase tracking-wider text-sm">Planes</h2>
+                <h3 class="text-4xl font-extrabold text-[#0a2540]">Escalabilidad sin límites.</h3>
+            </div>
+            <div id="plans-container" class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div class="col-span-full flex justify-center py-20">
+                    <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contacto" class="py-32 bg-[#0a2540] text-white">
+        <div class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
+            <div>
+                <h2 class="text-5xl font-extrabold mb-8 leading-tight">Comienza a digitalizar hoy.</h2>
+                <p class="text-slate-400 text-xl mb-12">Configura tu cuenta y obtén acceso inmediato a las herramientas de gestión más potentes del mercado.</p>
             </div>
             
-            <div id="plans-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="col-span-full text-center py-10 text-slate-500">Cargando planes disponibles...</div>
-            </div>
-        </div>
-    </section>
-
-    <section id="contacto" class="py-24 bg-white">
-        <div class="max-w-5xl mx-auto px-6">
-            <div class="bg-indigo-900 rounded-[3rem] p-8 md:p-16 grid lg:grid-cols-2 gap-12 text-white items-center">
-                <div>
-                    <h2 class="text-4xl font-bold mb-6">¿Listo para transformar tu colegio?</h2>
-                    <p class="text-indigo-200 text-lg mb-8">Agenda una demostración personalizada con uno de nuestros consultores expertos.</p>
-                    <ul class="space-y-4">
-                        <li class="flex items-center gap-3">✨ Demo gratuita de 30 min</li>
-                        <li class="flex items-center gap-3">📊 Análisis de tus procesos</li>
-                        <li class="flex items-center gap-3">🛠️ Cotización a medida</li>
-                    </ul>
-                </div>
-                <div class="bg-white p-8 rounded-3xl text-slate-900">
-                    <div id="form-container">
-                        <form id="demo-form" class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Nombre</label>
-                                    <input type="text" id="first_name" required class="w-full bg-slate-50 border-none rounded-xl p-3 focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Maria">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Apellido</label>
-                                    <input type="text" id="last_name" required class="w-full bg-slate-50 border-none rounded-xl p-3 focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Peña">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Institución / Razón Social</label>
-                                <input type="text" id="business_name" required class="w-full bg-slate-50 border-none rounded-xl p-3 focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Instituto MP, S.A.">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Teléfono de contacto</label>
-                                <input type="tel" id="contact_phone" required class="w-full bg-slate-50 border-none rounded-xl p-3 focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="809-555-1233">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Email Corporativo</label>
-                                <input type="email" id="email" required class="w-full bg-slate-50 border-none rounded-xl p-3 focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="hoced23204@arugy.com">
-                            </div>
-                            <button type="submit" id="submit-btn" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-indigo-700 transition flex justify-center items-center">
-                                <span id="btn-text">Solicitar mi Demo</span>
-                            </button>
-                        </form>
+            <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-3xl text-[#0a2540]">
+                <form id="onboard-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Institución / Razón Social</label>
+                            <input type="text" id="business_name" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="Nombre del Colegio">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Nombre Admin</label>
+                            <input type="text" id="first_name" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="Nombre">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Apellido Admin</label>
+                            <input type="text" id="last_name" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="Apellido">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Teléfono / WhatsApp</label>
+                            <input type="tel" id="contact_phone" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="809-000-0000">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Email Corporativo</label>
+                            <input type="email" id="email" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="admin@colegio.com">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Plan</label>
+                            <select id="plan_id_select" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none bg-transparent">
+                                <option value="">Cargando planes...</option>
+                            </select>
+                        </div>
                     </div>
+                    <button type="submit" id="submit-btn" class="w-full btn-stripe bg-[#6366f1] text-white py-4 rounded-2xl font-bold text-lg mt-4">
+                        Crear mi cuenta
+                    </button>
+                    <p class="text-center text-[10px] text-slate-400 tracking-widest uppercase">Sin tarjeta de crédito para iniciar</p>
+                </form>
 
-                    <div id="success-msg" class="hidden text-center py-10">
-                        <div class="text-5xl mb-4">📩</div>
-                        <h3 class="text-2xl font-bold text-slate-900 mb-2">¡Solicitud Enviada!</h3>
-                        <p class="text-slate-600">Te hemos enviado un correo electrónico para confirmar tu cuenta y activar la demo.</p>
-                    </div>
+                <div id="success-msg" class="hidden text-center py-10">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">✓</div>
+                    <h3 class="text-2xl font-bold mb-3">¡Cuenta en proceso!</h3>
+                    <p class="text-slate-500">Revisa tu correo para activar el acceso.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="py-12 border-t border-slate-100 text-center text-slate-400 text-sm">
-        <p>© 2025 Akdmia - Gestión Escolar Inteligente. Todos los derechos reservados.</p>
+    <footer class="py-16 text-center text-slate-400 text-xs border-t border-slate-50">
+        <p>© 2025 Akdmia Software. Built for modern education.</p>
     </footer>
 
     <script>
-        // --- FUNCIÓN PARA CARGAR PLANES DESDE LA API ---
-        async function loadPlans() {
-            const container = document.getElementById('plans-container');
-            try {
-                const response = await fetch('/api/v1/plans');
-                const result = await response.json();
+        let plansData = [];
 
-                if (result.success) {
-                    container.innerHTML = ''; // Limpiar cargando
+        async function init() {
+            const container = document.getElementById('plans-container');
+            const select = document.getElementById('plan_id_select');
+            
+            try {
+                const res = await fetch('/api/v1/plans');
+                const json = await res.json();
+                
+                if (json.success) {
+                    plansData = json.data;
+                    container.innerHTML = '';
+                    select.innerHTML = '<option value="">Selecciona un plan</option>';
                     
-                    result.data.forEach(plan => {
-                        const isStandard = plan.code === 'STANDARD';
-                        const price = plan.price_info ? plan.price_info.price : 'Custom';
-                        const cycle = plan.price_info ? (plan.price_info.billing_cycle === 'TRIAL' ? '/6 meses' : '/mes') : '';
+                    json.data.forEach(plan => {
+                        const priceInfo = plan.price_info;
+                        const price = priceInfo?.price ?? 'Custom';
                         
-                        // Crear el HTML de la tarjeta manteniendo el estilo original
-                        const planCard = `
-                            <div class="bg-white p-8 rounded-3xl border ${isStandard ? 'border-2 border-indigo-600 shadow-xl lg:scale-105 relative' : 'border-slate-200 shadow-sm'} flex flex-col">
-                                ${isStandard ? '<span class="absolute top-0 right-8 -translate-y-1/2 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">Más popular</span>' : ''}
+                        // Lógica de días de prueba (trial)
+                        const trialDays = plan.trial_days || (priceInfo?.billing_cycle === 'TRIAL' ? 14 : 0);
+                        const isTrial = trialDays > 0;
+                        const isStandard = plan.code === 'STANDARD';
+                        
+                        // Determinar color y texto de la línea de prueba
+                        const trialClass = isTrial ? 'text-emerald-600 font-bold italic' : 'text-slate-400';
+                        const trialIconColor = isTrial ? 'text-emerald-500' : 'text-slate-300';
+                        
+                        container.innerHTML += `
+                            <div class="group border-t-4 ${isStandard ? 'border-[#6366f1]' : 'border-slate-100'} pt-8 relative">
+                                ${isTrial ? `
+                                    <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-sm">
+                                        ${trialDays} DÍAS GRATIS
+                                    </div>
+                                ` : ''}
                                 
-                                <h3 class="font-bold text-lg ${isStandard ? 'text-indigo-600' : ''}">${plan.name}</h3>
-                                <div class="my-4 font-bold text-3xl">
-                                    ${price === 0 ? 'Gratis' : (typeof price === 'number' ? '$' + price : price)} 
-                                    <span class="text-sm font-normal text-slate-500">${cycle}</span>
+                                <h4 class="text-lg font-bold text-[#0a2540] mb-2">${plan.name}</h4>
+                                <div class="text-3xl font-extrabold text-[#0a2540] mb-4">
+                                    ${price === 0 ? 'Gratis' : '$' + price}
+                                    <span class="text-sm font-normal text-slate-400">${isTrial ? '' : '/ mes'}</span>
                                 </div>
+                                <p class="text-sm text-slate-500 mb-8 min-h-[40px]">${plan.description}</p>
                                 
-                                <p class="text-sm text-slate-500 mb-6">${plan.description}</p>
-                                
-                                <ul class="text-sm text-slate-600 space-y-3 mb-8 flex-1">
-                                    <li>✓ Hasta ${plan.max_users} usuarios</li>
-                                    <li>✓ ${plan.max_storage_gb}GB Almacenamiento</li>
-                                    <li>✓ Soporte ${plan.support_level}</li>
-                                    ${plan.code === 'STANDARD' ? '<li>✓ Módulos Premium incluidos</li>' : ''}
+                                <ul class="space-y-3 text-sm mb-10">
+                                    <li class="flex items-center gap-2">
+                                        <div class="w-1.5 h-1.5 bg-[#6366f1] rounded-full"></div> 
+                                        ${plan.max_users} Usuarios incluidos
+                                    </li>
+                                    <li class="flex items-center gap-2 ${trialClass}">
+                                        <svg class="w-4 h-4 ${trialIconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        ${trialDays} días de prueba incluidos
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <div class="w-1.5 h-1.5 bg-[#6366f1] rounded-full"></div> 
+                                        Soporte ${plan.support_level}
+                                    </li>
                                 </ul>
                                 
-                                <a href="#contacto" class="block text-center py-3 ${isStandard ? 'bg-indigo-600 text-white' : 'border border-indigo-600 text-indigo-600'} rounded-xl font-bold hover:opacity-90 transition">
-                                    ${plan.price_info?.price === 0 ? 'Probar gratis' : 'Seleccionar'}
+                                <a href="#contacto" onclick="preselectPlan(${plan.id})" class="inline-block w-full text-center bg-slate-100 text-[#0a2540] px-4 py-3 rounded-xl text-sm font-bold group-hover:bg-[#6366f1] group-hover:text-white transition-all duration-300">
+                                    ${isTrial ? 'Empezar prueba gratuita' : 'Seleccionar plan'}
                                 </a>
                             </div>
                         `;
-                        container.innerHTML += planCard;
+                        
+                        const optionLabel = `${plan.name} — ${isTrial ? trialDays + ' días gratis' : '$' + price + '/mes'}`;
+                        select.innerHTML += `<option value="${plan.id}">${optionLabel}</option>`;
                     });
                 }
-            } catch (error) {
-                console.error("Error cargando planes:", error);
-                container.innerHTML = '<p class="col-span-full text-red-500 text-center">Error al conectar con el servidor de planes.</p>';
+            } catch (e) {
+                container.innerHTML = '<p class="col-span-full text-center text-red-500">Error en la API.</p>';
             }
         }
 
-        // --- MANEJO DEL FORMULARIO DE CONTACTO ---
-        document.getElementById('demo-form').addEventListener('submit', async (e) => {
+        function preselectPlan(id) {
+            document.getElementById('plan_id_select').value = id;
+            document.getElementById('contacto').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.getElementById('onboard-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
-            const btnText = document.getElementById('btn-text');
-            
+            const selectedId = parseInt(document.getElementById('plan_id_select').value);
+            const plan = plansData.find(p => p.id === selectedId);
+
             btn.disabled = true;
-            btnText.innerHTML = "Enviando...";
+            btn.innerHTML = 'Procesando...';
 
             const payload = {
-                client_data: {
+                client_data: { 
                     business_name: document.getElementById('business_name').value,
-                    contact_phone: document.getElementById('contact_phone').value
+                    contact_phone: document.getElementById('contact_phone').value 
                 },
-                user_data: {
-                    first_name: document.getElementById('first_name').value,
-                    last_name: document.getElementById('last_name').value,
-                    email: document.getElementById('email').value
+                user_data: { 
+                    first_name: document.getElementById('first_name').value, 
+                    last_name: document.getElementById('last_name').value, 
+                    email: document.getElementById('email').value 
+                },
+                plan_data: { 
+                    plan_id: selectedId, 
+                    price_list_id: plan?.price_info?.id || 1 
                 }
             };
 
             try {
-                const response = await fetch('/api/v1/clients/onboard', {
+                const res = await fetch('/api/v1/clients/onboard', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(payload)
                 });
-
-                if (response.ok) {
-                    document.getElementById('form-container').classList.add('hidden');
+                if(res.ok) {
+                    document.getElementById('onboard-form').classList.add('hidden');
                     document.getElementById('success-msg').classList.remove('hidden');
                 } else {
-                    alert("Error al procesar la solicitud.");
-                    btn.disabled = false;
-                    btnText.innerHTML = "Solicitar mi Demo";
+                    const err = await res.json();
+                    alert("Error: " + (err.msg || "Error"));
                 }
-            } catch (err) {
-                alert("Error de conexión.");
-                btn.disabled = false;
-                btnText.innerHTML = "Solicitar mi Demo";
-            }
+            } catch (err) { alert("Error de conexión"); }
+            btn.disabled = false;
+            btn.innerText = 'Crear mi cuenta';
         });
 
-        // Cargar planes al iniciar la página
-        window.onload = loadPlans;
+        window.onload = init;
     </script>
 </body>
 </html>

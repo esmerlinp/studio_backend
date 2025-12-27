@@ -53,7 +53,8 @@ class StripeProvider:
                 client_reference_id=order_id,
                 customer_email=client_email,
                 success_url=f"{request.host_url}api/v1/payments/success?session_id={{CHECKOUT_SESSION_ID}}",
-                cancel_url=f"{request.host_url}api/v1/payments/cancel",
+                #cancel_url=f"{request.host_url}api/v1/payments/cancel",
+                cancel_url=f"{request.host_url}api/v1/payments/cancel?order_id={order_id}"
             )
             
             return {

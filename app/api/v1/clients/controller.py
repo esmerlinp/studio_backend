@@ -1,6 +1,10 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity, require_role
-from app.services.master_scheme.client_service import get_client_preferences, get_client_logs, onboard_client_service, storage_info, create_client, get_clients, get_client_by_id, get_client_by_uuid
+from app.services.master_scheme.client_service import (get_client_preferences, get_client_logs, 
+                                                       onboard_client_service, storage_info, 
+                                                       create_client, get_clients, 
+                                                       get_client_by_id, get_client_payment_orders)
+
 from app.services.master_scheme.user_client_service import get_client_by_user   
 from app.services.master_scheme.client_plan_service import get_active_client_plan, assign_plan_to_client, change_client_plan, get_client_plan_history
 from app.utils.responses import success
@@ -29,6 +33,16 @@ def get_logs():
 
     logs = get_client_logs()
     return success(data=[log.to_dict() for log in logs])
+
+@jwt_required()
+@track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
+def get_client_payments(clientId):
+
+    orders = get_client_payment_orders(client_id=clientId)
+    return success(data=[o.to_dict() for o in orders])
+
+
 
 @jwt_required()
 @track_activity
@@ -119,10 +133,11 @@ def onboard_client():
         data = request.get_json()
         client_data = data.get("client_data", None)
         admin_user_data = data.get("user_data", None)
+        plan_data = data.get("plan_data", None)
 
 
         response_data = onboard_client_service(client_data=client_data,
-                            admin_user_data=admin_user_data)
+                            admin_user_data=admin_user_data, plan_data=plan_data)
         return success(data=response_data)
     except ValueError as e:
         # ❗ Errores de negocio (validaciones)

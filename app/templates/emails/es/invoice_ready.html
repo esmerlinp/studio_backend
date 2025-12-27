@@ -1,36 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Pago</title>
+    <style type="text/css">
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f1f3f4;
+            font-family: 'Google Sans', Roboto, Segoe UI, Arial, sans-serif;
+        }
+
+        .container-table {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #dadce0;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3);
+        }
+
+        .content-td {
+            padding: 40px;
+            color: #3c4043;
+            line-height: 1.6;
+        }
+
+        h2 {
+            color: #202124;
+            font-size: 24px;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .invoice-card {
+            background-color: #f8f9fa;
+            border: 1px solid #e8eaed;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        .invoice-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #70757a;
+            font-weight: 700;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #e8eaed;
+            padding-bottom: 8px;
+        }
+
+        .detail-row {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .label {
+            color: #70757a;
+        }
+
+        .value {
+            color: #202124;
+            font-weight: 500;
+            float: right;
+        }
+
         .badge {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
+            background-color: #e6f4ea;
+            color: #188038;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
             font-size: 12px;
+            display: inline-block;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #70757a;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e8eaed;
         }
     </style>
 </head>
-<body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-    <h2 style="color: #2c3e50;">¡Hola {{ name }}!</h2>
-    <p>Gracias por tu confianza. Tu pago ha sido procesado exitosamente y tu suscripción está activa.</p>
-    
-    <div style="border: 1px solid #eee; padding: 20px; border-radius: 8px; background-color: #f9f9f9;">
-        <h3 style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Detalles de la Factura</h3>
-        <p><strong>Factura Nro:</strong> <span style="color: #3498db;">{{ invoice_num }}</span></p>
-        <p><strong>Monto Pagado:</strong> {{ amount }} {{ currency }}</p>
-        
-        <h3 style="margin-top: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Detalles del Plan</h3>
-        <p><strong>Plan:</strong> {{ plan_name }} <span class="badge">ACTIVO</span></p>
-    </div>
+<body>
 
-    <p>Ya puedes acceder a todos los beneficios de tu cuenta en nuestra plataforma.</p>
-    
-    <p style="margin-top: 30px;">Atentamente,<br>
-    <strong>El equipo de {{ app_name }}</strong></p>
-    
-    <hr style="border: 0; border-top: 1px solid #eee; margin-top: 40px;">
-    <p style="font-size: 11px; color: #999;">Este es un correo automático, por favor no respondas a esta dirección.</p>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
+    <tr>
+        <td align="center" style="padding: 20px;">
+            <table class="container-table" border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
+                <tr>
+                    <td class="content-td">
+                        <div style="font-size: 20px; color: #5f6368; margin-bottom: 30px; font-weight: 500;">
+                            {{ app_name }}
+                        </div>
+
+                        <h2>¡Gracias por tu compra, {{ name }}!</h2>
+                        <p>Tu pago ha sido procesado exitosamente. Tu suscripción ya se encuentra activa y puedes disfrutar de todos los beneficios de tu plan.</p>
+
+                        <div class="invoice-card">
+                            <div class="invoice-title">Resumen de la suscripción</div>
+                            
+                            <div class="detail-row">
+                                <span class="label">Plan:</span>
+                                <span class="value">{{ plan_name }} <span class="badge">ACTIVO</span></span>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span class="label">Factura Nro:</span>
+                                <span class="value" style="color: #1a73e8;">{{ invoice_num }}</span>
+                            </div>
+
+                            <div class="detail-row">
+                                <span class="label">Monto total:</span>
+                                <span class="value">{{ amount }} {{ currency }}</span>
+                            </div>
+                        </div>
+
+                        <p>Ya puedes acceder a tu panel de control desde nuestra plataforma para comenzar a configurar tu entorno.</p>
+
+                        <div class="footer-text">
+                            Atentamente,<br>
+                            El equipo de <strong>{{ app_name }}</strong>
+                            <br><br>
+                            <span style="font-size: 11px;">Este es un recibo digital automático. No es necesario responder.</span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
 </body>
 </html>

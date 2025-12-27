@@ -9,6 +9,7 @@ from app.models.master_scheme.user_model import User
 from app.models.master_scheme.plans_model import Plan
 from app.models.master_scheme.client_storage_model import ClientStorage
 from app.models.master_scheme.client_plans_model import ClientPlan
+from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
 from app.models.client_scheme.log_model import AuditLog
 from app.services.master_scheme.client_plan_service import assign_plan_to_client_onboard
 from app.services.master_scheme.user_service import  insert_user_onboard
@@ -58,7 +59,7 @@ def schema_exists(schema_name: str) -> bool:
      
   
   
-def onboard_client_service(client_data, admin_user_data):
+def onboard_client_service(client_data, admin_user_data, plan_data):
     load_dotenv()
     
     def deterministic_short_uuid(value, length=8):
@@ -89,8 +90,8 @@ def onboard_client_service(client_data, admin_user_data):
         if not client_plan:
             client_plan = assign_plan_to_client_onboard(
                 client_id=client.clientId,
-                plan_id=1, 
-                price_list_id=1, 
+                plan_id=plan_data["plan_id"], 
+                price_list_id=plan_data["price_list_id"], 
                 start_date=date.today(),
                 status="PENDING_PAYMENT"
             )
@@ -163,182 +164,6 @@ def onboard_client_service(client_data, admin_user_data):
         raise e
     
       
-def onboard_client_service3(client_data, admin_user_data):
-    load_dotenv()
-    
-    def deterministic_short_uuid(value, length=8):
-        return uuid.uuid5(uuid.NAMESPACE_DNS, str(value)).hex[:length]
-
-    sname = deterministic_short_uuid(f"{admin_user_data['email']}_{client_data['business_name']}")
-    schema_name = f"scheme_{sname}"
-    
-    try:
-        # 1. Crear el cliente
-        contact_name = f"{admin_user_data['first_name']} {admin_user_data['last_name']}"
-        client = create_client_onboard(
-            contact_name=contact_name,
-            contact_phone=client_data["contact_phone"],
-            business_name=client_data["business_name"],
-            billing_email=admin_user_data["email"],
-            schema_name=schema_name
-        )
-        
-        # 2. Asignarle un plan (PENDIENTE DE PAGO)
-        client_plan = assign_plan_to_client_onboard(
-            client_id=client.clientId,
-            plan_id=1, 
-            price_list_id=1, 
-            start_date=date.today(),
-            status="PENDING_PAYMENT"
-        )
-        
-        # 3. Crear el usuario owner
-        admin_user = insert_user_onboard(
-            username=admin_user_data["email"],
-            first_name=admin_user_data["first_name"],
-            last_name=admin_user_data["last_name"],
-            email=admin_user_data["email"],
-            uuid=client.uuid,
-            default_password=True,
-        )
-
-        # 4. Asignar el usuario al cliente 
-        assign_user_to_client_onboard(
-            user_id=admin_user.userId,
-            client_uuid=client.uuid,
-        )
-
-        # 5. HACEMOS COMMIT AQUÍ para asegurar que el ID del plan exista
-        # antes de que Stripe intente buscarlo
-        db.session.commit()
-
-        # 6. Iniciar proceso de suscripción (genera el link de Stripe)
-        # IMPORTANTE: request_suscription debe manejar su propio try/commit interno
-        subscription_data = request_suscription(plan_identity=client_plan.id)
-
-        
-        # Validamos que realmente obtuvimos una URL
-        if not subscription_data or subscription_data.get("status") != "success":
-            raise Exception("No se pudo generar la sesión de Stripe")
-
-        checkout_url = subscription_data["checkout_url"]
-        app_name = os.getenv("APP_NAME")
-
-        # 7. Enviar email de respaldo
-        try:
-            send_email_template(
-                subject=f"Completa tu registro en {app_name}",
-                to=[admin_user_data["email"]],
-                path_template="emails/es/complete_subscription.html",
-                name=admin_user_data["first_name"],
-                plan_name=client_plan.plan.code,
-                checkout_url=checkout_url,
-                app_name=app_name
-            )
-        except Exception as email_err:
-            print(f"Error no crítico enviando email: {email_err}")
-            # No lanzamos excepción aquí para no detener el flujo si solo falló el correo
-
-        return {
-            "status": "success",
-            "checkout_url": checkout_url,
-            "client_id": client.clientId
-        }
-            
-
-    except Exception as e:
-        db.session.rollback() # Limpiamos la sesión en caso de cualquier error
-        if schema_exists(schema_name):
-            drop_schema(schema_name)
-        raise e
-    
-    
-def onboard_client_service_2(client_data, admin_user_data):
-
-    #schema_name = client_data["schema_name"]
-    
-
-    def deterministic_short_uuid(value, length=8):
-        return uuid.uuid5(uuid.NAMESPACE_DNS, str(value)).hex[:length]
-
-
-    sname = deterministic_short_uuid(f"{admin_user_data['email']}_{client_data['business_name']}")
-    schema_name = f"scheme_{sname}"
-    try:
-
-
-        # 1️⃣ Crear schema (NO transaccional)
-        # if not schema_exists(schema_name):
-        #     create_client_schema(schema_name)
-
-        # 2️⃣ Transacción REAL solo para datos
-        with db.session.begin():  # ← NO usar commit/rollback manual
-            
-            #Crear el cliente
-            # client_data["schema_name"] = schema_name
-            contact_name = f"{admin_user_data['first_name']} {admin_user_data['last_name']}"
-            client = create_client_onboard(
-              contact_name=contact_name,
-              contact_phone=client_data["contact_phone"],
-              business_name=client_data["business_name"],
-              billing_email=admin_user_data["email"],
-              schema_name=schema_name
-            )
-            #asignarle un plan 
-            client_plan = assign_plan_to_client_onboard(
-                client_id=client.clientId,
-                plan_id=1, #TRIAL
-                price_list_id=1, #TRIAL
-                start_date=date.today(),
-                status="PENDING_PAYMENT"
-            )
-            
-            #crear el usuario owner
-            admin_user = insert_user_onboard(
-                username=admin_user_data["email"],
-                first_name=admin_user_data["first_name"],
-                last_name=admin_user_data["last_name"],
-                email=admin_user_data["email"],
-                uuid=client.uuid,
-                default_password=True,
-            )
-            #TODO: se debe cerar la tabla roles en el scheme master.
-            
-            # if schema_exists(client.schemaName):
-            #   # 3. Cambiar al schema del cliente
-            #   set_schema(client.schemaName)
-            #   #Asigno el rol del usuario en el scheme del cliente
-            #   assign_role_to_user(
-            #       user_id=admin_user.userId,
-            #       role_id=1,
-            #       commit=False
-            #   )
-            # set_schema("master")
-            #asignar el usuario al cliente 
-            assign_user_to_client_onboard(
-                user_id=admin_user.userId,
-                client_uuid=client.uuid,
-            )
-
-
-        # ✅ Si llega aquí, todo se confirmó automáticamente
-        
-        #Enviar email de confirmacion.
-        request_suscription(plan_identity=client_plan.id)
-            
-            
-        return client
-
-    except Exception as e:
-        # 🔥 rollback automático del with
-        # 🧨 borrar schema manualmente
-        if schema_exists(schema_name):
-            drop_schema(schema_name)
-
-        raise e
-
-
-
 def validate_schema_name(schema: str):
     if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", schema):
         raise ValueError("Invalid schema name")
@@ -575,6 +400,14 @@ def get_client_by_id(clientId)-> Optional[Client]:
 def get_client_by_uuid(uuid)-> Client:    
     client = Client.query.filter_by(uuid = uuid).first()
     return client
+
+def get_client_payment_orders(client_id)-> List[PaymentTransaction]:    
+    orders = PaymentTransaction.query.filter_by(clientId =client_id).all()
+    return orders
+
+def get_client_payment_orders_by_status(client_id, status_order)-> List[PaymentTransaction]:    
+    orders = PaymentTransaction.query.filter_by(clientId =client_id, status=status_order).all()
+    return orders
 
 
 
