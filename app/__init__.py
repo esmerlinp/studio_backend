@@ -8,13 +8,13 @@ from .extensions import mail, db
 from app.services.master_scheme.session_service import get_session_active_by_user_id, invalidar_sesiones_por_id_session, actualizar_actividad_sesion
 from app.services.master_scheme.log_service import log_action
 
-from flask import abort
-from sqlalchemy import text
 from app.utils.responses import error
 from app.models.master_scheme.user_model import User
 from app.models.master_scheme.user_roles_model import UserRole
 from app.models.master_scheme.roles_model import Role
 from datetime import datetime, timezone
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 
 
@@ -34,6 +34,9 @@ def create_app():
     load_dotenv()
 
     app = Flask(__name__)
+    
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+    
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")  # cámbiala por una segura
     
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
