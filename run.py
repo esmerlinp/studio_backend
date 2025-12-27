@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, redirect, render_template
 from flask_jwt_extended import JWTManager
 from app.api.v1.users.routes import users_bp
 from app.api.v1.auth.routes import auth_bp
@@ -11,7 +11,6 @@ from app.api.v1.notifications.routes import notification_bp
 from app.services.master_scheme.user_service import change_user_password, update_user, get_user_scheme, get_user_by_id
 from app import create_app
 from app.utils import i18n
-from flask import render_template
 from app.utils.helpers import verify_reset_token
 from app.utils.responses import error
 import os
@@ -78,7 +77,10 @@ PUBLIC_ENDPOINTS = {
 @app.before_request
 def set_schema():
 
-
+    if not request.is_secure and os.getenv('FLASK_ENV') != 'development':
+        url = request.url.replace('http://', 'https://', 1)
+        return redirect(url, code=301)
+    
     # 🔎 Endpoint actual
     endpoint = request.endpoint
     #print(endpoint)

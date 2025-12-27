@@ -190,7 +190,8 @@
             const select = document.getElementById('plan_id_select');
             
             try {
-                const res = await fetch(`${window.location.origin}/api/v1/plans`);
+                const apiUrl = `${window.location.protocol}//${window.location.host}/api/v1/plans`;
+                const res = await fetch(apiUrl);
                 const json = await res.json();
                 
                 if (json.success) {

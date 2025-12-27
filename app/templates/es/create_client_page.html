@@ -107,7 +107,8 @@
     <script>
         async function fetchPlans() {
             try {
-                const response = await fetch('/api/v1/plans');
+                const apiUrl = `${window.location.protocol}//${window.location.host}/api/v1/plans`;
+                const response = await fetch(apiUrl);
                 const result = await response.json();
                 if (result.success) renderPlans(result.data);
             } catch (error) {
