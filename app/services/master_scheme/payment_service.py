@@ -135,7 +135,7 @@ def request_suscription(plan_identity) -> dict:
         
         
             stripe_session = provider.create_checkout(
-                client = client,
+                client_id=client.clientId,
                 amount=amount,
                 currency=currency,
                 order_id=order_id,
