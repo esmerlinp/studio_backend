@@ -7,6 +7,7 @@ from app import track_activity, require_role, audit_log
 from app.utils.responses import success
 from app.services.master_scheme.payment_service import request_suscription
 from app.services.master_scheme.client_service import schema_exists, create_client_schema
+from app.services.master_scheme.user_client_service import get_user_by_client
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
 from app.models.master_scheme.pyments.invoice_model import Invoice
 from app.models.master_scheme.client_plans_model import ClientPlan
@@ -33,6 +34,57 @@ def request_payment(plan_identity):
 
 
 def payment_success():
+    load_dotenv()
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    app_name = os.getenv("APP_NAME")
+    session_id = request.args.get('session_id')
+  
+    # if not session_id:
+    #     return redirect(url_for('home')) # O a tu página de precios
+
+    # Intentamos buscar la transacción
+    transaction = PaymentTransaction.query.filter_by(externalReference=session_id).first()
+    
+    # Si la transacción existe pero aún está "PENDING", es que el webhook no ha llegado.
+    # En lugar de fallar, mostramos la vista de "Procesando" que haga un refresh automático.
+    if not transaction or transaction.status == "PENDING":
+        return render_template("es/processing_payment.html", 
+                               app_name=app_name, 
+                               session_id=session_id)
+
+    if transaction.status == "APPROVED":
+        
+        client = Client.query.get(transaction.clientId)
+        client_plan = ClientPlan.query.filter_by(client_id=client.clientId)
+        user = get_user_by_client(client.uuid)
+        
+        # 2. ENVIAR EMAIL (Solo si el usuario está inactivo o no ha seteado clave)
+        # Esto evita que se re-envíe si el usuario refresca la página de éxito
+        if user and not user.user.isActive:
+            send_confirmation_account_email(user.user.userId, client.contactName, user.user.email)
+        
+        invoice = Invoice.query.filter_by(transactionId=transaction.id).first()
+        is_trial = (transaction.amount == 0)
+        
+        # Obtenemos el nombre del plan desde la relación si la tienes
+        plan_name = "client_plan.plan.name"
+        # if transaction.clientPlan:
+        #     plan_name = transaction.clientPlan.plan.name
+
+        # Usamos la nueva vista estética que diseñamos
+        return render_template(
+            "es/receipt_view.html", # Tu nueva plantilla estilo Stripe
+            transaction=transaction,
+            invoice=invoice,
+            app_name=app_name,
+            is_trial=is_trial,
+            plan_name=plan_name,
+            user_email=user.user.email # Pasamos el email para mostrarlo en el texto
+        )
+        
+    return render_template("es/error_payment.html", app_name=app_name)
+
+def payment_success_old():
     load_dotenv()
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
     app_name = os.getenv("APP_NAME")
@@ -217,9 +269,9 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial):
                 db.session.flush() # Asegura que tenemos los datos del usuario listos
                 
                 # ENVIAR EMAIL DE CONFIGURACIÓN DE CLAVE (Solo la primera vez/Trial)
-                if is_trial:
+                #if is_trial:
                     # Aquí asumo que esta función genera el token y envía el link de password
-                    send_confirmation_account_email(user.userId, client.contactName, user.email)
+                    # send_confirmation_account_email(user.userId, client.contactName, user.email)
    
     db.session.commit()
 

@@ -72,6 +72,12 @@ def get_users_by_client(client_uuid: UUID) -> List[UsuarioCliente]:
     """
     return UsuarioCliente.query.filter_by(client_uuid=client_uuid).all()
 
+def get_user_by_client(client_uuid: UUID) -> UsuarioCliente:
+    """
+    Retorna el cliente del usuario.
+    """
+    return UsuarioCliente.query.filter_by(client_uuid=client_uuid).first()
+
 
 
 def user_has_access_to_client(
