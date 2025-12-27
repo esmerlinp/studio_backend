@@ -110,17 +110,24 @@ def close_all_session_except_current(sessionId, user_id:int) -> dict:
     
     return {"sessionId": sessionId}
 
-def close_all_session(user_id:int) -> dict:
-    """Cierra todas las sesiones activas de un usuario"""
-    value = db.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuario = %s", (int(user_id), ))
-    sessions = Session.query.filter_by(userId=user_id).all()
-    if sessions:
-        for session in sessions:
-            session.isActive = False
-        db.session.commit()
-        
-    # if value == 0:
-    #     return {"sessionId": 0}
-    
-    return {"sessionId": 0}
 
+
+def close_all_session(user_id: int, commit = True) -> dict:
+    """Cierra todas las sesiones activas de un usuario de forma masiva"""
+    try:
+        # Realizamos el update de todas las sesiones activas de ese usuario en un solo paso
+        updated_count = Session.query.filter_by(userId=user_id, isActive=True).update(
+            {"isActive": False},
+            synchronize_session=False
+        )
+        if commit:
+            db.session.commit()
+        
+        return {
+            "status": "success", 
+            "message": f"Se cerraron {updated_count} sesiones.",
+            "user_id": user_id
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {"status": "error", "message": str(e)}

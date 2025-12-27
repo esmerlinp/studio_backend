@@ -14,7 +14,7 @@ from app.utils.responses import error
 from app.models.master_scheme.user_model import User
 from app.models.master_scheme.user_roles_model import UserRole
 from app.models.master_scheme.roles_model import Role
-
+from datetime import datetime, timezone
 INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 
 
@@ -41,7 +41,7 @@ def create_app():
     
     app.config.update(
         SECRET_KEY=os.getenv("SECRET_KEY"),
-        FRONTEND_URL=os.getenv("FRONTEND_URL"),
+        FRONTEND_URL=os.getenv("BASE_URL"),
 
         MAIL_SERVER=os.getenv("MAIL_SERVER"),
         MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
@@ -69,23 +69,21 @@ def track_activity(func):
     def wrapper(*args, **kwargs):
         try:
             user_id = get_jwt_identity()
-            # Buscar la sesión activa del usuario
-            # session = database.fetch_one("""
-            #     SELECT * FROM usuariossesiones
-            #     WHERE idusuario = %s AND bactivo = TRUE
-            #     ORDER BY idusuariosesion DESC LIMIT 1
-            # """, (user_id,))
-            
+
             session = get_session_active_by_user_id(userId=user_id)
 
-            if not session:
-                return jsonify({"msg": "Sesión inválida"}), 440
-
-            #now = datetime.now()
-            from datetime import datetime, timezone
-            # now = datetime.now(timezone.utc)
-            # Si expiró por inactividad
+            if not session or not session.isActive:
+                return jsonify({"msg": "Sesión inválida o expirada"}), 440
             
+            # 2. VALIDACIÓN CRÍTICA: ¿El usuario sigue activo?
+            # Esto detiene a los usuarios  que no pagaron
+            user = User.query.get(user_id)
+            if not user.isActive: 
+                return jsonify({
+                    "msg": "Cuenta inhabilitada. Contacte al administrador de su institución."
+                }), 403
+
+
             expiration = session.expirationDate
 
             if expiration.tzinfo is None:
@@ -95,21 +93,10 @@ def track_activity(func):
 
             if expiration < now:
                 invalidar_sesiones_por_id_session(sessionId=session.sessionId)
-                #database.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion = %s", (session["idusuariosesion"],))
                 return jsonify({"msg": "Sesión expirada por inactividad"}), 440
 
             # Actualizar actividad
             actualizar_actividad_sesion(sessionId=session.sessionId, inactivity_minutes=INACTIVITY_MINUTES)
-            # database.execute_non_query("""
-            #     UPDATE usuariossesiones 
-            #     SET dultimoacceso = %s,
-            #         dfechaexpiracion = %s
-            #     WHERE idusuariosesion = %s
-            # """, (
-            #     now,
-            #     now + timedelta(minutes=INACTIVITY_MINUTES),
-            #     session["idusuariosesion"]
-            # ))
 
             return func(*args, **kwargs)
 

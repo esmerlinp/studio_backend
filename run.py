@@ -81,7 +81,7 @@ def set_schema():
 
     # 🔎 Endpoint actual
     endpoint = request.endpoint
-    print(endpoint)
+    #print(endpoint)
     # Si la ruta no existe (404), no intentes validar JWT
     if endpoint is None:
         return

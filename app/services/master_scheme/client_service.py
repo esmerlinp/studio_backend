@@ -16,49 +16,21 @@ from app.services.master_scheme.user_service import  insert_user_onboard
 from app.services.master_scheme.user_client_service import  assign_user_to_client_onboard
 from uuid import uuid4
 from datetime import date
-from app.utils.helpers import send_confirmation_account_email
 import uuid
+from sqlalchemy import func
 
-
-from app.utils.responses import error
-from typing import Optional
-from typing import List
+from typing import Optional, List
 from app.services.master_scheme.payment_service import request_suscription
 from app.utils.helpers import send_email_template
 import os
 from dotenv import load_dotenv
+
 def set_schema(schema_name: str):
     db.session.execute(
         text('SET search_path TO :schema, public'),
         {"schema": schema_name}
     )
     
-def drop_schema(schema_name: str):
-    """
-    Elimina un esquema PostgreSQL de forma segura.
-    """
-    stmt = text(f'DROP SCHEMA IF EXISTS "{schema_name}" CASCADE')
-    db.session.execute(stmt)
-    db.session.commit()
-  
-  
-
-def schema_exists(schema_name: str) -> bool:
-    """
-    Verifica si un esquema existe en la base de datos PostgreSQL.
-    """
-    query = text("""
-        SELECT EXISTS(
-            SELECT 1 
-            FROM information_schema.schemata 
-            WHERE schema_name = :schema
-        )
-    """)
-    result = db.session.execute(query, {"schema": schema_name}).scalar()
-    return bool(result)
-     
-  
-  
 def onboard_client_service(client_data, admin_user_data, plan_data):
     load_dotenv()
     
@@ -162,14 +134,10 @@ def onboard_client_service(client_data, admin_user_data, plan_data):
         db.session.rollback()
         print(f"Error fatal en onboard: {str(e)}")
         raise e
-    
-      
+       
 def validate_schema_name(schema: str):
     if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", schema):
         raise ValueError("Invalid schema name")
-
-
-
 
 def create_client_onboard(
     *,
@@ -203,8 +171,6 @@ def create_client_onboard(
     db.session.add(new_client)
     client = get_client_by_uuid(uuid)
     return client
-
-
 
 def create_client(
     *,
@@ -270,54 +236,9 @@ def create_client(
           db.session.rollback()
         raise e
 
-    # try:
-    #     #asociar plan al cliente
-    #     # 2️⃣ Crear esquema del cliente
-    #     create_client_schema(schema_name)
 
-    # except Exception as e:
-    #     # ⚠️ Si falla el schema, el cliente queda inconsistente
-    #     # Puedes decidir:
-    #     # - eliminar el cliente
-    #     # - o marcarlo inactivo
-    #     client.isActive = False
-    #     db.session.commit()
-
-    #     raise RuntimeError(
-    #         f"Cliente creado pero falló la creación del esquema '{schema_name}'"
-    #     ) from e
     client = get_client_by_uuid(uuid)
     return client
-
-
-def create_client_schema(new_schema: str, base_schema: str = "cliente"):
-    sql = f"""
-    CREATE SCHEMA IF NOT EXISTS {new_schema};
-
-    DO $$
-    DECLARE
-        r RECORD;
-    BEGIN
-        FOR r IN 
-            SELECT tablename 
-            FROM pg_tables 
-            WHERE schemaname = '{base_schema}'
-        LOOP
-            EXECUTE format(
-                'CREATE TABLE {new_schema}.%I (LIKE {base_schema}.%I INCLUDING ALL)',
-                r.tablename,
-                r.tablename
-            );
-        END LOOP;
-    END $$;
-    """
-    try:
-      db.session.execute(text(sql))
-      db.session.commit()
-    except Exception as e:
-      db.session.rollback()
-      raise e
-
 
 def get_client_preferences():
   
@@ -380,7 +301,6 @@ def get_client_preferences():
     
   return {"user_id": 1, "preferences": []}
 
-
 def get_client_logs()-> List[AuditLog]:    
     logs = AuditLog.query.all()
     return logs
@@ -408,9 +328,6 @@ def get_client_payment_orders(client_id)-> List[PaymentTransaction]:
 def get_client_payment_orders_by_status(client_id, status_order)-> List[PaymentTransaction]:    
     orders = PaymentTransaction.query.filter_by(clientId =client_id, status=status_order).all()
     return orders
-
-
-
 
 def has_available_storage(client_id: int, new_file_size_mb: float) -> tuple[bool, Optional[str]]:
     """
@@ -445,17 +362,10 @@ def has_available_storage(client_id: int, new_file_size_mb: float) -> tuple[bool
 
     return True, None
 
-
-
-
-
-from sqlalchemy import func
-
 def storage_info(client_id) -> ClientStorage:
     storage = ClientStorage.query.filter_by(client_id=client_id).first()
     return storage
     
-
 def update_client_storage_usage(client_id: int, size_mb: float, operation: str = "add"):
     """
     Actualiza el contador de almacenamiento consumido por un cliente.

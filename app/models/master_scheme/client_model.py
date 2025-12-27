@@ -122,7 +122,8 @@ class Client(db.Model):
         db.String(50),
         nullable=False
     )
-
+    stripe_customer_id = db.Column("sidclientestripe", db.String(50), unique=True, nullable=True)
+    
     # --------------------------------------------------
     # Representación (útil para logs / debug)
     # --------------------------------------------------

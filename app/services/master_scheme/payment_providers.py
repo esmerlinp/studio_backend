@@ -2,14 +2,15 @@ import stripe
 import os
 from dotenv import load_dotenv
 from flask import request
-
+from app.models.master_scheme.client_model import Client
+from ...extensions import db
 class StripeProvider:
     def __init__(self):
         load_dotenv()
         
         stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
-
-    def create_checkout(self, amount, currency, order_id, client_email, plan_period="month", is_trial_plan=False, trial_days=14):
+        
+    def create_checkout(self, client_id, client_email, amount, currency, order_id,  plan_period="month", is_trial_plan=False, trial_days=14):
         try:
             # 1. Configuración del Ciclo
             interval = "month"
@@ -30,6 +31,17 @@ class StripeProvider:
 
             amount_in_cents = int(float(amount) * 100)
             
+            client = Client.query.get(client_id)
+            # Creamos el cliente en Stripe (si no lo hemos hecho antes)
+            if not client.stripe_customer_id:
+                stripe_customer = stripe.Customer.create(
+                    email=client.email,
+                    name=client.business_name,
+                    metadata={'internal_client_id': client.clientId}
+                )
+                client.stripe_customer_id = stripe_customer.id
+                db.session.commit()
+            
             # 3. Creación de la Sesión
             session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
@@ -38,6 +50,8 @@ class StripeProvider:
                         'currency': currency.lower(),
                         'product_data': {
                             'name': f"Orden #{order_id}",
+                            'description': 'Hasta 500 alumnos, Facturación automática y Soporte 24/7', #TODO: agregar info real <--- INFO EXTRA
+                            #'images': ['https://tu-sitio.com/plan-icon.png'],
                         },
                         'unit_amount': amount_in_cents,
                         'recurring': {
@@ -51,6 +65,7 @@ class StripeProvider:
                 # Pasamos el diccionario que preparamos arriba
                 subscription_data=sub_data, 
                 client_reference_id=order_id,
+                customer=client.stripe_customer_id, # IMPORTANTE: Vinculamos la sesión al cliente
                 customer_email=client_email,
                 success_url=f"{request.host_url}api/v1/payments/success?session_id={{CHECKOUT_SESSION_ID}}",
                 #cancel_url=f"{request.host_url}api/v1/payments/cancel",

@@ -1,0 +1,16 @@
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+    <h2 style="color: #6366f1;">¡Tu prueba gratuita está por terminar!</h2>
+    <p>Hola <strong>{{ name }}</strong>,</p>
+    <p>Esperamos que estés disfrutando de todas las herramientas de <strong>Akdmia</strong> para la gestión de <strong>{{ business_name }}</strong>.</p>
+    
+    <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <p style="margin: 0;">📅 Tu periodo de prueba finaliza el: <strong>{{ trial_end_date }}</strong></p>
+        <p style="margin: 5px 0 0 0;">A partir de esa fecha, se realizará el primer cobro automático a tu tarjeta registrada.</p>
+    </div>
+
+    <p>Si deseas continuar usando el servicio sin interrupciones, asegúrate de que tu método de pago sea válido. Si deseas hacer cambios, puedes acceder a nuestro portal de facturación:</p>
+    
+    <a href="{{ update_payment_url }}" style="display: inline-block; background-color: #6366f1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Gestionar mi cuenta</a>
+    
+    <p style="font-size: 12px; color: #666; margin-top: 30px;">Si tienes alguna duda, responde a este correo y nuestro equipo de soporte te ayudará de inmediato.</p>
+</div>

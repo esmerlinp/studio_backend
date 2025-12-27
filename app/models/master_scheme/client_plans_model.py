@@ -47,7 +47,7 @@ class ClientPlan(db.Model):
         db.String(20),
         default="ACTIVE",
         nullable=False
-    )  # ACTIVE, SUSPENDED, CANCELED, EXPIRED
+    )  # ACTIVE, CANCELED, PAST_DUE, PENDING_PAYMENT, TRIAL
 
     # 🔗 Relaciones
     plan = db.relationship(
