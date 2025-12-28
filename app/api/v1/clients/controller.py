@@ -84,6 +84,9 @@ def get_client(clientId):
         error(message="not found")
     return success(data=data.to_dict())
 
+
+
+
 @jwt_required()
 @track_activity
 @require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])

@@ -7,6 +7,9 @@ from app.utils.responses import success, error
 from app.utils.helpers import generate_reset_token, send_reset_email
 from app.utils import i18n
 from uuid import uuid4
+
+from app.services.master_scheme.user_client_service import get_client_by_user
+
 def hashear_password(password):
     return generate_password_hash(password)
 
@@ -58,6 +61,15 @@ def get_user_by_name(userName):
     
     return success(data=user.to_dict(), message=i18n._("common.users.retrieved_successfully"), status_code=200)
 
+
+@jwt_required()
+@track_activity
+def get_my_client():
+    user_id = get_jwt_identity()  
+    data = get_client_by_user(user_id=user_id)
+    if not data:
+        error(message="not found")
+    return success(data=data.to_dict())
 
 @jwt_required()
 @track_activity

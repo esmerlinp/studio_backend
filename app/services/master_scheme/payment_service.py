@@ -3,9 +3,10 @@ from app.models.master_scheme.pyments.invoice_model import Invoice
 from app.models.master_scheme.client_plans_model import ClientPlan
 from app.models.master_scheme.client_model import Client
 from app.models.master_scheme.user_model import User
-
+from app.models.master_scheme.user_client_model import UsuarioCliente
+from app.services.master_scheme.session_service import close_all_session
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
-from app.services.master_scheme.client_plan_service import get_active_plan, get_active_pending
+from app.services.master_scheme.client_plan_service import  get_active_pending
 from app.models.master_scheme.client_model import Client
 from datetime import datetime, timezone
 from app.services.master_scheme.payment_factory import get_current_provider
@@ -88,12 +89,7 @@ def create_client_schema(new_schema: str, base_schema: str = "cliente"):
         END LOOP;
     END $$;
     """
-    try:
-      db.session.execute(text(sql))
-      db.session.commit()
-    except Exception as e:
-      db.session.rollback()
-      raise e
+    db.session.execute(text(sql))
 
 def request_suscription(plan_identity) -> dict:
     provider = get_current_provider()
@@ -174,7 +170,7 @@ def request_suscription(plan_identity) -> dict:
 
 
 
-
+    
 def send_goodbye_email(client_email, contact_name, business_name):
     load_dotenv()
     base_url=os.getenv("BASE_URL")
@@ -190,8 +186,7 @@ def send_goodbye_email(client_email, contact_name, business_name):
         print(f"Correo de despedida enviado a {client_email}")
     except Exception as e:
         print(f"Error enviando email de despedida: {str(e)}")
-        
-        
+             
 def process_successful_payment(transaction, stripe_obj, app_name, is_trial):
     # 1. Actualizar/Confirmar Transacción
     transaction.status = "APPROVED"
@@ -200,8 +195,12 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial):
 
     stripe_paid_at = stripe_obj.get('status_transitions', {}).get('paid_at') or stripe_obj.get('created')
     payment_date_dt = datetime.fromtimestamp(stripe_paid_at, tz=timezone.utc)
+    # 1. Obtenemos los IDs de Stripe
+    stripe_sub_id = stripe_obj.get('subscription') # Aquí viene el sub_xxx
+    stripe_cus_id = stripe_obj.get('customer')     # Aquí viene el cus_xxx    
         
         
+
     transaction.paymentDate = payment_date_dt
     
     # 2. Crear Factura
@@ -220,24 +219,27 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial):
         client_plan.status = "ACTIVE" # Asegúrate que el nombre de columna sea correcto
 
         
-        client = Client.query.get(client_plan.client_id)
-        if client:
-            client.isActive = True
+    client = Client.query.get(transaction.clientId)
+    if client:
+        client.isActive = True
+        client.stripe_customer_id = stripe_cus_id
+        client.stripe_subscription_id = stripe_sub_id
+        
+        # --- CREACIÓN DE ESQUEMA (Base de Datos separada) ---
+        if not schema_exists(client.schemaName):
+            create_client_schema(client.schemaName)
+        
+        # --- ACTIVACIÓN DE USUARIO Y ENVÍO DE CLAVE ---
+        relacion = UsuarioCliente.query.filter_by(client_uuid=client.uuid).first()
+        user = User.query.get(relacion.user_id)
+        if user:
+            user.isActive = True
+            #db.session.flush() # Asegura que tenemos los datos del usuario listos
             
-            # --- CREACIÓN DE ESQUEMA (Base de Datos separada) ---
-            if not schema_exists(client.schemaName):
-                create_client_schema(client.schemaName)
-            
-            # --- ACTIVACIÓN DE USUARIO Y ENVÍO DE CLAVE ---
-            user = User.query.filter_by(idcliente=client.clientId).first()
-            if user:
-                user.active = True
-                db.session.flush() # Asegura que tenemos los datos del usuario listos
-                
-                # ENVIAR EMAIL DE CONFIGURACIÓN DE CLAVE (Solo la primera vez/Trial)
-                #if is_trial:
-                    # Aquí asumo que esta función genera el token y envía el link de password
-                    # send_confirmation_account_email(user.userId, client.contactName, user.email)
+            # ENVIAR EMAIL DE CONFIGURACIÓN DE CLAVE (Solo la primera vez/Trial)
+            #if is_trial:
+                # Aquí asumo que esta función genera el token y envía el link de password
+                # send_confirmation_account_email(user.userId, client.contactName, user.email)
    
     db.session.commit()
 
@@ -297,7 +299,7 @@ def handle_invoice_payment_failed(invoice, app_name):
         if pi.last_payment_error:
             failure_msg = pi.last_payment_error.message
     
-    client = Client.query.filter_by(sidclientestripe=customer_id).first()
+    client = Client.query.filter_by(stripe_customer_id=customer_id).first()
     if client:
         plan = ClientPlan.query.filter_by(client_id=client.clientId, status='ACTIVE').first()
         if plan:
@@ -322,6 +324,10 @@ def handle_invoice_paid(invoice_data, app_name):
         invoice_data.get('subscription') or 
         invoice_data.get('parent', {}).get('subscription_details', {}).get('subscription')
     )
+    
+    # También obtenemos el Customer ID 
+    customer_id = invoice_data.get('customer')
+    
     is_trial = (invoice_data.get('amount_paid') == 0)
     stripe_paid_at = invoice_data.get('status_transitions', {}).get('paid_at') or invoice_data.get('created')
     payment_date_dt = datetime.fromtimestamp(stripe_paid_at, tz=timezone.utc)
@@ -332,6 +338,22 @@ def handle_invoice_paid(invoice_data, app_name):
         ).first()
 
         if prev_trans:
+            
+            # --- ACTUALIZACIÓN DEL CLIENTE ---
+            client = Client.query.get(prev_trans.clientId)
+            if client:
+                # Si el campo sidcontratostripe está vacío, lo llenamos                
+                if hasattr(client, 'stripe_subscription_id') and not client.stripe_subscription_id:
+                    client.stripe_subscription_id = subscription_id
+                
+                # Aprovechamos para guardar el customer_id si no existe
+                # (Asumiendo que tienes una columna para ello, ej: stripe_customer_id)
+                if hasattr(client, 'stripe_customer_id') and not client.stripe_customer_id:
+                    client.stripe_customer_id = customer_id
+                
+                db.session.flush() 
+            # --------------------------------------------------
+            
             new_trans = PaymentTransaction(
                 clientPlanId=prev_trans.clientPlanId,
                 clientId=prev_trans.clientId,
@@ -350,13 +372,13 @@ def handle_invoice_paid(invoice_data, app_name):
 
 def handle_subscription_updated(subscription):
     stripe_cus_id = subscription['customer']
-    client = Client.query.filter_by(sidclientestripe=stripe_cus_id).first()
+    client = Client.query.filter_by(stripe_customer_id=stripe_cus_id).first()
 
     if client:
         client_plan = ClientPlan.query.filter_by(client_id=client.clientId, status='ACTIVE').first()
         if client_plan:
-            new_end_date = datetime.fromtimestamp(subscription['current_period_end']).date()
-            client_plan.end_date = new_end_date
+            #new_end_date = datetime.fromtimestamp(subscription['current_period_end']).date()
+            #client_plan.end_date = new_end_date
             
             stripe_status = subscription['status']
             if stripe_status == 'active':
@@ -367,8 +389,9 @@ def handle_subscription_updated(subscription):
             db.session.commit()
 
 def handle_subscription_deleted(subscription):
+    print("handle_subscription_deleted")
     stripe_cus_id = subscription['customer']
-    client = Client.query.filter_by(sidclientestripe=stripe_cus_id).first()
+    client = Client.query.filter_by(stripe_customer_id=stripe_cus_id).first()
     
     if client:
         client_plan = ClientPlan.query.filter_by(client_id=client.clientId).filter(
@@ -378,10 +401,7 @@ def handle_subscription_deleted(subscription):
         if client_plan:
             client_plan.status = 'CANCELED'
             client_plan.end_date = datetime.now().date() 
-            
-            from app.models.master_scheme.user_client_model import UsuarioCliente
-            from app.services.master_scheme.session_service import close_all_session
-            
+
             user_ids_subquery = db.session.query(UsuarioCliente.user_id).filter(
                 UsuarioCliente.client_uuid == client.uuid
             ).subquery()
@@ -392,13 +412,11 @@ def handle_subscription_deleted(subscription):
     
             users_to_close = User.query.filter(User.userId.in_(user_ids_subquery)).all()
             for u in users_to_close:
-                close_all_session(user_id=u.userId)
+                close_all_session(user_id=u.userId, commit=False)
             
             db.session.commit()
             send_goodbye_email(client.billingEmail, client.contactName, business_name=client.businessName)
-            
-            
-
+                       
 def handle_subscription_trial_will_end(subscription, app_name):
     load_dotenv()
     base_url = os.getenv("BASE_URL")

@@ -1,17 +1,21 @@
 from flask import  request, jsonify, render_template
 from ....extensions import db
 
-
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app import track_activity, require_role
 
 from app.services.master_scheme.user_client_service import get_user_by_client
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
 from app.models.master_scheme.pyments.invoice_model import Invoice
 from app.models.master_scheme.client_plans_model import ClientPlan
 from app.models.master_scheme.client_model import Client
-
+from app.models.master_scheme.user_client_model import UsuarioCliente
+from app.models.master_scheme.user_model import User
+from app.utils.responses import error, success
 from dotenv import load_dotenv
 import os
 import stripe
+from werkzeug.security import check_password_hash
 from app.utils.helpers import send_confirmation_account_email
 from app.services.master_scheme.payment_service import (handle_checkout_session_completed, handle_invoice_paid,
                                                         handle_invoice_payment_failed,handle_subscription_deleted,handle_subscription_updated, handle_subscription_trial_will_end)
@@ -46,30 +50,35 @@ def stripe_webhook():
 
     # Se dispara al completar con éxito el formulario de pago inicial (Suscripción o Trial)
     if event_type == 'checkout.session.completed':
+        print('checkout.session.completed')
         handle_checkout_session_completed(data_object, app_name)
             
     # Se dispara cuando un cobro recurrente falla (ej. tarjeta sin fondos o expirada)
     elif event_type == 'invoice.payment_failed':
+        print('invoice.payment_failed')
         handle_invoice_payment_failed(data_object, app_name)
             
     # Se dispara cada vez que un pago se realiza con éxito (Renovaciones mensuales/anuales)
     elif event_type == 'invoice.paid':
+        print('invoice.paid')
         handle_invoice_paid(data_object, app_name)
 
     # Se dispara al cambiar fechas de periodo, planes (Upgrade/Downgrade) o estado de la suscripción
     elif event_type == "customer.subscription.updated":
+        print("customer.subscription.updated")
         handle_subscription_updated(data_object)
         
     # Se dispara cuando la suscripción termina definitivamente (Fin de ciclo o cancelación total)
     elif event_type == "customer.subscription.deleted":
+        print("customer.subscription.deleted")
         handle_subscription_deleted(data_object)
     
     # Se dispara 3 días antes de que el periodo de prueba finalice y se convierta en pago real
     elif event_type == "customer.subscription.trial_will_end":
+        print("customer.subscription.trial_will_end")
         handle_subscription_trial_will_end(data_object, app_name)
     
     return jsonify({"status": "success"}), 200
-
 
 def payment_success():
     load_dotenv()
@@ -122,8 +131,6 @@ def payment_success():
         
     return render_template("es/error_payment.html", app_name=app_name)
 
-
-
 def payment_cancel():
     order_id = request.args.get('order_id')
     
@@ -147,6 +154,73 @@ def payment_cancel():
     return render_template("es/payment_cancelled.html", order_id=order_id)
 
 
+
+
+
+
+
+
+#@app.route('/api/v1/subscriptions/cancel', methods=['POST']
+@jwt_required()
+@track_activity
+def cancel_subscription():
+    data = request.get_json()
+    subscription_id = data.get('subscription_id')
+    password = data.get('password')
+    user_id = get_jwt_identity()  
+
+    if not subscription_id or not password:
+            return jsonify({"success": False, "msg": "Datos incompletos"}), 400
+    
+
+        
+    try:
+
+        
+        client = Client.query.filter_by(stripe_subscription_id=subscription_id).first()
+        if not client:
+            return error(message="Invalid suscription")  
+            
+        user = User.query.get(user_id)
+        if not user:
+            return error(message="not user found")    
+            
+        def verificar_password(hash_stored: str, password: str) -> bool:
+            """Verifica la contraseña comparando con el hash almacenado."""
+            return check_password_hash(hash_stored, password)
+        
+        if not verificar_password(user.password, password):
+            return error(message="Credenciales inválidas", status_code=401)
+        
+        relacion = UsuarioCliente.query.filter_by(client_uuid=client.uuid).first()
+        if not relacion or relacion.user_id != user_id:
+            return error(message="Este usuario no esta relacionado a ningun cliente")
+        
+        if not user.rol or  user.rol not in ("ADMIN", "OWNER"):
+                    return jsonify({"success": False, "msg": "Nivel de privilegios insuficiente"}), 403
+            
+            
+        
+        # Cancelación inmediata
+        deleted_subscription = stripe.Subscription.delete(subscription_id)
+        
+        #El cliente sigue teniendo acceso hasta que termine el mes que ya pagó.
+        # stripe.Subscription.modify(
+        #     subscription_id,
+        #     cancel_at_period_end=True
+        # )
+        
+        # Aquí deberías actualizar tu base de datos: 
+        # cliente.status = 'inactive'
+        
+        return jsonify({
+            "success": True, 
+            "status": deleted_subscription.status,
+            "msg": "Suscripción cancelada exitosamente"
+        }), 200
+
+    except stripe.error.StripeError as e:
+        return jsonify({"success": False, "msg": str(e)}), 400
 # def stripe_webhook_old():
 #     load_dotenv()
 #     payload = request.data

@@ -13,7 +13,8 @@ class StripeProvider:
         
     def create_checkout(self, client_id, client_email, amount, currency, order_id,  plan_period="month", is_trial_plan=False, trial_days=14):
         load_dotenv()
-        base_url = os.getenv("BASE_URL")
+        base_url = request.host_url
+
         try:
             # 1. Configuración del Ciclo
             interval = "month"
@@ -39,7 +40,7 @@ class StripeProvider:
             if not client.stripe_customer_id:
                 stripe_customer = stripe.Customer.create(
                     email=client.billingEmail,
-                    name=client.business_name,
+                    name=client.businessName,
                     metadata={'internal_client_id': client.clientId}
                 )
                 client.stripe_customer_id = stripe_customer.id
@@ -69,7 +70,7 @@ class StripeProvider:
                 subscription_data=sub_data, 
                 client_reference_id=order_id,
                 customer=client.stripe_customer_id, # IMPORTANTE: Vinculamos la sesión al cliente
-                customer_email=client_email,
+                #customer_email=client.billingEmail,
                 success_url=f"{base_url}api/v1/payments/success?session_id={{CHECKOUT_SESSION_ID}}",
                 #cancel_url=f"{request.host_url}api/v1/payments/cancel",
                 cancel_url=f"{base_url}api/v1/payments/cancel?order_id={order_id}"

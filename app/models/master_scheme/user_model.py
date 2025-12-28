@@ -25,6 +25,7 @@ class User(db.Model):
     tokenExpirationDate = db.Column("dexpiraciontoken", db.DateTime, nullable=True)
     lastPasswordChangeDate = db.Column("dfechaultcambiocont",db.DateTime, nullable=False)
     password = db.Column("scontrasena", db.String(500), nullable=False)
+    rol = db.Column("srol", db.String(20), nullable=True, default=None)
     
     # preferences = db.relationship(
     #     "UserPreference",
@@ -47,6 +48,7 @@ class User(db.Model):
             "mustChangePassword": self.mustChangePassword,
             "loginAttempts": self.loginAttempts,
             "isBlocked": self.isBlocked,
+            "rol": self.rol,
             "blockedDate": self.blockedDate.isoformat() if self.blockedDate else None,
             "lastLoginDate": self.lastLoginDate.isoformat() if self.lastLoginDate else None,
             "tokenExpirationDate": self.tokenExpirationDate.isoformat() if self.tokenExpirationDate else None,

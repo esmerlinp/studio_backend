@@ -276,6 +276,7 @@ def insert_user_onboard(
         tokenExpirationDate=None,
         lastPasswordChangeDate=datetime.now(timezone.utc),
         password=generate_password_hash(password),
+        rol="OWNER"
     )
 
 
@@ -310,7 +311,7 @@ def insert_user(
     uuid: str,
     password: str,
     photo: Optional[str] = None,
-    is_active: bool = True,
+    is_active: bool = False,
     is_confirmed_user: bool = False,
     must_change_password: bool = False,
     commit:bool = True,
@@ -362,6 +363,7 @@ def insert_user(
         tokenExpirationDate=None,
         lastPasswordChangeDate=datetime.now(timezone.utc),
         password=generate_password_hash(password),
+        rol="USER"
     )
 
     try:

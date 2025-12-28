@@ -11,7 +11,7 @@ from app.api.v1.notifications.routes import notification_bp
 from app.services.master_scheme.user_service import change_user_password, update_user, get_user_scheme, get_user_by_id
 from app import create_app
 from app.utils import i18n
-from app.utils.helpers import verify_reset_token
+from app.utils.helpers import verify_reset_token, send_email
 from app.utils.responses import error
 import os
 from dotenv import load_dotenv
@@ -19,11 +19,14 @@ from app.extensions import db
 from sqlalchemy import text
 
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 load_dotenv()
 
 app = create_app()
-
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1
+)
 
 jwt = JWTManager(app)
 
@@ -48,14 +51,12 @@ i18n.setup_gettext("es")
 def health():
     return 'OK', 200
 
-# @app.route("/")
-# def index():
-#     users = User.query.all()
-#     return {"users": [u.email for u in users]}
 
 
 PUBLIC_ENDPOINTS = {
     "health",
+    "host",
+    "test_mail",
     "client_form",
     "main_page",
     "auth.login",
@@ -73,6 +74,31 @@ PUBLIC_ENDPOINTS = {
     "payments.cancel"
 }
 
+
+@app.route("/host")
+def host():
+    return {"host": request.host_url}
+
+
+@app.route('/test-mail')
+def test_mail():
+    try:
+        import logging
+        import smtplib
+
+        # Esto forzará a imprimir el log del protocolo SMTP en la consola de Google Cloud
+        smtplib.SMTP.debuglevel = 1 
+        logging.basicConfig(level=logging.DEBUG)
+
+        send_email(subject="Prueba Akdmia",
+                      message="Si lees esto, el correo funciona desde Cloud Run",
+                      to=["esmerlinep@gmail.com"])
+
+        return "Correo enviado con éxito"
+    except Exception as e:
+        return f"Error enviando correo: {str(e)}"
+    
+    
 
 @app.before_request
 def set_schema():

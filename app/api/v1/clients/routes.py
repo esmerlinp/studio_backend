@@ -10,6 +10,8 @@ client_bp = Blueprint('clients', __name__, url_prefix='/api/v1/clients')
 
 client_bp.get("/")(get_all_clients)
 client_bp.get("/<int:clientId>")(get_client)
+
+
 client_bp.get("/<int:clientId>/plan")(get_plan) #planes activos
 client_bp.get("/<int:clientId>/plan/all")(get_client_plans) #todos los planes 
 

@@ -123,6 +123,7 @@ class Client(db.Model):
         nullable=False
     )
     stripe_customer_id = db.Column("sidclientestripe", db.String(50), unique=True, nullable=True)
+    stripe_subscription_id = db.Column("sidcontratostripe", db.String(50), unique=True, nullable=True)
     
     # --------------------------------------------------
     # Representación (útil para logs / debug)
@@ -154,4 +155,7 @@ class Client(db.Model):
             "comment": self.comment,
             "uuid": str(self.uuid),
             "schema": self.schemaName,
+            "stripe_customer_id": self.stripe_customer_id,
+            "stripe_subscription_id": self.stripe_subscription_id
+            
         }

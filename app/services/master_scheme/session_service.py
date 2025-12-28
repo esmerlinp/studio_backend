@@ -129,5 +129,6 @@ def close_all_session(user_id: int, commit = True) -> dict:
             "user_id": user_id
         }
     except Exception as e:
-        db.session.rollback()
+        if commit:
+            db.session.rollback()
         return {"status": "error", "message": str(e)}
