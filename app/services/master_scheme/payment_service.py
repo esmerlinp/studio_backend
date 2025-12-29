@@ -118,7 +118,7 @@ def request_suscription(plan_identity) -> dict:
         new_trans = PaymentTransaction(
             clientPlanId=plan_identity,
             clientId=client_id,
-            amount=amount,
+            amount=0 if is_trial else amount,
             currency=currency,
             internalReference=order_id,
             status="PENDING",
@@ -187,7 +187,7 @@ def send_goodbye_email(client_email, contact_name, business_name):
     except Exception as e:
         print(f"Error enviando email de despedida: {str(e)}")
              
-def process_successful_payment(transaction, stripe_obj, app_name, is_trial):
+def process_successful_payment(transaction, stripe_obj, app_name, is_trial, commit=True):
     # 1. Actualizar/Confirmar Transacción
     transaction.status = "APPROVED"
     transaction.rawResponse = stripe_obj
@@ -223,7 +223,8 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial):
     if client:
         client.isActive = True
         client.stripe_customer_id = stripe_cus_id
-        client.stripe_subscription_id = stripe_sub_id
+        if stripe_sub_id:
+            client.stripe_subscription_id = stripe_sub_id
         
         # --- CREACIÓN DE ESQUEMA (Base de Datos separada) ---
         if not schema_exists(client.schemaName):
@@ -240,8 +241,9 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial):
             #if is_trial:
                 # Aquí asumo que esta función genera el token y envía el link de password
                 # send_confirmation_account_email(user.userId, client.contactName, user.email)
-   
-    db.session.commit()
+    db.session.flush()
+    if commit:
+        db.session.commit()
 
     # 4. Enviar Email
     try:
@@ -320,55 +322,63 @@ def handle_invoice_payment_failed(invoice, app_name):
         )
 
 def handle_invoice_paid(invoice_data, app_name):
-    subscription_id = (
-        invoice_data.get('subscription') or 
-        invoice_data.get('parent', {}).get('subscription_details', {}).get('subscription')
-    )
-    
-    # También obtenemos el Customer ID 
-    customer_id = invoice_data.get('customer')
-    
-    is_trial = (invoice_data.get('amount_paid') == 0)
-    stripe_paid_at = invoice_data.get('status_transitions', {}).get('paid_at') or invoice_data.get('created')
-    payment_date_dt = datetime.fromtimestamp(stripe_paid_at, tz=timezone.utc)
-    
-    if subscription_id:
-        prev_trans = PaymentTransaction.query.filter(
-            PaymentTransaction.rawResponse['subscription'].astext == subscription_id
-        ).first()
+    try:
+        subscription_id = (
+            invoice_data.get('subscription') or 
+            invoice_data.get('parent', {}).get('subscription_details', {}).get('subscription')
+        )
+        
+        # También obtenemos el Customer ID 
+        customer_id = invoice_data.get('customer')
+        
+        is_trial = (invoice_data.get('amount_paid') == 0)
+        stripe_paid_at = invoice_data.get('status_transitions', {}).get('paid_at') or invoice_data.get('created')
+        payment_date_dt = datetime.fromtimestamp(stripe_paid_at, tz=timezone.utc)
+        
+        if subscription_id:
+            prev_trans = PaymentTransaction.query.filter(
+                PaymentTransaction.rawResponse['subscription'].astext == subscription_id
+            ).first()
 
-        if prev_trans:
-            
-            # --- ACTUALIZACIÓN DEL CLIENTE ---
-            client = Client.query.get(prev_trans.clientId)
-            if client:
-                # Si el campo sidcontratostripe está vacío, lo llenamos                
-                if hasattr(client, 'stripe_subscription_id') and not client.stripe_subscription_id:
+            if prev_trans:
+                print(f"prev_trans clientId : {prev_trans.clientId}")
+                # --- ACTUALIZACIÓN DEL CLIENTE ---
+                client = Client.query.get(prev_trans.clientId)
+                if client:
+                    # Si el campo sidcontratostripe está vacío, lo llenamos                
+                    #if hasattr(client, 'stripe_subscription_id') and not client.stripe_subscription_id:
+                    
+                    print(f"Actualiza la suscripcion del cliente : {client.clientId}")
                     client.stripe_subscription_id = subscription_id
+                    
+                    # Aprovechamos para guardar el customer_id si no existe
+                    # (Asumiendo que tienes una columna para ello, ej: stripe_customer_id)
+                    if hasattr(client, 'stripe_customer_id') and not client.stripe_customer_id:
+                        client.stripe_customer_id = customer_id
+                    
+                    db.session.flush() 
+                # --------------------------------------------------
                 
-                # Aprovechamos para guardar el customer_id si no existe
-                # (Asumiendo que tienes una columna para ello, ej: stripe_customer_id)
-                if hasattr(client, 'stripe_customer_id') and not client.stripe_customer_id:
-                    client.stripe_customer_id = customer_id
-                
-                db.session.flush() 
-            # --------------------------------------------------
-            
-            new_trans = PaymentTransaction(
-                clientPlanId=prev_trans.clientPlanId,
-                clientId=prev_trans.clientId,
-                internalReference=f"REC-{int(datetime.now().timestamp())}",
-                externalReference=invoice_data.get('payment_intent'),
-                amount=invoice_data.get('amount_paid') / 100,
-                currency=invoice_data.get('currency').upper(),
-                status="APPROVED",
-                paymentDate=payment_date_dt,
-                rawResponse=invoice_data
-            )
-            db.session.add(new_trans)
-            db.session.flush()
-            process_successful_payment(new_trans, invoice_data, app_name, is_trial)
-            db.session.commit()
+                new_trans = PaymentTransaction(
+                    clientPlanId=prev_trans.clientPlanId,
+                    clientId=prev_trans.clientId,
+                    internalReference=f"REC-{int(datetime.now().timestamp())}",
+                    externalReference=invoice_data.get('payment_intent'),
+                    amount=invoice_data.get('amount_paid') / 100,
+                    currency=invoice_data.get('currency').upper(),
+                    status="APPROVED",
+                    paymentDate=payment_date_dt,
+                    rawResponse=invoice_data
+                )
+                db.session.add(new_trans)
+                db.session.flush()
+                process_successful_payment(new_trans, invoice_data, app_name, is_trial, commit=False)
+                db.session.commit()
+        
+    except Exception as e:
+            db.session.rollback()
+            print(f"Error procesando el pago, se hizo rollback: {e}")
+            raise e    
 
 def handle_subscription_updated(subscription):
     stripe_cus_id = subscription['customer']

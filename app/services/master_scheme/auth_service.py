@@ -2,7 +2,7 @@ from flask import  request, jsonify
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 from datetime import timedelta
-from app.services.master_scheme.user_service import get_user_by_user_name_with_passwd, get_user_by_id, get_user_preferences
+from app.services.master_scheme.user_service import get_user_by_user_name_with_passwd, get_user_by_id, get_user_preferences, add_default_user_preferences
 from app.services.master_scheme.session_service import close_session, create_session, get_session_active_by_refresh_token
 from app.utils.responses import success, error
 
@@ -60,6 +60,15 @@ def login():
 
     if not verificar_password(user.password, password):
         return jsonify({"error": "Credenciales inválidas"}), 401
+    
+    if not user.isActive:
+        # Personalizamos el mensaje según el contexto (si tienes el campo de motivo)
+        mensaje_error = (
+            "Tu cuenta se encuentra inactiva. "
+            "Esto puede deberse a un pago pendiente o a una revisión administrativa. "
+            "Por favor, contacta al administrador de tu institución o a nuestro equipo de soporte."
+        )
+        return error(message=mensaje_error, status_code=403) # 403 Forbidden es más preciso que 400
 
 
     identity = str(user.userId)   # identity debe ser string
@@ -83,6 +92,13 @@ def login():
     
     session_create = get_session_active_by_refresh_token(refreshToken=refresh_token)
     preferences = get_user_preferences(user_id=user.userId)
+    print(preferences)
+    if not preferences:
+        new_pref = add_default_user_preferences(user_id=user.userId)
+        if not new_pref:
+             return error("Error creating user preferences", status_code=500)
+        preferences = new_pref
+            
     
     
 

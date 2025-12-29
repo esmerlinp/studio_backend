@@ -154,12 +154,6 @@ def payment_cancel():
     return render_template("es/payment_cancelled.html", order_id=order_id)
 
 
-
-
-
-
-
-
 #@app.route('/api/v1/subscriptions/cancel', methods=['POST']
 @jwt_required()
 @track_activity

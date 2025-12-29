@@ -99,9 +99,10 @@ def get_all_clients():
 def get_storage_info():
     identity = get_jwt_identity()  
     client = get_client_by_user(user_id=identity)
-    storage = storage_info(client_id=client.clientId)
-    return success(data=storage.to_dict())
-
+    if client:
+        storage = storage_info(client_id=client.clientId)
+        return success(data=storage.to_dict())
+    return success(data={})
 
 @jwt_required()
 @track_activity

@@ -35,6 +35,12 @@ class Plan(db.Model):
             None
         )
         
+        active_prices_data = [
+            pl.to_dict()
+            for pl in self.price_lists if pl.is_active
+        ]
+        #active_price = [pl for pl in self.price_lists if pl.is_active]
+        
         return {
             "id": self.id,
             "code": self.code,
@@ -46,5 +52,5 @@ class Plan(db.Model):
             "environment_type": self.environment_type,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat() if self.created_at else None,
-            "price_info": active_price.to_dict() if active_price else None
+            "price_info": active_prices_data
         }

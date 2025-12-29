@@ -52,8 +52,9 @@ def health():
     return 'OK', 200
 
 
-
-PUBLIC_ENDPOINTS = {
+#endpoints que consultas en esquema master que no requieren validacion de jwt
+#aca no debe haber solicitudes a esquemas de clientes
+MASTER_PUBLIC_ENDPOINTS = {
     "health",
     "host",
     "test_mail",
@@ -100,8 +101,67 @@ def test_mail():
     
     
 
+def schema_exists(schema_name):
+    query = text("""
+        SELECT EXISTS (
+            SELECT 1 FROM information_schema.schemata WHERE schema_name = :schema
+        )
+    """)
+    result = db.session.execute(query, {"schema": schema_name}).scalar()
+    return result
+
 @app.before_request
 def set_schema():
+    # 1. Forzar HTTPS
+    if not request.is_secure and os.getenv('FLASK_ENV') != 'development':
+        return redirect(request.url.replace('http://', 'https://', 1), code=301)
+    
+    endpoint = request.endpoint
+    if endpoint is None:
+        return
+
+    # 2. Excluir Webhooks y Públicos (VITAL para evitar errores de conexión en pagos)
+    if request.path.startswith('/api/v1/payments/webhook') or endpoint in MASTER_PUBLIC_ENDPOINTS:
+        # Aseguramos que los webhooks siempre operen sobre public
+        #db.session.execute(text("SET search_path TO cliente"))
+        return
+    
+    # 3. Validación de JWT
+    try:
+        verify_jwt_in_request()
+        user_id = get_jwt_identity()
+    except Exception:
+        return error("No autenticado", 401)
+
+    # 4. Obtener datos del usuario (Intenta optimizar esta función para que traiga el esquema de una vez)
+    user = get_user_by_id(user_id=user_id)
+    if not user:
+        return error("Usuario no existe", 401)
+
+    # ... tus validaciones de isConfirmedUser y mustChangePassword ...
+
+    # 5. Cambio de Schema con Manejo de Errores Robusto
+    schema_name = get_user_scheme(user_id=user_id)
+    
+    # if not schema_name:
+    #     return error("Ambiente no configurado", 500)
+
+    try:
+        # Intentamos el cambio directamente (es más rápido que preguntar si existe)
+        db.session.execute(text(f"SET search_path TO {schema_name}, cliente"))
+    except Exception as e:
+        db.session.rollback()
+        # Si falla, verificamos si es por conexión perdida o por esquema inexistente
+        app.logger.error(f"Error al cambiar esquema a {schema_name}: {str(e)}")
+        
+        # Opcional: Aquí podrías llamar a schema_exists solo si falló el SET
+        return error(
+            "Su ambiente de trabajo no está disponible. Contacte a soporte.",
+            500
+        )
+        
+#@app.before_request
+def set_schema_old():
 
     if not request.is_secure and os.getenv('FLASK_ENV') != 'development':
         url = request.url.replace('http://', 'https://', 1)
@@ -114,11 +174,14 @@ def set_schema():
     if endpoint is None:
         return
 
+    if request.path.startswith('/api/v1/payments/webhook'):
+        return
+    
     # 🔓 Endpoints públicos → NO validación de usuario
-    if endpoint in PUBLIC_ENDPOINTS:
-        db.session.execute(
-            text("SET search_path TO public")
-        )
+    if endpoint in MASTER_PUBLIC_ENDPOINTS:
+        # db.session.execute(
+        #     text("SET search_path TO public")
+        # )
         return
 
     # 🔐 A partir de aquí TODO requiere usuario
@@ -146,11 +209,33 @@ def set_schema():
 
     # 🔀 Cambiar schema del cliente
     schema_name = get_user_scheme(user_id=user_id)
-    db.session.execute(
-        text(f"SET search_path TO {schema_name}, public")
-    )
+    
 
-
+    def schema_exists(schema_name):
+        query = text("""
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.schemata WHERE schema_name = :schema
+            )
+        """)
+        result = db.session.execute(query, {"schema": schema_name}).scalar()
+        return result
+    
+    try:
+        if schema_name and schema_exists(schema_name):
+            db.session.execute(
+                text(f"SET search_path TO {schema_name}, public")
+            )
+        else:
+             return error(
+                "ha ocurrido un error al verificar su ambiente de trabajo, favor contacte a soporte de inmediato.",
+                500
+            )
+    except Exception as e:
+        db.session.rollback()
+        # Intentar reconectar si la conexión se perdió
+        db.session.execute(
+            text(f"SET search_path TO {schema_name}, public")
+        )
 
 
 @app.route("/")

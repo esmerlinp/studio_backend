@@ -1,6 +1,7 @@
 from datetime import datetime
 from ...extensions import db
 
+from sqlalchemy.dialects.postgresql import JSONB
 
 class PriceList(db.Model):
     __tablename__ = "listasprecios"
@@ -87,6 +88,8 @@ class PriceList(db.Model):
         default=0,
         nullable=False
     )
+    
+    features_config = db.Column('jcaracteristicas', JSONB, nullable=False, default={})
 
     # 🔗 Relación con Plan
     plan = db.relationship(
@@ -117,4 +120,5 @@ class PriceList(db.Model):
             "valid_to": self.valid_to.isoformat() if self.valid_to else None,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat(),
+            "features_config":self.features_config
         }

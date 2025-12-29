@@ -15,6 +15,7 @@ def create_price_list(
     min_users: int = 1,
     valid_from: date,
     valid_to: Optional[date] = None,
+    features_config: dict ={}
 ) -> PriceList:
 
     # Validar plan
@@ -46,7 +47,8 @@ def create_price_list(
         min_users=min_users,
         valid_from=valid_from,
         valid_to=valid_to,
-        is_active=True
+        is_active=True,
+        features_config=features_config
     )
 
     try:
@@ -107,6 +109,7 @@ def update_price_list(
     min_users: Optional[int] = None,
     valid_to: Optional[date] = None,
     is_active: Optional[bool] = None,
+    features_config: Optional[dict] = None
 ) -> Optional[PriceList]:
 
     price_list = PriceList.query.get(price_list_id)
@@ -125,6 +128,8 @@ def update_price_list(
         price_list.valid_to = valid_to
     if is_active is not None:
         price_list.is_active = is_active
+    if features_config is not None:
+        price_list.features_config = features_config
 
     try:
         db.session.commit()

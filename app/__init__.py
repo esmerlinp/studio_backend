@@ -41,6 +41,10 @@ def create_app():
     
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        "pool_pre_ping": True,  # Verifica si la conexión sirve antes de usarla
+        "pool_recycle": 300,    # Recicla conexiones cada 5 minutos (evita que caduquen)
+    }
     
     app.config.update(
         SECRET_KEY=os.getenv("SECRET_KEY"),

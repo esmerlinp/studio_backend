@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z'/></svg>">
-    <link rel="alternate icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAAA... (opcional)">
     <style>
         body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
@@ -21,15 +20,6 @@
             background-size: 400% 400%;
             animation: gradient-move 15s ease infinite;
         }
-
-        .skewed-bg {
-            position: relative;
-            transform: skewY(-6deg);
-            margin-top: -100px;
-            padding-top: 150px;
-            z-index: 1;
-        }
-        .skewed-content { transform: skewY(6deg); }
 
         .glass-nav {
             background: rgba(255, 255, 255, 0.7);
@@ -58,9 +48,8 @@
                 <span class="text-xl font-bold tracking-tight text-[#0a2540]">Akdmia</span>
             </div>
             <div class="hidden md:flex space-x-8 font-semibold text-sm">
-                <a href="#modulos" class="hover:text-[#0a2540] transition">Productos</a>
                 <a href="#precios" class="hover:text-[#0a2540] transition">Planes</a>
-                <a href="#contacto" class="hover:text-[#0a2540] transition">Empieza ahora</a>
+                <a href="#contacto" class="hover:text-[#0a2540] transition">Contacto</a>
             </div>
             <div class="flex items-center gap-4">
                 <a href="#contacto" class="btn-stripe bg-[#6366f1] text-white px-5 py-2 rounded-full text-sm font-bold">
@@ -70,7 +59,7 @@
         </nav>
     </header>
 
-    <section class="relative pt-48 pb-64 overflow-hidden">
+    <section class="relative pt-48 pb-32 overflow-hidden">
         <div class="absolute inset-0 animated-mesh opacity-10 blur-3xl"></div>
         <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 relative z-10 text-center lg:text-left">
             <div>
@@ -78,7 +67,7 @@
                     El sistema operativo de tu <span class="text-[#6366f1]">colegio</span>
                 </h1>
                 <p class="text-xl text-[#424770] leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0">
-                    Akdmia unifica la gestión académica, administrativa y financiera en una plataforma diseñada para instituciones modernas.
+                    Akdmia unifica la gestión académica, administrativa y financiera en una sola plataforma.
                 </p>
                 <div class="flex flex-wrap justify-center lg:justify-start gap-4">
                     <a href="#contacto" class="btn-stripe bg-[#0a2540] text-white px-8 py-3.5 rounded-full font-bold text-lg">
@@ -86,53 +75,32 @@
                     </a>
                 </div>
             </div>
-            <div class="relative hidden lg:block">
-                <div class="bg-white/40 backdrop-blur-md p-2 rounded-3xl border border-white/50 shadow-2xl">
-                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80" alt="Dashboard" class="rounded-2xl shadow-lg">
-                </div>
-            </div>
         </div>
     </section>
 
-    <section id="modulos" class="skewed-bg bg-[#f6f9fc]">
-        <div class="skewed-content max-w-7xl mx-auto px-6 pb-32">
-            <div class="grid lg:grid-cols-2 gap-20 items-center">
-                <div>
-                    <h2 class="text-blue-600 font-bold uppercase tracking-widest text-sm mb-4">Módulos integrados</h2>
-                    <h3 class="text-4xl font-extrabold text-[#0a2540] mb-6">Todo lo que necesitas en un solo lugar.</h3>
-                    <p class="text-lg text-[#424770] mb-8">Nuestra arquitectura permite centralizar la información de padres, alumnos y administración en una base de datos única y segura.</p>
-                </div>
-                <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
-                    <div class="h-3 w-32 bg-slate-200 rounded-full mb-6"></div>
-                    <div class="space-y-3">
-                        <div class="h-2 w-full bg-slate-50 rounded-full"></div>
-                        <div class="h-2 w-full bg-slate-50 rounded-full"></div>
-                        <div class="h-2 w-2/3 bg-slate-50 rounded-full"></div>
-                    </div>
-                </div>
+    <section id="precios" class="py-32 bg-[#f6f9fc]">
+        <div class="max-w-7xl mx-auto px-6 text-center mb-16">
+            <h2 class="text-[#6366f1] font-bold mb-4 uppercase tracking-wider text-sm">Planes</h2>
+            <h3 class="text-4xl font-extrabold text-[#0a2540] mb-8">Escalabilidad sin límites.</h3>
+            
+            <div class="flex justify-center items-center gap-4">
+                <span id="monthly-label" class="text-sm font-medium transition-colors">Mensual</span>
+                <button onclick="toggleBilling()" class="w-14 h-7 bg-[#6366f1] rounded-full p-1 relative transition-all duration-300">
+                    <div id="toggle-circle" class="bg-white w-5 h-5 rounded-full shadow-md transition-transform duration-300 transform translate-x-7"></div>
+                </button>
+                <span id="annual-label" class="text-sm font-bold text-[#0a2540] transition-colors">Anual <span class="text-emerald-500 font-bold ml-1">(-15%)</span></span>
             </div>
         </div>
-    </section>
 
-    <section id="precios" class="py-32">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="mb-20">
-                <h2 class="text-[#6366f1] font-bold mb-4 uppercase tracking-wider text-sm">Planes</h2>
-                <h3 class="text-4xl font-extrabold text-[#0a2540]">Escalabilidad sin límites.</h3>
+        <div id="plans-container" class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
             </div>
-            <div id="plans-container" class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <div class="col-span-full flex justify-center py-20">
-                    <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
-                </div>
-            </div>
-        </div>
     </section>
 
     <section id="contacto" class="py-32 bg-[#0a2540] text-white">
         <div class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
             <div>
                 <h2 class="text-5xl font-extrabold mb-8 leading-tight">Comienza a digitalizar hoy.</h2>
-                <p class="text-slate-400 text-xl mb-12">Configura tu cuenta y obtén acceso inmediato a las herramientas de gestión más potentes del mercado.</p>
+                <p class="text-slate-400 text-xl mb-12">Configura tu cuenta y obtén acceso inmediato a las herramientas de gestión académica.</p>
             </div>
             
             <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-3xl text-[#0a2540]">
@@ -154,7 +122,7 @@
                         </div>
 
                         <div class="col-span-1">
-                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Teléfono / WhatsApp</label>
+                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">WhatsApp</label>
                             <input type="tel" id="contact_phone" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="809-000-0000">
                         </div>
 
@@ -166,117 +134,136 @@
                         <div class="md:col-span-2">
                             <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Plan</label>
                             <select id="plan_id_select" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none bg-transparent">
-                                <option value="">Cargando planes...</option>
+                                <option value="">Selecciona un plan arriba</option>
                             </select>
                         </div>
                     </div>
                     <button type="submit" id="submit-btn" class="w-full btn-stripe bg-[#6366f1] text-white py-4 rounded-2xl font-bold text-lg mt-4">
-                        Crear mi cuenta
+                        Empezar ahora
                     </button>
-                    <p class="text-center text-[10px] text-slate-400 tracking-widest uppercase">tarjeta de crédito requerida para iniciar</p>
+                    <p class="text-center text-[10px] text-slate-400 tracking-widest uppercase mt-4">Tarjeta de crédito requerida para iniciar</p>
                 </form>
 
                 <div id="success-msg" class="hidden text-center py-10">
                     <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">✓</div>
-                    <h3 class="text-2xl font-bold mb-3">¡Cuenta en proceso!</h3>
-                    <p class="text-slate-500">Revisa tu correo para activar el acceso.</p>
+                    <h3 class="text-2xl font-bold mb-3 text-[#0a2540]">¡Registro exitoso!</h3>
+                    <p class="text-slate-500">Te redirigiremos para completar el pago.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="py-16 text-center text-slate-400 text-xs border-t border-slate-50">
-        <p>© 2025 Akdmia Software. Built for modern education.</p>
-    </footer>
-
     <script>
         let plansData = [];
+        let currentBillingCycle = 'ANNUAL';
 
         async function init() {
-            const container = document.getElementById('plans-container');
-            const select = document.getElementById('plan_id_select');
-            
             try {
-                const apiUrl = "/api/v1/plans";
-                const res = await fetch(apiUrl);
+                const res = await fetch("/api/v1/plans");
                 const json = await res.json();
-                
                 if (json.success) {
                     plansData = json.data;
-                    container.innerHTML = '';
-                    select.innerHTML = '<option value="">Selecciona un plan</option>';
-                    
-                    json.data.forEach(plan => {
-                        const priceInfo = plan.price_info;
-                        const price = priceInfo?.price ?? 'Custom';
-                        
-                        // Lógica de días de prueba (trial)
-                        const trialDays = plan.trial_days || (priceInfo?.billing_cycle === 'TRIAL' ? 14 : 0);
-                        const isTrial = trialDays > 0;
-                        const isStandard = plan.code === 'STANDARD';
-                        
-                        // Determinar color y texto de la línea de prueba
-                        const trialClass = isTrial ? 'text-emerald-600 font-bold italic' : 'text-slate-400';
-                        const trialIconColor = isTrial ? 'text-emerald-500' : 'text-slate-300';
-                        
-                        container.innerHTML += `
-                            <div class="group border-t-4 ${isStandard ? 'border-[#6366f1]' : 'border-slate-100'} pt-8 relative">
-                                ${isTrial ? `
-                                    <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-sm">
-                                        ${trialDays} DÍAS GRATIS
-                                    </div>
-                                ` : ''}
-                                
-                                <h4 class="text-lg font-bold text-[#0a2540] mb-2">${plan.name}</h4>
-                                <div class="text-3xl font-extrabold text-[#0a2540] mb-4">
-                                    ${price === 0 ? 'Gratis' : '$' + price}
-                                    <span class="text-sm font-normal text-slate-400">${isTrial ? '' : '/ mes'}</span>
-                                </div>
-                                <p class="text-sm text-slate-500 mb-8 min-h-[40px]">${plan.description}</p>
-                                
-                                <ul class="space-y-3 text-sm mb-10">
-                                    <li class="flex items-center gap-2">
-                                        <div class="w-1.5 h-1.5 bg-[#6366f1] rounded-full"></div> 
-                                        ${plan.max_users} Usuarios incluidos
-                                    </li>
-                                    <li class="flex items-center gap-2 ${trialClass}">
-                                        <svg class="w-4 h-4 ${trialIconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        ${trialDays} días de prueba incluidos
-                                    </li>
-                                    <li class="flex items-center gap-2">
-                                        <div class="w-1.5 h-1.5 bg-[#6366f1] rounded-full"></div> 
-                                        Soporte ${plan.support_level}
-                                    </li>
-                                </ul>
-                                
-                                <a href="#contacto" onclick="preselectPlan(${plan.id})" class="inline-block w-full text-center bg-slate-100 text-[#0a2540] px-4 py-3 rounded-xl text-sm font-bold group-hover:bg-[#6366f1] group-hover:text-white transition-all duration-300">
-                                    ${isTrial ? 'Empezar prueba gratuita' : 'Seleccionar plan'}
-                                </a>
-                            </div>
-                        `;
-                        
-                        const optionLabel = `${plan.name} — ${isTrial ? trialDays + ' días gratis' : '$' + price + '/mes'}`;
-                        select.innerHTML += `<option value="${plan.id}">${optionLabel}</option>`;
-                    });
+                    renderPlans();
                 }
-            } catch (e) {
-                container.innerHTML = '<p class="col-span-full text-center text-red-500">Error en la API.</p>';
-            }
+            } catch (e) { console.error("Error cargando planes", e); }
         }
 
-        function preselectPlan(id) {
-            document.getElementById('plan_id_select').value = id;
+        function toggleBilling() {
+            currentBillingCycle = currentBillingCycle === 'ANNUAL' ? 'MONTHLY' : 'ANNUAL';
+            const circle = document.getElementById('toggle-circle');
+            const monthlyLabel = document.getElementById('monthly-label');
+            const annualLabel = document.getElementById('annual-label');
+
+            if (currentBillingCycle === 'ANNUAL') {
+                circle.classList.add('translate-x-7');
+                circle.classList.remove('translate-x-0');
+                annualLabel.classList.add('text-[#0a2540]', 'font-bold');
+                monthlyLabel.classList.remove('text-[#0a2540]', 'font-bold');
+            } else {
+                circle.classList.add('translate-x-0');
+                circle.classList.remove('translate-x-7');
+                monthlyLabel.classList.add('text-[#0a2540]', 'font-bold');
+                annualLabel.classList.remove('text-[#0a2540]', 'font-bold');
+            }
+            renderPlans();
+        }
+
+        function renderPlans() {
+            const container = document.getElementById('plans-container');
+            const select = document.getElementById('plan_id_select');
+            container.innerHTML = '';
+            select.innerHTML = '<option value="">Selecciona un plan</option>';
+
+            plansData.forEach(plan => {
+                const priceObj = plan.price_info.find(p => p.billing_cycle === currentBillingCycle);
+                if (!priceObj) return;
+
+                const config = priceObj.features_config;
+                const isTrial = priceObj.is_trial;
+                const trialDays = priceObj.trial_days || 0;
+                const isStandard = plan.code === 'STANDARD';
+
+                container.innerHTML += `
+                    <div class="group border-t-4 ${isStandard ? 'border-[#6366f1]' : 'border-slate-200'} bg-white p-8 rounded-b-2xl shadow-sm hover:shadow-2xl transition-all relative">
+                        ${isTrial ? `<div class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-sm">${trialDays} DÍAS GRATIS</div>` : ''}
+                        
+                        <h4 class="text-lg font-bold text-[#0a2540] mb-2">${plan.name}</h4>
+                        <div class="text-4xl font-extrabold text-[#0a2540] mb-4">
+                            $${priceObj.price}
+                            <span class="text-sm font-normal text-slate-400">/${currentBillingCycle === 'ANNUAL' ? 'año' : 'mes'}</span>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-6 min-h-[40px]">${plan.description}</p>
+                        
+                        <div class="space-y-6 mb-8">
+                            <div>
+                                <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Capacidad</span>
+                                <ul class="mt-2 text-sm text-[#424770] space-y-1">
+                                    <li>• <strong>${config.limits.max_users}</strong> Usuarios Staff</li>
+                                    <li>• <strong>${config.limits.max_students}</strong> Alumnos</li>
+                                    <li>• <strong>${config.limits.max_storage_gb}GB</strong> Disco</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Módulos Incluidos</span>
+                                <ul class="mt-2 text-sm text-[#424770] space-y-1">
+                                    ${config.modules.map(mod => `<li class="flex items-center gap-2">✓ ${mod.replace('_', ' ')}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <button onclick="preselectPlan(${plan.id}, ${priceObj.id})" class="w-full bg-slate-100 text-[#0a2540] py-3 rounded-xl font-bold group-hover:bg-[#6366f1] group-hover:text-white transition-all">
+                            ${isTrial ? 'Empezar prueba gratis' : 'Elegir Plan'}
+                        </button>
+                    </div>
+                `;
+
+                const optLabel = `${plan.name} - $${priceObj.price} (${currentBillingCycle}) ${isTrial ? '[Trial '+trialDays+'d]' : ''}`;
+                const opt = new Option(optLabel, plan.id);
+                opt.setAttribute('data-price-id', priceObj.id);
+                select.add(opt);
+            });
+        }
+
+        function preselectPlan(planId, priceId) {
+            const select = document.getElementById('plan_id_select');
+            select.value = planId;
+            select.setAttribute('data-selected-price-id', priceId);
             document.getElementById('contacto').scrollIntoView({ behavior: 'smooth' });
         }
 
         document.getElementById('onboard-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
-            const selectedId = parseInt(document.getElementById('plan_id_select').value);
-            const plan = plansData.find(p => p.id === selectedId);
+            const select = document.getElementById('plan_id_select');
+            const priceId = select.options[select.selectedIndex]?.getAttribute('data-price-id') || select.getAttribute('data-selected-price-id');
+
+            if (!priceId) {
+                alert("Por favor selecciona un plan válido.");
+                return;
+            }
 
             btn.disabled = true;
-            btn.innerHTML = 'Procesando...';
+            btn.innerHTML = 'Procesando registro...';
 
             const payload = {
                 client_data: { 
@@ -289,8 +276,8 @@
                     email: document.getElementById('email').value 
                 },
                 plan_data: { 
-                    plan_id: selectedId, 
-                    price_list_id: plan?.price_info?.id || 1 
+                    plan_id: parseInt(select.value), 
+                    price_list_id: parseInt(priceId)
                 }
             };
 
@@ -300,16 +287,24 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(payload)
                 });
+                const data = await res.json();
+                
                 if(res.ok) {
                     document.getElementById('onboard-form').classList.add('hidden');
                     document.getElementById('success-msg').classList.remove('hidden');
+                    if(data.checkout_url) {
+                        setTimeout(() => window.location.href = data.checkout_url, 1200);
+                    }
                 } else {
-                    const err = await res.json();
-                    alert("Error: " + (err.msg || "Error"));
+                    alert("Error: " + (data.msg || "Verifica los datos"));
+                    btn.disabled = false;
+                    btn.innerText = 'Empezar ahora';
                 }
-            } catch (err) { alert("Error de conexión"); }
-            btn.disabled = false;
-            btn.innerText = 'Crear mi cuenta';
+            } catch (err) { 
+                alert("Error de red"); 
+                btn.disabled = false;
+                btn.innerText = 'Empezar ahora';
+            }
         });
 
         window.onload = init;

@@ -37,19 +37,6 @@ def get_user_scheme(user_id:int)-> Optional[str]:
     
 def get_user_preferences(user_id) -> Optional[UserPreference]:
     prefs = UserPreference.query.filter_by(userId=user_id).first()
-    # TODO: No enviar DEFAULT_PREFERENCES cuando cueli elimine la opcion de agregar preferencias en la base de datos
-    DEFAULT_PREFERENCES = {
-        "language": "es",
-        "theme": "light",
-        "hourFormat": "24",
-        "timeZone":"America/Santo_Domingo",
-        "dateFormat": "DD/MM/YYYY",
-        "notifications": {
-            "email": True,
-            "push": False
-        }
-    }
-    prefs.preferences = DEFAULT_PREFERENCES
     return prefs
 
 
@@ -76,13 +63,14 @@ def add_default_user_preferences_onboard(user_id:int,language="es", theme="light
 
     db.session.add(prefs)
 
+
     return prefs
 
 def add_default_user_preferences(user_id:int,language="es", theme="light", timezone="America/Santo_Domingo", date_format="DD/MM/YYYY", 
                         receive_not_email = True, 
                         push_notifications = False, 
                         hour_format = "24"):
-    DEFAULT_PREFERENCES = {
+    default_data = {
         "language": language,
         "theme": theme,
         "hourFormat": hour_format,
@@ -96,14 +84,15 @@ def add_default_user_preferences(user_id:int,language="es", theme="light", timez
 
     prefs = UserPreference(
         userId=user_id,
-        preferences=DEFAULT_PREFERENCES
+        preferences=default_data
     )
 
     db.session.add(prefs)
     db.session.commit()
     
     return prefs
-    
+
+        
 
 
 def update_user_preference(
