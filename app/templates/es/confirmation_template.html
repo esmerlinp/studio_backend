@@ -2,25 +2,25 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Confirmar Cuenta - Activa tu perfil</title>
+    <title>Activa tu acceso a Akdmia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Variables y Reset Básico */
         :root {
-            --primary-color: #4f46e5;
-            --primary-hover: #4338ca;
-            --text-color: #1f2937;
-            --text-muted: #6b7280;
-            --background-color: #f9fafb;
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-color: #0a2540;
+            --text-muted: #424770;
+            --background-color: #f6f9fc;
             --card-background: white;
-            --border-color: #e5e7eb;
+            --border-color: #e6ebf1;
             --success-color: #10b981;
             --error-color: #ef4444;
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--background-color);
             display: flex;
             justify-content: center;
@@ -32,129 +32,159 @@
 
         .card {
             background: var(--card-background);
-            padding: 40px 32px;
+            padding: 48px 32px;
             width: 100%;
-            max-width: 400px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 420px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
             border: 1px solid var(--border-color);
             text-align: center;
         }
 
-        /* Icono de éxito */
+        .welcome-badge {
+            display: inline-block;
+            background: #eef2ff;
+            color: var(--primary-color);
+            padding: 6px 16px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
         .success-icon {
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
             background: #d1fae5;
             color: var(--success-color);
-            border-radius: 50%;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 30px;
+            margin: 0 auto 24px;
+            font-size: 32px;
+            transform: rotate(-5deg);
         }
 
         h2 {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             color: var(--text-color);
-            margin-bottom: 8px;
-            font-weight: 700;
+            margin-bottom: 12px;
+            font-weight: 800;
+            letter-spacing: -0.025em;
         }
 
         p.subtitle {
             color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 24px;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 32px;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            margin-left: 4px;
         }
 
         input {
             width: 100%;
-            padding: 12px;
-            margin-top: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
             font-size: 1rem;
             box-sizing: border-box;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         input:focus {
             border-color: var(--primary-color);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            background: #fcfdff;
         }
 
         button {
             width: 100%;
-            padding: 14px;
-            margin-top: 24px;
+            padding: 16px;
+            margin-top: 12px;
             background: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 1rem;
-            font-weight: 600;
-            transition: background 0.2s;
+            font-weight: 700;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
         }
 
         button:hover {
             background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(99, 102, 241, 0.3);
         }
 
         #message {
-            margin-top: 20px;
-            min-height: 40px;
+            margin-top: 24px;
         }
         
         .error {
             color: var(--error-color);
-            font-size: 0.9rem;
-            padding: 10px;
-            background-color: #fee2e2;
-            border-radius: 6px;
-        }
-
-        .success {
-            color: var(--success-color);
-            font-size: 0.9rem;
-            padding: 10px;
-            background-color: #d1fae5;
-            border-radius: 6px;
+            font-size: 0.85rem;
+            padding: 12px;
+            background-color: #fff1f2;
+            border-radius: 10px;
+            border: 1px solid #fecdd3;
+            font-weight: 500;
         }
 
         .hidden { display: none; }
+
+        .footer-text {
+            margin-top: 32px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body>
 
 <div class="card">
     <div id="setup-view">
-        <div class="success-icon">✓</div>
-        <h2>¡Cuenta creada!</h2>
-        <p class="subtitle">Para terminar de activar tu cuenta, por favor establece una contraseña segura.</p>
+        <div class="welcome-badge">¡Suscripción Activa!</div>
+        <div class="success-icon">✦</div>
+        <h2>Finaliza tu acceso</h2>
+        <p class="subtitle">¡Bienvenido a Akdmia! Para comenzar a gestionar tu institución, establece tu contraseña de acceso.</p>
 
         <form id="confirmForm">
-            <input
-                type="password"
-                id="password"
-                placeholder="Crea tu contraseña"
-                required
-            />
+            <div class="input-group">
+                <label>Nueva Contraseña</label>
+                <input type="password" id="password" placeholder="Mínimo 8 caracteres" required />
+            </div>
 
-            <input
-                type="password"
-                id="confirmPassword"
-                placeholder="Confirma tu contraseña"
-                required
-            />
+            <div class="input-group">
+                <label>Confirmar Contraseña</label>
+                <input type="password" id="confirmPassword" placeholder="Repite tu contraseña" required />
+            </div>
 
-            <button type="submit" id="submitBtn">Activar mi cuenta</button>
+            <button type="submit" id="submitBtn">Activar mi cuenta y entrar</button>
         </form>
     </div>
 
     <div id="message"></div>
+    
+    <p class="footer-text">Akdmia © 2025 · Gestión Educativa Inteligente</p>
 </div>
 
 <script>
@@ -163,12 +193,11 @@
     const setupView = document.getElementById("setup-view");
     const submitBtn = document.getElementById("submitBtn");
 
-    // Obtener token desde la URL (?token=xyz)
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
 
     if (!token) {
-        message.innerHTML = "<p class='error'>El enlace de activación no es válido o ha expirado.</p>";
+        message.innerHTML = "<p class='error'>El enlace de activación ya no es válido o ya fue utilizado.</p>";
         setupView.classList.add("hidden");
     }
 
@@ -178,20 +207,18 @@
         const password = document.getElementById("password").value;
         const confirmPassword = document.getElementById("confirmPassword").value;
 
-        // Validaciones locales
         if (password.length < 8) {
-            message.innerHTML = "<p class='error'>La contraseña debe tener al menos 8 caracteres</p>";
+            message.innerHTML = "<p class='error'>La contraseña debe ser más robusta (mínimo 8 caracteres).</p>";
             return;
         }
 
         if (password !== confirmPassword) {
-            message.innerHTML = "<p class='error'>Las contraseñas no coinciden</p>";
+            message.innerHTML = "<p class='error'>Las contraseñas no coinciden. Inténtalo de nuevo.</p>";
             return;
         }
 
-        // Estado de carga
         submitBtn.disabled = true;
-        submitBtn.innerText = "Procesando...";
+        submitBtn.innerText = "Activando acceso...";
         message.innerHTML = "";
 
         try {
@@ -207,21 +234,21 @@
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || "Error al activar la cuenta");
+                throw new Error(data.error || "No pudimos activar la cuenta en este momento.");
             }
 
-            // Éxito
+            // ÉXITO FINAL
             setupView.innerHTML = `
-                <div class="success-icon">✓</div>
-                <h2>¡Todo listo!</h2>
-                <p class="subtitle">Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesión.</p>
-                <button onclick="window.location.href='/'">Ir al Inicio de Sesión</button>
+                <div class="success-icon" style="background: #ecfdf5; transform: rotate(0deg)">✓</div>
+                <h2 style="color: #059669">¡Acceso Activado!</h2>
+                <p class="subtitle">Tu perfil administrativo está listo. Ya puedes acceder al panel de control de tu colegio.</p>
+                <button onclick="window.location.href='/login'">Ir al Panel de Control</button>
             `;
 
         } catch (error) {
             message.innerHTML = `<p class='error'>${error.message}</p>`;
             submitBtn.disabled = false;
-            submitBtn.innerText = "Activar mi cuenta";
+            submitBtn.innerText = "Activar mi cuenta y entrar";
         }
     });
 </script>

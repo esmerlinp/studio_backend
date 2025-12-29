@@ -107,7 +107,7 @@ def payment_success():
         
         # 2. ENVIAR EMAIL (Solo si el usuario está inactivo o no ha seteado clave)
         # Esto evita que se re-envíe si el usuario refresca la página de éxito
-        if user and not user.user.isActive:
+        if user:
             send_confirmation_account_email(user.user.userId, client.contactName, user.user.email)
         
         invoice = Invoice.query.filter_by(transactionId=transaction.id).first()
