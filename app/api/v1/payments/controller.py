@@ -17,7 +17,7 @@ import os
 import stripe
 from werkzeug.security import check_password_hash
 from app.utils.helpers import send_confirmation_account_email
-from app.services.master_scheme.payment_service import (handle_checkout_session_completed, handle_invoice_paid,
+from app.services.master_scheme.payment_service import (handle_checkout_session_completed, handle_invoice_created, handle_invoice_paid,
                                                         handle_invoice_payment_failed,handle_subscription_deleted,handle_subscription_updated, handle_subscription_trial_will_end)
 
 
@@ -56,6 +56,10 @@ def stripe_webhook():
     elif event_type == 'invoice.paid':
         print('invoice.paid')
         handle_invoice_paid(data_object, app_name)
+        
+    elif event_type == 'invoice.created':
+        print('invoice.created')
+        handle_invoice_created(data_object, app_name)
 
     # Se dispara al cambiar fechas de periodo, planes (Upgrade/Downgrade) o estado de la suscripción
     elif event_type == "customer.subscription.updated":

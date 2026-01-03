@@ -3,6 +3,7 @@ from app.models.master_scheme.pyments.invoice_model import Invoice
 from app.models.master_scheme.client_plans_model import ClientPlan
 from app.models.master_scheme.client_model import Client
 from app.models.master_scheme.user_model import User
+from app.models.master_scheme.ncf_model import NCFSequence, NCFLog
 from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.services.master_scheme.session_service import close_all_session
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
@@ -299,6 +300,8 @@ def handle_checkout_session_completed(session, app_name):
 def handle_invoice_payment_failed(invoice, app_name):
     load_dotenv()
     base_url = os.getenv("BASE_URL")
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
     customer_id = invoice['customer']
     payment_intent_id = invoice.get('payment_intent')
     failure_msg = "Rechazo general por parte del banco"
@@ -328,6 +331,76 @@ def handle_invoice_payment_failed(invoice, app_name):
             update_payment_url=f"{base_url}billing/settings"
         )
 
+def handle_invoice_created(invoice, app_name):
+    
+    load_dotenv()
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
+    # 1. Obtener cliente de tu DB
+    client = Client.query.filter_by(stripe_customer_id=invoice.customer).first()
+    
+    if client and client.billingCountryId == 1:
+        
+        # 2. Determinar qué tipo de NCF le toca según su idtipodocumento
+        # Tipo 3 es RNC -> Crédito Fiscal (01)
+        # Otros -> Consumidor Final (02)
+        tipo_ncf_requerido = '01' if client.documentTypeId == 3 else '02'
+        tipo_doc_nombre = "RNC"
+        if client.documentTypeId:
+            #tipo_doc_nombre = DocType.query.filter_by("")
+            pass
+            #TODO: crea el modelo de tipos de documento y agrega la descripcion para enviar a stripe
+            
+        try:
+            # 3. TRANSACCIÓN ATÓMICA: Bloqueamos la fila de la secuencia para evitar duplicados
+            # Usamos SELECT ... FOR UPDATE para que otros procesos esperen
+            seq = db.session.query(NCFSequence).filter_by(
+                type_ncf=tipo_ncf_requerido, 
+                is_active=True
+            ).with_for_update().first()
+            
+            if not seq:
+                raise Exception(f"No hay secuencias activas para tipo {tipo_ncf_requerido}")
+
+            if seq.current_number > seq.max_number:
+                raise Exception(f"Secuencia NCF {tipo_ncf_requerido} agotada")
+                
+            # 2. Generar NCF (Lógica simplificada)
+            #seq = NCFSequence.query.filter_by(type_ncf='01', is_active=True).first()
+            nuevo_ncf = seq.get_next_ncf()
+        
+            # 5. Actualizar la factura en Stripe con CUSTOM FIELDS
+            # Esto es lo que aparece en el PDF oficial de Stripe
+            stripe.Invoice.modify(
+                invoice.id,
+                custom_fields=[
+                    {"name": "Tipo de Comprobante", "value": "Crédito Fiscal" if tipo_ncf_requerido == '01' else "Consumidor Final"},
+                    {"name": "NCF", "value": nuevo_ncf},
+                    {"name": "RNC/Cédula Cliente", "value": client.documentNumber if client.documentNumber else "N/A"}
+                ],
+                statement_descriptor=f"Servicios {app_name}",
+                footer="Gracias por su pago. Este documento es un comprobante fiscal válido."
+            )
+            
+            # 6. Guardar en el Log y actualizar contador
+            ncf_log = NCFLog(
+                client_id=client.clientId,
+                ncf_assigned=nuevo_ncf,
+                stripe_invoice_id=invoice.id
+            )
+            
+            seq.current_number += 1 # Incrementamos la secuencia
+            db.session.add(ncf_log)
+            db.session.commit() # Liberamos el bloqueo de la DB
+        
+        except Exception as ex:
+            db.session.rollback()
+            print(f"Error procesando NCF: {str(ex)}")
+            #TODO: Aquí podrías enviar una notificación al admin
+            
+
+
+    
 def handle_invoice_paid(invoice_data, app_name):
     try:
         subscription_id = (
@@ -390,7 +463,7 @@ def handle_invoice_paid(invoice_data, app_name):
 def handle_subscription_updated(subscription):
     stripe_cus_id = subscription['customer']
     client = Client.query.filter_by(stripe_customer_id=stripe_cus_id).first()
-    
+
     if client:
         #client_plan = ClientPlan.query.filter_by(client_id=client.clientId, status='CANCELED').first()
         client_plan = ClientPlan.query.filter(
