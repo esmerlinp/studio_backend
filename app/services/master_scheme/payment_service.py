@@ -91,7 +91,7 @@ def create_client_schema(new_schema: str, base_schema: str = "cliente"):
     """
     db.session.execute(text(sql))
 
-def request_suscription(plan_identity) -> dict:
+def request_suscription(plan_identity, billing_cycle="month") -> dict:
     provider = get_current_provider()
     
     try:
@@ -108,7 +108,6 @@ def request_suscription(plan_identity) -> dict:
         price_info = plan_del_cliente.price_list
         amount = float(price_info.price)
         currency = price_info.currency
-        billing_cycle = "mensual" 
         is_trial = price_info.is_trial
         trial_days = price_info.trial_days
 
@@ -129,7 +128,7 @@ def request_suscription(plan_identity) -> dict:
         # 4. LLAMAR A STRIPE con bloque Try específico
         try:
         
-        
+
             stripe_session = provider.create_checkout(
                 client_id=client.clientId,
                 amount=amount,
@@ -181,7 +180,7 @@ def send_goodbye_email(client_email, contact_name, business_name):
             path_template="emails/es/subscription_ended.html",
             name=contact_name,
             business_name=business_name,
-            reactivate_url=f"{base_url}billing/pricing"
+            reactivate_url=f"{base_url}/login"
         )
         print(f"Correo de despedida enviado a {client_email}")
     except Exception as e:
@@ -265,6 +264,12 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
                 app_name=app_name
             )
         else:
+                        # --- AQUÍ OBTIENES LAS URL ---
+            invoice_url = stripe_obj.get('hosted_invoice_url')
+            # pdf_url = stripe_obj.get('invoice_pdf')
+            # customer_email = stripe_obj.get('customer_email')
+            # order_id = stripe_obj.get('metadata', {}).get('order_id') # Si lo pasaste en metadata
+            
             # CASO PAGO REAL: Email de factura normal
             send_email_template(
                 subject=f"Tu Factura {num_factura} - {app_name}",
@@ -275,8 +280,10 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
                 amount=float(transaction.amount),
                 currency=transaction.currency,
                 plan_name=plan_name,
-                app_name=app_name
+                app_name=app_name,
+                invoice_url = invoice_url
             )
+
     except Exception as e:
         print(f"Error enviando email: {e}")
         
@@ -383,18 +390,25 @@ def handle_invoice_paid(invoice_data, app_name):
 def handle_subscription_updated(subscription):
     stripe_cus_id = subscription['customer']
     client = Client.query.filter_by(stripe_customer_id=stripe_cus_id).first()
-
+    
     if client:
-        client_plan = ClientPlan.query.filter_by(client_id=client.clientId, status='ACTIVE').first()
+        #client_plan = ClientPlan.query.filter_by(client_id=client.clientId, status='CANCELED').first()
+        client_plan = ClientPlan.query.filter(
+            ClientPlan.client_id == client.clientId, 
+            ClientPlan.status != 'CANCELED'
+        ).first()
         if client_plan:
             #new_end_date = datetime.fromtimestamp(subscription['current_period_end']).date()
             #client_plan.end_date = new_end_date
             
             stripe_status = subscription['status']
-            if stripe_status == 'active':
-                client_plan.status = 'ACTIVE'
-            elif stripe_status in ['past_due', 'unpaid']:
-                client_plan.status = 'PAST_DUE'
+            client_plan.status = stripe_status.upper()
+            print(client)
+            print(stripe_status)
+            # if stripe_status == 'active':
+            #     client_plan.status = 'ACTIVE'
+            # elif stripe_status in ['past_due', 'unpaid']:
+            #     client_plan.status = 'PAST_DUE'
             
             db.session.commit()
 
@@ -423,6 +437,9 @@ def handle_subscription_deleted(subscription):
             users_to_close = User.query.filter(User.userId.in_(user_ids_subquery)).all()
             for u in users_to_close:
                 close_all_session(user_id=u.userId, commit=False)
+            
+            #inactivo al cliente
+            client.isActive = False
             
             db.session.commit()
             send_goodbye_email(client.billingEmail, client.contactName, business_name=client.businessName)

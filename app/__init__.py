@@ -85,9 +85,10 @@ def track_activity(func):
             # 2. VALIDACIÓN CRÍTICA: ¿El usuario sigue activo?
             # Esto detiene a los usuarios  que no pagaron
             user = User.query.get(user_id)
-            if not user.isActive: 
+            
+            if not user.isActive:                 
                 return jsonify({
-                    "msg": "Cuenta inhabilitada. Contacte al administrador de su institución."
+                    "msg": f"Cuenta inhabilitada. Contacte al administrador de su institución."
                 }), 403
 
 

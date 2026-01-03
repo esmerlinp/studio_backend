@@ -1,7 +1,6 @@
 
 from ...extensions import db
-from app.models.master_scheme.user_roles_model import UserRole
-from app.models.master_scheme.roles_model import Role
+
 
 class User(db.Model):
     __tablename__ = "usuarios"

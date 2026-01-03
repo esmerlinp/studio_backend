@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reactivar Suscripción | Akdmia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            -webkit-font-smoothing: antialiased;
+        }
+        /* Estilo para que el input de Stripe se vea igual a los de Tailwind */
+        .StripeElement {
+            width: 100%;
+            padding: 12px;
+            background-color: white;
+        }
+    </style>
+</head>
+<body class="bg-[#f6f9fc] min-h-screen flex items-center justify-center p-6">
+
+    <div class="max-w-md w-full bg-white rounded-lg shadow-[0_7px_14px_0_rgba(60,66,87,0.1),0_3px_6px_0_rgba(0,0,0,0.07)] p-10">
+        
+        <div class="mb-8">
+            <div class="flex items-center text-indigo-600 font-bold text-xl tracking-tight uppercase">
+                <svg class="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Akdmia
+            </div>
+        </div>
+
+        <h2 class="text-[#1a1f36] text-2xl font-bold mb-2">Reactivar suscripción</h2>
+        <p class="text-[#4f566b] text-[15px] leading-relaxed mb-8">
+            Tu cuenta está inactiva. Confirma los detalles a continuación para restablecer el acceso a tu institución inmediatamente.
+        </p>
+
+        <div class="border-b border-[#e3e8ee] pb-6 mb-6">
+            <div class="flex justify-between items-baseline">
+                <span class="text-[#1a1f36] font-semibold text-[15px]">Plan Institucional</span>
+                <span class="text-[#1a1f36] font-bold text-lg">Recurrente</span>
+            </div>
+            <p class="text-[#697386] text-sm mt-1">Acceso total al panel de administración</p>
+        </div>
+
+        <div class="mb-10">
+            <div class="flex justify-between items-center mb-3">
+                <label class="text-[#4f566b] text-xs font-bold uppercase tracking-wider">Método de pago</label>
+                {% if card.last4 != "****" %}
+                <button id="btn-change-card" class="text-indigo-600 text-xs font-bold hover:text-indigo-800 transition-colors">
+                    Cambiar tarjeta
+                </button>
+                {% endif %}
+            </div>
+
+            <div id="saved-card-view" class="{% if card.last4 == '****' %}hidden{% endif %} flex items-center justify-between p-4 bg-[#f7fafc] rounded-md border border-[#e3e8ee]">
+                <div class="flex items-center">
+                    <svg class="w-8 h-8 text-[#697386] mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                    <div class="text-[14px]">
+                        <span class="text-[#1a1f36] font-medium">•••• {{ card.last4 }}</span>
+                        <span class="text-[#697386] ml-2">{{ card.exp_month }}/{{ card.exp_year }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="new-card-view" class="{% if card.last4 != '****' %}hidden{% endif %}">
+                <div id="card-element" class="p-1 bg-white rounded-md border border-[#e3e8ee] shadow-sm">
+                    </div>
+                <div id="card-errors" class="text-red-500 text-xs mt-2 font-medium" role="alert"></div>
+            </div>
+        </div>
+
+        <button id="btn-restore" class="w-full bg-[#635bff] hover:bg-[#0a2540] text-white font-semibold py-[11px] px-4 rounded-md transition-all duration-200 shadow-[0_2px_4px_rgba(0,0,0,0.07),0_1px_1px_rgba(0,0,0,0.06)] flex items-center justify-center min-h-[44px]">
+            <span id="btn-text">Reactivar suscripción</span>
+            <div id="loader" class="hidden">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+        </button>
+
+        <div class="mt-8 flex items-center justify-center space-x-2 opacity-50">
+            <svg class="w-3 h-3 text-[#697386]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+            <span class="text-[12px] text-[#697386] font-medium uppercase tracking-tighter">Powered by Stripe</span>
+        </div>
+    </div>
+
+    
+
+    <script>
+        // REEMPLAZA CON TU CLAVE PÚBLICA (pk_test_...)
+        const stripe = Stripe('pk_test_51SiLlm2dcgxctmEVwUMBDNa77Ma9Hhv3VAPplzWFMHTzETJgZEnedEzw1jyLI2Jv4YqrhEiQ12YGzVvglf6WCjlR00wB9v5SxJ'); 
+        const elements = stripe.elements();
+
+        // Elementos del DOM
+        const btnRestore = document.getElementById('btn-restore');
+        const btnText = document.getElementById('btn-text');
+        const loader = document.getElementById('loader');
+        const btnChangeCard = document.getElementById('btn-change-card');
+        const savedCardView = document.getElementById('saved-card-view');
+        const newCardView = document.getElementById('new-card-view');
+        const cardErrors = document.getElementById('card-errors');
+
+        // Estado inicial basado en si hay tarjeta guardada o no
+        let useNewCard = (savedCardView.classList.contains('hidden'));
+        let cardElement = null;
+
+        const style = {
+            base: {
+                color: '#1a1f36',
+                fontFamily: '"Inter", sans-serif',
+                fontSmoothing: 'antialiased',
+                fontSize: '15px',
+                '::placeholder': { color: '#aab7c4' }
+            },
+            invalid: {
+                color: '#fa755a',
+                iconColor: '#fa755a'
+            }
+        };
+
+        // Si entramos y no hay tarjeta, montar el elemento inmediatamente
+        if (useNewCard) {
+            mountStripeElement();
+        }
+
+        function mountStripeElement() {
+            if (!cardElement) {
+                cardElement = elements.create('card', { style: style, hidePostalCode: true });
+                cardElement.mount('#card-element');
+                cardElement.on('change', (event) => {
+                    cardErrors.textContent = event.error ? event.error.message : '';
+                });
+            }
+        }
+
+        // Manejo del botón cambiar tarjeta (si existe)
+        if (btnChangeCard) {
+            btnChangeCard.addEventListener('click', (e) => {
+                e.preventDefault();
+                useNewCard = !useNewCard;
+
+                if (useNewCard) {
+                    savedCardView.classList.add('hidden');
+                    newCardView.classList.remove('hidden');
+                    btnChangeCard.innerText = 'Usar tarjeta guardada';
+                    mountStripeElement();
+                } else {
+                    savedCardView.classList.remove('hidden');
+                    newCardView.classList.add('hidden');
+                    btnChangeCard.innerText = 'Cambiar tarjeta';
+                }
+            });
+        }
+
+        btnRestore.addEventListener('click', async () => {
+            setLoading(true);
+            const token = localStorage.getItem('access_token');
+
+            try {
+                let paymentMethodId = null;
+
+                // 1. Si es tarjeta nueva, crear el PaymentMethod en Stripe
+                if (useNewCard) {
+                    const { paymentMethod, error } = await stripe.createPaymentMethod({
+                        type: 'card',
+                        card: cardElement,
+                    });
+
+                    if (error) throw new Error(error.message);
+                    paymentMethodId = paymentMethod.id;
+                }
+
+                // 2. Llamada a tu API de restauración
+                const response = await fetch('/api/v1/subscriptions/restore', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({
+                        clientId: "{{ clientId }}",
+                        paymentMethodId: paymentMethodId 
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.msg || "Error en el servidor");
+
+                // ESCENARIO A: SCA (Autenticación 3D Secure)
+                if (data.status === "requires_action" || data.client_secret) {
+                    const { error, paymentIntent } = await stripe.confirmCardPayment(data.client_secret);
+                    
+                    if (error) throw new Error(error.message);
+
+                    if (paymentIntent.status === 'succeeded') {
+                        handleSuccess();
+                    } else {
+                        throw new Error("Estado del pago: " + paymentIntent.status);
+                    }
+                }
+                // ESCENARIO B: Error de cobro inicial
+                else if (data.status === "payment_failed") {
+                    alert(data.msg);
+                    if (data.url_actualizacion) window.location.href = data.url_actualizacion;
+                } 
+                // ESCENARIO C: Éxito
+                else if (data.success) {
+                    handleSuccess();
+                } 
+
+            } catch (err) {
+                alert("Atención: " + err.message);
+                setLoading(false);
+            }
+        });
+
+        function setLoading(isLoading) {
+            btnRestore.disabled = isLoading;
+            btnRestore.style.opacity = isLoading ? "0.7" : "1";
+            if (isLoading) {
+                loader.classList.remove('hidden');
+                btnText.classList.add('hidden');
+            } else {
+                loader.classList.add('hidden');
+                btnText.classList.remove('hidden');
+            }
+        }
+
+        function handleSuccess() {
+            window.location.href = "/dashboard?status=restored";
+        }
+    </script>
+</body>
+</html>

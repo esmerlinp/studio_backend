@@ -8,8 +8,9 @@ def success(data, message="OK", status_code=200):
     }), status_code
 
 
-def error(message, status_code=400):
+def error(message, status_code=400, redirect_url=None):
     return jsonify({
         "success": False,
-        "msg": message
+        "msg": message,
+        "redirect_url":redirect_url
     }), status_code

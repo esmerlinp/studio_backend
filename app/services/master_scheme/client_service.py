@@ -9,6 +9,7 @@ from app.models.master_scheme.user_model import User
 from app.models.master_scheme.plans_model import Plan
 from app.models.master_scheme.client_storage_model import ClientStorage
 from app.models.master_scheme.client_plans_model import ClientPlan
+from app.models.master_scheme.price_list_model import PriceList
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
 from app.models.client_scheme.log_model import AuditLog
 from app.services.master_scheme.client_plan_service import assign_plan_to_client_onboard
@@ -24,6 +25,8 @@ from app.services.master_scheme.payment_service import request_suscription
 from app.utils.helpers import send_email_template
 import os
 from dotenv import load_dotenv
+import stripe
+
 
 def set_schema(schema_name: str):
     db.session.execute(
@@ -33,7 +36,8 @@ def set_schema(schema_name: str):
     
 def onboard_client_service(client_data, admin_user_data, plan_data):
     load_dotenv()
-    
+        
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
     def deterministic_short_uuid(value, length=8):
         return uuid.uuid5(uuid.NAMESPACE_DNS, str(value)).hex[:length]
 
@@ -52,22 +56,45 @@ def onboard_client_service(client_data, admin_user_data, plan_data):
                 contact_phone=client_data["contact_phone"],
                 business_name=client_data["business_name"],
                 billing_email=email,
-                schema_name=schema_name
+                schema_name=schema_name,
+                country_id=client_data['country_id']
             )
             db.session.flush() # Obtenemos ID sin confirmar transacción completa
         
         # 2. Verificar si ya tiene un Plan
         client_plan = ClientPlan.query.filter_by(client_id=client.clientId).first()
+        lista_precios = db.session.get(PriceList, plan_data["price_list_id"])
+        billing_cycle = "month"
         
+        if lista_precios.billing_cycle == "ANNUAL":
+            billing_cycle = "year"
+            
         if not client_plan:
+            
             client_plan = assign_plan_to_client_onboard(
                 client_id=client.clientId,
                 plan_id=plan_data["plan_id"], 
                 price_list_id=plan_data["price_list_id"], 
                 start_date=date.today(),
-                status="PENDING_PAYMENT"
+                status="PENDING_PAYMENT",
             )
             db.session.flush()
+            
+            nuevo_producto = stripe.Product.create(
+                name=client_plan.plan.name,
+                description=client_plan.plan.description
+            )
+                        
+            stripe_price = stripe.Price.create(
+                unit_amount=int(lista_precios.price * 100), #en centavos
+                currency=lista_precios.currency.lower(),
+                recurring={"interval": billing_cycle},
+                product=nuevo_producto.id, # Tu ID de producto en Stripe
+            )
+            
+            client_plan.stripe_price_id = stripe_price.id
+            
+            
 
         # 3. Verificar si el Usuario ya existe
         admin_user = User.query.filter_by(email=email).first()
@@ -95,7 +122,7 @@ def onboard_client_service(client_data, admin_user_data, plan_data):
         db.session.commit()
 
         # 6. Intentar generar la suscripción (Esto es lo que solía fallar)
-        subscription_data = request_suscription(plan_identity=client_plan.id)
+        subscription_data = request_suscription(plan_identity=client_plan.id, billing_cycle=billing_cycle)
         
         if not subscription_data or subscription_data.get("status") != "success":
             # Aquí ya no hacemos rollback de los datos anteriores porque ya son válidos
@@ -147,6 +174,7 @@ def create_client_onboard(
     business_name: str,
     schema_name: str,
     billing_email: str | None = None,
+    country_id: int | None = None,
 ) -> Client:
     """
     Crea un cliente en master.clientes y su esquema de base de datos
@@ -163,6 +191,7 @@ def create_client_onboard(
         serviceStartDate=date.today(),
         isActive=False,
         schemaName=schema_name,
+        billingCountryId=country_id
     )
   
 

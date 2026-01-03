@@ -34,10 +34,7 @@
             padding: 20px;
         }
 
-        .brand {
-            text-align: center;
-            margin-bottom: 24px;
-        }
+        .brand { text-align: center; margin-bottom: 24px; }
 
         .brand-name {
             font-size: 26px;
@@ -58,39 +55,15 @@
             border: 1px solid var(--border-color);
         }
 
-        h2 {
-            font-size: 22px;
-            color: var(--text-color);
-            margin: 0 0 8px 0;
-            font-weight: 500;
-            text-align: center;
-        }
+        h2 { font-size: 22px; color: var(--text-color); margin: 0 0 8px 0; font-weight: 500; text-align: center; }
 
-        p.subtitle {
-            color: var(--text-muted);
-            font-size: 15px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
+        p.subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; text-align: center; }
 
-        .form-group {
-            margin-bottom: 18px;
-            position: relative;
-        }
+        .form-group { margin-bottom: 18px; position: relative; }
 
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-color);
-            margin-bottom: 8px;
-        }
+        label { display: block; font-size: 14px; font-weight: 600; color: var(--text-color); margin-bottom: 8px; }
 
-        .password-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
+        .password-wrapper { position: relative; display: flex; align-items: center; }
 
         input {
             width: 100%;
@@ -101,11 +74,6 @@
             color: var(--text-color);
             background-color: #fff;
             transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        /* Padding extra a la derecha para el icono de password */
-        input#login-password {
-            padding-right: 45px;
         }
 
         input:focus {
@@ -124,20 +92,10 @@
             padding: 0;
             display: flex;
             align-items: center;
-            justify-content: center;
             transition: color 0.2s;
         }
 
-        .toggle-password:hover {
-            color: var(--primary-color);
-        }
-
-        .options {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 8px;
-            margin-bottom: 24px;
-        }
+        .options { display: flex; justify-content: flex-end; margin-top: 8px; margin-bottom: 24px; }
 
         .link-btn {
             background: none;
@@ -150,10 +108,9 @@
             border-radius: 4px;
         }
 
-        .link-btn:hover {
-            background-color: var(--accent-soft);
-        }
+        .link-btn:hover { background-color: var(--accent-soft); }
 
+        /* Botón con Spinner */
         button.main-btn {
             width: 100%;
             padding: 12px;
@@ -164,21 +121,26 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
-        button.main-btn:hover {
-            background: var(--primary-hover);
+        button.main-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
         }
 
-        .footer-text {
-            margin-top: 28px;
-            text-align: center;
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        .hidden { display: none !important; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         #message {
             margin-top: 20px;
@@ -188,17 +150,9 @@
             border-radius: 6px;
         }
 
-        .error-msg { 
-            color: var(--error-color);
-            background-color: #fce8e6;
-            border: 1px solid #f9d2ce;
-        }
-
-        .success-msg {
-            background-color: #e6f4ea;
-            color: #137333;
-            border: 1px solid #ceead6;
-        }
+        .error-msg { color: var(--error-color); background-color: #fce8e6; border: 1px solid #f9d2ce; }
+        .success-msg { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -225,7 +179,7 @@
                     <label for="login-password">Contraseña</label>
                     <div class="password-wrapper">
                         <input type="password" id="login-password" name="password" placeholder="Tu contraseña" required autocomplete="current-password">
-                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" aria-label="Mostrar contraseña">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
                             <svg id="eye-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                 <circle cx="12" cy="12" r="3"></circle>
@@ -238,27 +192,23 @@
                     <button type="button" class="link-btn" onclick="toggleViews('forgot-view')">¿Has olvidado tu contraseña?</button>
                 </div>
 
-                <button type="submit" class="main-btn">Siguiente</button>
+                <button type="submit" id="submit-btn" class="main-btn">
+                    <span id="btn-text">Siguiente</span>
+                    <div id="btn-spinner" class="spinner"></div>
+                </button>
             </form>
-
-            <p class="footer-text">
-                ¿No tienes cuenta? <button class="link-btn" onclick="window.location.href='/register'">Crear una cuenta</button>
-            </p>
         </div>
 
         <div id="forgot-view" class="hidden">
             <h2>Recuperar cuenta</h2>
             <p class="subtitle">Introduce tu correo para restablecer tu contraseña</p>
-
             <form id="forgotForm">
                 <div class="form-group">
                     <label for="reset-email">Correo electrónico</label>
                     <input type="email" id="reset-email" name="email" placeholder="correo@ejemplo.com" required>
                 </div>
-
                 <button type="submit" class="main-btn">Enviar enlace</button>
             </form>
-
             <p class="footer-text">
                 <button class="link-btn" onclick="toggleViews('login-view')">Volver al inicio</button>
             </p>
@@ -268,36 +218,36 @@
     </div>
 
 <script>
-    const loginView = document.getElementById('login-view');
-    const forgotView = document.getElementById('forgot-view');
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
     const message = document.getElementById('message');
     const passwordInput = document.getElementById('login-password');
     const eyeIcon = document.getElementById('eye-icon');
 
-    // Función para ver/ocultar contraseña
     function togglePasswordVisibility() {
         const isPassword = passwordInput.type === 'password';
         passwordInput.type = isPassword ? 'text' : 'password';
-        
-        // Cambiar el icono visualmente (opcionalmente podrías alternar el SVG completo)
         eyeIcon.style.color = isPassword ? 'var(--primary-color)' : 'var(--text-muted)';
     }
 
     function toggleViews(viewId) {
         message.classList.add('hidden');
-        if (viewId === 'forgot-view') {
-            loginView.classList.add('hidden');
-            forgotView.classList.remove('hidden');
-        } else {
-            loginView.classList.remove('hidden');
-            forgotView.classList.add('hidden');
-        }
+        document.getElementById('login-view').classList.toggle('hidden', viewId === 'forgot-view');
+        document.getElementById('forgot-view').classList.toggle('hidden', viewId === 'login-view');
     }
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('login-username').value;
         const password = passwordInput.value;
+
+        // UI State: Cargando
+        message.classList.add('hidden');
+        submitBtn.disabled = true;
+        btnText.innerText = 'Validando...';
+        btnSpinner.style.display = 'block';
 
         try {
             const response = await fetch('/api/v1/auth/login', {
@@ -306,20 +256,37 @@
                 body: JSON.stringify({ username, password })
             });
 
-            if (response.ok) {
+            // CASO 200: Éxito
+            if (response.status === 200) {
                 window.location.href = '/dashboard';
-            } else {
-                const data = await response.json();
-                showMessage(data.error || 'Credenciales incorrectas', 'error');
+                return;
             }
-        } catch (err) {
-            showMessage('Error de conexión con el servidor', 'error');
-        }
-    });
 
-    document.getElementById('forgotForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        showMessage('Si el correo está registrado, recibirás un enlace pronto.', 'success');
+            const data = await response.json();
+
+            // CASO 403: Suscripción Inactiva (Redirección a Restore)
+            if (response.status === 403) {
+                const token = data.access_token; // Asumiendo que el login 403 te devuelve el token
+                const clientId = data.clientId; 
+                localStorage.setItem('access_token', token);
+                localStorage.setItem('clientId', clientId);
+
+                // window.location.href = '/billing/restore';
+                //window.location.href = `/billing/restore?clientId=${clientId}`;
+                window.location.href = `/billing/restore?clientId=${clientId}&token=${token}`;
+                return;
+            }
+
+            // OTROS ERRORES (401, etc.)
+            showMessage(data.message || 'Credenciales incorrectas', 'error');
+
+        } catch (err) {
+            showMessage('Error de red. Intenta de nuevo.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            btnText.innerText = 'Siguiente';
+            btnSpinner.style.display = 'none';
+        }
     });
 
     function showMessage(text, type) {
@@ -328,6 +295,5 @@
         message.innerHTML = text;
     }
 </script>
-
 </body>
 </html>

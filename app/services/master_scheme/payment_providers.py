@@ -46,6 +46,18 @@ class StripeProvider:
                 client.stripe_customer_id = stripe_customer.id
                 db.session.commit()
             
+            tax_rates = []
+            if client.billingCountryId == 1:
+                ITBIS_ID = os.getenv('STRIPE_ITBIS_TAX_RATE')
+                tax_rates.append(ITBIS_ID)
+            
+            
+            contract_summary = (
+                f"Suscripción {plan_period}. Renovación automática. "
+                "Cancelación disponible en cualquier momento desde el panel. "
+                "Al pagar, aceptas nuestros términos: https://akdmia.com/terms"
+            )
+            
             # 3. Creación de la Sesión
             session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
@@ -54,7 +66,7 @@ class StripeProvider:
                         'currency': currency.lower(),
                         'product_data': {
                             'name': f"Orden #{order_id}",
-                            'description': 'Hasta 500 alumnos, Facturación automática y Soporte 24/7', #TODO: agregar info real <--- INFO EXTRA
+                            'description': contract_summary, 
                             #'images': ['https://tu-sitio.com/plan-icon.png'],
                         },
                         'unit_amount': amount_in_cents,
@@ -64,6 +76,7 @@ class StripeProvider:
                         },
                     },
                     'quantity': 1,
+                    'tax_rates': tax_rates, # <--- Aplica el impuesto a este ítem
                 }],
                 mode='subscription',
                 # Pasamos el diccionario que preparamos arriba

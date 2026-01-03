@@ -49,6 +49,12 @@ class ClientPlan(db.Model):
         nullable=False
     )  # ACTIVE, CANCELED, PAST_DUE, PENDING_PAYMENT, TRIAL
 
+    stripe_price_id = db.Column(
+        "sid_precio_stripe", 
+        db.String(100),
+        nullable=True
+    ) 
+
     # 🔗 Relaciones
     plan = db.relationship(
         "Plan",

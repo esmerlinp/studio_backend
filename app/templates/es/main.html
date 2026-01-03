@@ -130,6 +130,14 @@
                             <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Email Corporativo</label>
                             <input type="email" id="email" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="admin@colegio.com">
                         </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">País de Facturación</label>
+                            <select id="country_id_select" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none bg-transparent">
+                                <option value="">Cargando países...</option>
+                            </select>
+                            <p id="tax-notice" class="text-[9px] text-emerald-600 mt-1 hidden font-bold">✓ Se aplicará ITBIS (18%) por residencia en RD</p>
+                        </div>
 
                         <div class="md:col-span-2">
                             <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Plan</label>
@@ -137,6 +145,7 @@
                                 <option value="">Selecciona un plan arriba</option>
                             </select>
                         </div>
+
                     </div>
                     <button type="submit" id="submit-btn" class="w-full btn-stripe bg-[#6366f1] text-white py-4 rounded-2xl font-bold text-lg mt-4">
                         Empezar ahora
@@ -167,7 +176,33 @@
                     plansData = json.data;
                     renderPlans();
                 }
-            } catch (e) { console.error("Error cargando planes", e); }
+
+                // NUEVO: Carga de Países
+                const resCountries = await fetch("/api/v1/countries");
+                const jsonCountries = await resCountries.json();
+                if (jsonCountries.success) {
+                    const countrySelect = document.getElementById('country_id_select');
+                    countrySelect.innerHTML = '<option value="">Selecciona tu país</option>';
+                    
+                    jsonCountries.data.forEach(country => {
+                        const opt = new Option(country.name, country.id);
+                        // Guardamos el ISO para la lógica de impuestos visual
+                        opt.setAttribute('data-iso', country.iso_code);
+                        countrySelect.add(opt);
+                    });
+
+                    // Listener para mostrar aviso de ITBIS
+                    countrySelect.addEventListener('change', (e) => {
+                        const selectedIso = e.target.options[e.target.selectedIndex].getAttribute('data-iso');
+                        const notice = document.getElementById('tax-notice');
+                        if(selectedIso === 'DOM') {
+                            notice.classList.remove('hidden');
+                        } else {
+                            notice.classList.add('hidden');
+                        }
+                    });
+                }
+            } catch (e) { console.error("Error cargando datos iniciales", e); }
         }
 
         function toggleBilling() {
@@ -270,7 +305,8 @@
             const payload = {
                 client_data: { 
                     business_name: document.getElementById('business_name').value,
-                    contact_phone: document.getElementById('contact_phone').value 
+                    contact_phone: document.getElementById('contact_phone').value ,
+                    country_id: parseInt(document.getElementById('country_id_select').value)
                 },
                 user_data: { 
                     first_name: document.getElementById('first_name').value, 

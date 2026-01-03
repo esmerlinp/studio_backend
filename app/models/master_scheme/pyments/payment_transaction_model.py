@@ -34,6 +34,7 @@ class PaymentTransaction(db.Model):
             "clientPlanId": self.clientPlanId,
             "internalReference": self.internalReference,
             "externalReference": self.externalReference,
+            "rawResponse": self.rawResponse,
             "amount": float(self.amount),
             "currency": self.currency,
             "status": self.status,

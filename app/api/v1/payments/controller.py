@@ -2,7 +2,7 @@ from flask import  request, jsonify, render_template
 from ....extensions import db
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import track_activity, require_role
+#from app import track_activity, require_role
 
 from app.services.master_scheme.user_client_service import get_user_by_client
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
@@ -22,15 +22,9 @@ from app.services.master_scheme.payment_service import (handle_checkout_session_
 
 
 
-
-# @jwt_required()
-# @track_activity
-# @require_role(["SUPER_ADMIN", "SYS_ADMIN"])
-# @audit_log(action="REQUEST_PAYMENT", resource_type="transacciones_pagos",description="request payment")
-# def request_payment(plan_identity):
-#    data = request_suscription(plan_identity=plan_identity)
-#    return success(data=data)
-
+def verificar_password(hash_stored: str, password: str) -> bool:
+    """Verifica la contraseña comparando con el hash almacenado."""
+    return check_password_hash(hash_stored, password)
 
 
 def stripe_webhook():
@@ -153,25 +147,228 @@ def payment_cancel():
     # Puedes usar el template 'payment_cancelled.html' que mencionamos antes
     return render_template("es/payment_cancelled.html", order_id=order_id)
 
-
-#@app.route('/api/v1/subscriptions/cancel', methods=['POST']
 @jwt_required()
-@track_activity
+def restore_canceled_subscription():
+    try:
+        # 1. Obtener al cliente y el ID del nuevo plan/precio
+        load_dotenv()
+        stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
+        user_id = get_jwt_identity()
+        relacion= UsuarioCliente.query.filter_by(user_id=user_id).first()
+        client = Client.query.filter_by(uuid=relacion.client_uuid).first()        
+        data = request.get_json()    
+        price_id = data.get('price_id', None) #New price 
+        new_pm_id = data.get('paymentMethodId') # ID de la nueva tarjeta si existe
+        #client_id = data.get('clientId') 
+        
+        #client = Client.query.get(client_id)
+
+        if not client.stripe_customer_id:
+            return jsonify({"success": False, "msg": "El cliente no tiene un perfil de Stripe asociado"}), 400
+        
+        
+        
+        if new_pm_id:
+            # 1. Asociar nueva tarjeta al cliente
+            stripe.PaymentMethod.attach(new_pm_id, customer=client.stripe_customer_id)
+            # 2. Ponerla como predeterminada para facturas
+            stripe.Customer.modify(
+                client.stripe_customer_id,
+                invoice_settings={"default_payment_method": new_pm_id}
+            )
+        
+        if not price_id:
+            # Opción A: Buscar el precio que el cliente tenía antes de cancelar
+            # Buscamos en su última transacción exitosa
+            plan_cliente = ClientPlan.query.filter_by(client_id=client.clientId).first()
+
+            if plan_cliente.stripe_price_id:
+                price_id = plan_cliente.stripe_price_id
+                
+            else:
+                ultima_transaccion = PaymentTransaction.query.filter_by(
+                    clientId=client.clientId, 
+                    status="APPROVED"
+                ).order_by(PaymentTransaction.id.desc()).first()
+
+                subscription_id = ultima_transaccion.rawResponse.get('subscription')
+                
+                if subscription_id:
+                    # 2. Le pedimos a Stripe los detalles de esa suscripción
+                    old_sub = stripe.Subscription.retrieve(subscription_id)
+                    
+                    # 3. Extraemos el precio del primer item
+                    price_id = old_sub['items']['data'][0]['price']['id']
+                    print(f"Price ID recuperado de Stripe: {price_id}")
+                    
+    
+            # Extraemos el price_id de la respuesta de Stripe que guardamos en JSON
+            # if ultima_transaccion:
+            #     price_id = ultima_transaccion.rawResponse.get('items', {}).get('data', [{}])[0].get('price', {}).get('id') # El ID del precio en Stripe (ej: price_123...)
+
+        
+        # 2. Crear una nueva suscripción en Stripe
+        # Al crearla para un customer ya existente, usará su tarjeta predeterminada
+        
+        #Para que Stripe sepa cuánto cobrar de impuestos, el objeto Customer debe tener una dirección válida (especialmente el país y el código postal)
+        # Actualizar dirección antes de cobrar impuestos
+
+        tax_rates = []
+        if client.billingCountryId == 1:
+            ITBIS_ID = os.getenv('STRIPE_ITBIS_TAX_RATE')
+            tax_rates.append(ITBIS_ID)
+    
+        new_subscription = stripe.Subscription.create(
+            customer=client.stripe_customer_id,
+            items=[{"price": price_id}],
+            payment_behavior='default_incomplete', # Permite manejar fallos de pago
+            default_tax_rates=tax_rates, # <--- Aplica el 18% desde el inicio
+            expand=['latest_invoice.payment_intent'],
+        )
+        
+        
+        latest_invoice = new_subscription.latest_invoice
+        # En la nueva API, el intent se recupera del objeto expandido
+        payment_intent = getattr(latest_invoice, 'payment_intent', None)
+        if payment_intent:
+            # 1. Si el pago requiere autenticación (SCA / 3D Secure)
+            if payment_intent.status == 'requires_action':
+                # IMPORTANTE: No actives al cliente aún, el pago no es exitoso
+                client.stripe_subscription_id = new_subscription.id
+                db.session.commit()
+                
+                return jsonify({
+                    "status": "requires_action",
+                    "client_secret": payment_intent.client_secret,
+                    "subscription_id": new_subscription.id,
+                    "msg": "Se requiere autenticación bancaria"
+                }), 200
+            
+            
+            # CASO 2: Pago Exitoso (Succeeded) o ya Activo
+            # Con la tarjeta 4242, el payment_intent suele quedar en 'succeeded' inmediatamente
+            if payment_intent.status == 'succeeded':
+                client.stripe_subscription_id = new_subscription.id
+                client.isActive = True 
+                db.session.commit()
+                return jsonify({
+                    "success": True, 
+                    "status": "active",
+                    "msg": "Suscripción restaurada con éxito",
+                    "subscription_id": new_subscription.id
+                })
+                
+                
+            # CASO 3: Fallo Real (Requires Payment Method)
+            if payment_intent.status == 'requires_payment_method':
+                payment_url = latest_invoice.hosted_invoice_url
+                return jsonify({
+                    "success": False,
+                    "status": "payment_failed", # <--- Agrega este status para que tu JS lo capture
+                    "msg": "El pago inicial falló. Por favor intenta con otra tarjeta.",
+                    "url_actualizacion": payment_url
+                }), 402
+            
+
+            # CASO DE RESPALDO: Si por alguna razón no hay intent pero la sub está activa
+            if new_subscription.status == 'active':
+                client.stripe_subscription_id = new_subscription.id
+                client.isActive = True
+                db.session.commit()
+                return jsonify({"success": True, "status": "active", "msg": "Suscripción activa"})
+
+            # Si llega aquí, es un estado desconocido
+            return jsonify({"success": False, "msg": "Estado de pago pendiente o desconocido"}), 400
+
+        # 2. CASO ESPECÍFICO TEST CLOCK / FACTURA ABIERTA
+        # Si la factura está abierta y no hubo intento fallido, consideramos que el proceso inició bien
+        if latest_invoice.status == 'open' or latest_invoice.status == 'draft':
+            client.stripe_subscription_id = new_subscription.id
+            # Nota: Con Test Clock, quizás no quieras poner isActive=True hasta que el webhook confirme el pago,
+            # pero para desbloquear tus pruebas, lo activamos:
+            client.isActive = True 
+            db.session.commit()
+            return jsonify({
+                "success": True,
+                "status": "pending_test_clock",
+                "msg": "Suscripción creada (Pendiente de proceso por Test Clock)"
+            })
+
+        # 3. Si la factura falló
+        if new_subscription.status == 'incomplete':
+             return jsonify({
+                "success": False,
+                "msg": "El pago inicial falló. Revisa tu configuración en Stripe.",
+                "url_actualizacion": latest_invoice.hosted_invoice_url
+            }), 402
+             
+    except stripe.error.StripeError as e:
+        print(e)
+        db.session.rollback()
+        return jsonify({"success": False, "msg": str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+        return jsonify({"success": False, "msg": f"Error procesando la solicitud {e}"}), 500
+    
+      
+
+
+def show_restore_view():
+    load_dotenv()
+    #user_id = user_id
+    #relacion = UsuarioCliente.query.filter_by(user_id=user_id).first()
+    client_id = 68
+    client = Client.query.get(client_id)
+    
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    # Obtenemos el cliente de Stripe para ver su tarjeta predeterminada
+    stripe_customer = stripe.Customer.retrieve(
+        client.stripe_customer_id,
+        expand=['invoice_settings.default_payment_method']
+    )
+    
+    payment_method = stripe_customer.invoice_settings.default_payment_method
+    print("payment_method, ", stripe_customer.invoice_settings)
+    
+    card_data = {
+        "last4": "****",
+        "brand": "tarjeta",
+        "exp_month": "--",
+        "exp_year": "--"
+    }
+    
+    if payment_method:
+        card_data = {
+            "last4": payment_method.card.last4,
+            "brand": payment_method.card.brand,
+            "exp_month": payment_method.card.exp_month,
+            "exp_year": payment_method.card.exp_year
+        }
+
+    return render_template('es/restore_subscription.html', card=card_data, clientId=client.clientId)
+
+@jwt_required()
 def cancel_subscription():
     data = request.get_json()
     subscription_id = data.get('subscription_id')
     password = data.get('password')
     user_id = get_jwt_identity()  
+    
+    load_dotenv()
+        
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+        
 
     if not subscription_id or not password:
             return jsonify({"success": False, "msg": "Datos incompletos"}), 400
     
-
-        
+    
     try:
-
         
         client = Client.query.filter_by(stripe_subscription_id=subscription_id).first()
+
         if not client:
             return error(message="Invalid suscription")  
             
@@ -179,16 +376,22 @@ def cancel_subscription():
         if not user:
             return error(message="not user found")    
             
-        def verificar_password(hash_stored: str, password: str) -> bool:
-            """Verifica la contraseña comparando con el hash almacenado."""
-            return check_password_hash(hash_stored, password)
-        
+
         if not verificar_password(user.password, password):
             return error(message="Credenciales inválidas", status_code=401)
         
+        
         relacion = UsuarioCliente.query.filter_by(client_uuid=client.uuid).first()
-        if not relacion or relacion.user_id != user_id:
-            return error(message="Este usuario no esta relacionado a ningun cliente")
+
+        
+        # 1. Validar existencia primero
+        if relacion is None:
+            return error(message="La relación no existe")
+
+        # 2. Validar pertenencia con casting de tipo para evitar el error de str vs int
+        if str(relacion.user_id) != str(user_id):
+            return error(message="Este usuario no está relacionado a la suscripción")
+        
         
         if not user.rol or  user.rol not in ("ADMIN", "OWNER"):
                     return jsonify({"success": False, "msg": "Nivel de privilegios insuficiente"}), 403
@@ -215,224 +418,3 @@ def cancel_subscription():
 
     except stripe.error.StripeError as e:
         return jsonify({"success": False, "msg": str(e)}), 400
-# def stripe_webhook_old():
-#     load_dotenv()
-#     payload = request.data
-#     sig_header = request.headers.get('Stripe-Signature')
-#     endpoint_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
-#     app_name = os.getenv("APP_NAME")
-    
-   
-#     try:
-#         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 400
-
-
-#     print(event['type'])
-#     # CASO 1: PAGO INICIAL (CHECKOUT)
-#     if event['type'] == 'checkout.session.completed':
-#         session = event['data']['object']
-#         stripe_session_id = session.get('id')
-        
-
-        
-#         # En Checkout, el monto total nos dice si es Trial
-#         # amount_total es 0 si es un inicio de periodo de prueba
-#         is_trial = (session.get('amount_total') == 0)
-        
-
-#         transaction = PaymentTransaction.query.filter_by(externalReference=stripe_session_id).first()
-#         if transaction:
-#             transaction.rawResponse = session
-#             process_successful_payment(transaction, session, app_name, is_trial=is_trial)
-            
-            
-#     elif event['type'] == 'invoice.payment_failed':
-#         # IMPORTANTE: Aquí manejamos si la tarjeta falló en la renovación
-#         invoice = event['data']['object']
-#         customer_id = invoice['customer']
-
-#             # 1. Obtener detalles del error de Stripe
-#         # Accedemos al último intento de pago para saber por qué falló
-#         payment_intent_id = invoice.get('payment_intent')
-#         failure_msg = "Rechazo general por parte del banco"
-        
-#         if payment_intent_id:
-#             pi = stripe.PaymentIntent.retrieve(payment_intent_id)
-#             if pi.last_payment_error:
-#                 failure_msg = pi.last_payment_error.message
-        
-#         # 2. Buscar al cliente en la DB
-#         client = Client.query.filter_by(stripe_customer_id=customer_id).first()
-#         #client = Client.query.filter_by(clientId=1).first()
-#         if client:
-#             # 3. Cambiar estado a PAST_DUE (Vencido)
-#             plan = ClientPlan.query.filter_by(client_id=client.clientId, status='ACTIVE').first()
-#             if plan:
-#                 plan.status = 'PAST_DUE'
-#                 db.session.commit()
-
-#             # 4. Enviar el Email
-#             # Nota: update_payment_url debería ser el enlace a tu panel de configuración de facturación
-#             send_email_template(
-#                 subject="Acción requerida: Error en el pago de tu suscripción",
-#                 to=[client.billingEmail],
-#                 path_template="emails/es/payment_failed.html",
-#                 name=client.contactName,
-#                 app_name=os.getenv("APP_NAME"),
-#                 plan_name=plan.plan.name if plan else "Suscripción Akdmia",
-#                 amount=invoice['amount_due'] / 100, # Convertir de centavos
-#                 currency=invoice['currency'].upper(),
-#                 failure_reason=failure_msg,
-#                 update_payment_url=f"{request.host_url}billing/settings" #TODO: esto debe ser trabajado para actualizar metodos de pago desde stripe
-#             )
-            
-
-#     elif event['type'] == 'invoice.paid':
-#         # CASO 2: COBROS RECURRENTES AUTOMÁTICOS (MES 2, 3...)
-#         #elif event['type'] == 'invoice.payment_succeeded':
-    
-#         invoice_data = event['data']['object']
-  
-#         # Si es el pago de una suscripción
-#         subscription_id = (
-#                 invoice_data.get('subscription') or 
-#                 invoice_data.get('parent', {}).get('subscription_details', {}).get('subscription')
-#             )
-            
-#         # En Invoice, amount_paid nos dice si este ciclo fue gratuito
-#         is_trial = (invoice_data.get('amount_paid') == 0)
-        
-#         print(f"DEBUG: Subscription ID encontrado -> {subscription_id}")
-        
-#         stripe_paid_at = invoice_data.get('status_transitions', {}).get('paid_at') or invoice_data.get('created')
-        
-#         # Convertir el timestamp de Stripe a datetime con zona horaria UTC
-#         payment_date_dt = datetime.fromtimestamp(stripe_paid_at, tz=timezone.utc)
-        
-        
-#         # Si quieres guardar también el inicio y fin del periodo pagado
-#         period_start = datetime.fromtimestamp(invoice_data['lines']['data'][0]['period']['start'], tz=timezone.utc)
-#         period_end = datetime.fromtimestamp(invoice_data['lines']['data'][0]['period']['end'], tz=timezone.utc)
-
-            
-#         if subscription_id:
-#             # Buscamos la transacción anterior para identificar al cliente/plan
-#             # Buscamos en el JSON rawResponse de transacciones previas
-#             prev_trans = PaymentTransaction.query.filter(
-#                 PaymentTransaction.rawResponse['subscription'].astext == subscription_id
-#             ).first()
-
-#             if prev_trans:
-#                 # Creamos una NUEVA transacción para el nuevo periodo
-#                 new_trans = PaymentTransaction(
-#                     clientPlanId=prev_trans.clientPlanId,
-#                     clientId=prev_trans.clientId,
-#                     internalReference=f"REC-{int(datetime.now().timestamp())}",
-#                     externalReference=invoice_data.get('payment_intent'), # ID del cobro actual
-#                     amount=invoice_data.get('amount_paid') / 100,
-#                     currency=invoice_data.get('currency').upper(),
-#                     status="APPROVED",
-#                     paymentDate=payment_date_dt,
-#                     rawResponse=invoice_data
-#                 )
-#                 db.session.add(new_trans)
-#                 db.session.flush() # Para obtener el ID de la transacción
-                
-#                 process_successful_payment(new_trans, invoice_data, app_name, is_trial)
-
-#     elif event['type'] == "customer.subscription.updated":
-#         # customer.subscription.updated: Se dispara cuando el usuario decide cancelar (pero aún tiene días restantes) o cuando cambia de plan (Upgrade/Downgrade).
-#         subscription = event['data']['object']
-#         stripe_cus_id = subscription['customer'] # Obtenemos el cus_...
-
-#         # 1. Buscamos al cliente primero
-#         client = Client.query.filter_by(stripe_customer_id=stripe_cus_id).first()
-#         #client = Client.query.filter_by(clientId=1).first()
-
-#         if client:
-#             # 2. Ahora buscamos el plan ACTIVO de ese cliente
-#             # (O el que coincida con esta suscripción si guardas el sub_...)
-#             client_plan = ClientPlan.query.filter_by(
-#                 client_id=client.clientId, 
-#                 status='ACTIVE' 
-#             ).first()
-
-#             if client_plan:
-#                 # 3. ACTUALIZAR FECHA DE VENCIMIENTO (dfin)
-#                 # Convertimos el timestamp de Stripe a fecha de Python
-#                 new_end_date = datetime.fromtimestamp(subscription['current_period_end']).date()
-#                 client_plan.end_date = new_end_date # Tu campo dfin
-
-#                 # 4. Sincronizar estado
-#                 stripe_status = subscription['status']
-#                 if stripe_status == 'active':
-#                     client_plan.status = 'ACTIVE'
-#                 elif stripe_status in ['past_due', 'unpaid']:
-#                     client_plan.status = 'PAST_DUE'
-
-#                 db.session.commit()
-#                 print(f"DEBUG: Fecha dfin actualizada a {new_end_date} para el cliente {client.businessName}")
-        
-        
-        
-#     elif event['type'] == "customer.subscription.deleted":
-#         # customer.subscription.deleted: Este es el evento final. Se dispara cuando el acceso debe cortarse definitivamente. Aquí es donde cambias el estado a INACTIVE en tu base de datos.
-#         subscription = event['data']['object']
-#         stripe_cus_id = subscription['customer']
-        
-#         # 1. Buscamos al cliente por su nuevo nombre de columna
-#         client = Client.query.filter_by(stripe_customer_id=stripe_cus_id).first()
-        
-#         if client:
-#             # 2. Buscamos el plan que estaba activo o en mora (past_due)
-#             # Es vital buscar ambos porque un plan borrado suele venir de una mora
-#             client_plan = ClientPlan.query.filter_by(client_id=client.clientId).filter(
-#                 ClientPlan.status.in_(['ACTIVE', 'PAST_DUE', 'TRIAL'])
-#             ).first()
-
-#             if client_plan:
-#                 # 3. CAMBIAR ESTADO A INACTIVO / CANCELADO
-#                 client_plan.status = 'CANCELED'
-                
-#                 # 4. Opcional: Limpiar la fecha de vencimiento o registrar la fecha real de baja
-#                 client_plan.end_date = datetime.now().date() 
-                
-                
-#                 from app.models.master_scheme.user_client_model import UsuarioCliente
-#                 from app.services.master_scheme.session_service import close_all_session
-                
-#                 #Obtener IDs de usuarios vinculados a este cliente a través de la intermedia
-#                 user_ids_subquery = db.session.query(UsuarioCliente.user_id).filter(
-#                                         UsuarioCliente.client_uuid == client.uuid
-#                                     ).subquery()
-                
-                
-#                 #Inhabilitar usuarios en masa
-#                 User.query.filter(User.userId.in_(user_ids_subquery)).update(
-#                     {"isActive": False}, 
-#                     synchronize_session=False
-#                 )
-        
-#                 #Cerrar sesiones (Iteramos para limpiar cache/Redis si es necesario)
-#                 users_to_close = User.query.filter(User.userId.in_(user_ids_subquery)).all()
-#                 for u in users_to_close:
-#                     close_all_session(user_id=u.userId, commit=False)
-                
-                
-
-#                 db.session.commit()
-#                 print(f"❌ ACCESO REVOCADO: La suscripción del cliente {client.businessName} ha finalizado.")
-
-#                 # 5. Acción adicional: Notificar al equipo de ventas o al cliente
-#                 send_goodbye_email(client.billingEmail, client.contactName, business_name=client.businessName)
-        
-    
-#     elif event['type'] == "customer.subscription.trial_will_end":
-#         # Stripe lo envía 3 días antes de que acabe el trial. Es perfecto para enviar un email de: "Tu prueba termina pronto, asegúrate de tener fondos en tu tarjeta".
-#         #session = event['data']['object'];
-#         print("customer.subscription.trial_will_end --- ")
-    
-#     return jsonify({"status": "success"}), 200
-

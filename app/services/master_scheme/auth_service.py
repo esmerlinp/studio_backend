@@ -5,6 +5,10 @@ from datetime import timedelta
 from app.services.master_scheme.user_service import get_user_by_user_name_with_passwd, get_user_by_id, get_user_preferences, add_default_user_preferences
 from app.services.master_scheme.session_service import close_session, create_session, get_session_active_by_refresh_token
 from app.utils.responses import success, error
+from app.models.master_scheme.user_client_model import UsuarioCliente
+from app.models.master_scheme.client_model import Client
+from app.api.v1.payments.controller import show_restore_view
+from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
 
 
 INACTIVITY_MINUTES = 10  # tiempo de inactividad permitido
@@ -61,14 +65,26 @@ def login():
     if not verificar_password(user.password, password):
         return jsonify({"error": "Credenciales inválidas"}), 401
     
+    is_restore = False
+    clientId=0
     if not user.isActive:
-        # Personalizamos el mensaje según el contexto (si tienes el campo de motivo)
-        mensaje_error = (
-            "Tu cuenta se encuentra inactiva. "
-            "Esto puede deberse a un pago pendiente o a una revisión administrativa. "
-            "Por favor, contacta al administrador de tu institución o a nuestro equipo de soporte."
-        )
-        return error(message=mensaje_error, status_code=403) # 403 Forbidden es más preciso que 400
+        if user.rol in ("OWNER", "ADMIN"):
+            relacion = UsuarioCliente.query.filter_by(user_id=user.userId).first()
+            client = Client.query.filter_by(uuid=relacion.client_uuid).first()
+            if not client.isActive:
+                trans = PaymentTransaction.query.filter_by(clientId=client.clientId, status="APPROVED").all()
+                if trans:
+                    is_restore = True
+                    clientId = client.clientId
+
+        else:            
+            # Personalizamos el mensaje según el contexto (si tienes el campo de motivo)
+            mensaje_error = (
+                "Tu cuenta se encuentra inactiva. "
+                "Esto puede deberse a un pago pendiente o a una revisión administrativa. "
+                "Por favor, contacta al administrador de tu institución o a nuestro equipo de soporte."
+            )
+            return error(message=mensaje_error, status_code=401) # 403 Forbidden es más preciso que 400
 
 
     identity = str(user.userId)   # identity debe ser string
@@ -92,7 +108,6 @@ def login():
     
     session_create = get_session_active_by_refresh_token(refreshToken=refresh_token)
     preferences = get_user_preferences(user_id=user.userId)
-    print(preferences)
     if not preferences:
         new_pref = add_default_user_preferences(user_id=user.userId)
         if not new_pref:
@@ -107,6 +122,21 @@ def login():
     response_data['refresh_token'] = refresh_token
     response_data['sessionId'] = session_create.sessionId
     response_data['preferences'] = preferences.preferences
+    
+    if is_restore:                 
+        # return error(message="Tu suscripción ha expirado. Por favor, reanúdala para continuar.", 
+        #             access_token=access_token, 
+        #             status_code=403, redirect_url="/billing/restore") # 403 Forbidden es más preciso que 400
+        return jsonify({
+            "success": False,
+            "msg": "Tu suscripción ha expirado. Por favor, reanúdala para continuar.",
+            "access_token":access_token,
+            "clientId":clientId,
+            "redirect_url":f"/billing/restore?clientId={clientId}&token={access_token}"
+            
+        }), 403
+
+
     return success(data=response_data, message="Login successful", status_code=200)
 
 

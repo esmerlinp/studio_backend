@@ -1,13 +1,14 @@
-from flask import request, redirect, render_template
+from flask import request, redirect, render_template, jsonify
 from flask_jwt_extended import JWTManager
 from app.api.v1.users.routes import users_bp
 from app.api.v1.auth.routes import auth_bp
 from app.api.v1.clients.routes import client_bp
 from app.api.v1.plan.routes import plans_bp
-from app.api.v1.payments.routes import payment_bp
+from app.api.v1.payments.routes import payment_bp, billing_bp
 from app.api.v1.student.routes import students_bp
 from app.api.v1.dynamics.routes import dynamic_fields_bp
 from app.api.v1.notifications.routes import notification_bp
+from app.api.v1.country.routes import countries_bp
 from app.services.master_scheme.user_service import change_user_password, update_user, get_user_scheme, get_user_by_id
 from app import create_app
 from app.utils import i18n
@@ -38,7 +39,8 @@ app.register_blueprint(plans_bp)
 app.register_blueprint(students_bp)
 app.register_blueprint(dynamic_fields_bp)
 app.register_blueprint(payment_bp)
-#TODO: Agregar el blueprint de Notificaciones cuando se cree la tabla
+app.register_blueprint(billing_bp)
+app.register_blueprint(countries_bp)
 
 # ------------------------------
 # Configuración de idioma
@@ -60,6 +62,7 @@ MASTER_PUBLIC_ENDPOINTS = {
     "test_mail",
     "client_form",
     "main_page",
+    "restore",
     "auth.login",
     "login",
     "plans_page",
@@ -72,7 +75,9 @@ MASTER_PUBLIC_ENDPOINTS = {
     "clients.onboard_client",
     "payments.payment_success",
     "payments.stripe_webhook",
-    "payments.cancel"
+    "payments.cancel",
+    "payments.show_restore_view",
+    "countries.get_countries"
 }
 
 
@@ -120,6 +125,7 @@ def set_schema():
     if endpoint is None:
         return
 
+    print(endpoint)
     # 2. Excluir Webhooks y Públicos (VITAL para evitar errores de conexión en pagos)
     if request.path.startswith('/api/v1/payments/webhook') or endpoint in MASTER_PUBLIC_ENDPOINTS:
         # Aseguramos que los webhooks siempre operen sobre public
@@ -241,6 +247,60 @@ def set_schema_old():
 @app.route("/")
 def main_page():
     return render_template('es/main.html')
+
+@app.route("/billing/restore")
+def restore():
+    from app.models.master_scheme.client_model import Client
+    import stripe
+    load_dotenv()
+    
+    #user_id = user_id
+    #relacion = UsuarioCliente.query.filter_by(user_id=user_id).first()
+    #client_id = 68
+    #data = request.get_json()
+    client_id = request.args.get('clientId')
+    client_id = request.args.get('clientId')
+    
+    if not client_id:
+        return jsonify({"msg": "Falta el parámetro clientId"}), 400
+    
+    client = db.session.get(Client, client_id)
+    
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    # Obtenemos el cliente de Stripe para ver su tarjeta predeterminada
+    stripe_customer = stripe.Customer.retrieve(
+        client.stripe_customer_id,
+        expand=['invoice_settings.default_payment_method']
+    )
+    
+    payment_method = stripe_customer.invoice_settings.default_payment_method
+    
+    if not payment_method:
+        payment_methods = stripe.PaymentMethod.list(
+            customer=client.stripe_customer_id,
+            type="card",
+            limit=1
+        )
+        if payment_methods.data:
+            payment_method = payment_methods.data[0]
+        
+    
+    card_data = {
+        "last4": "****",
+        "brand": "tarjeta",
+        "exp_month": "--",
+        "exp_year": "--"
+    }
+    
+    if payment_method:
+        card_data = {
+            "last4": payment_method.card.last4,
+            "brand": payment_method.card.brand,
+            "exp_month": payment_method.card.exp_month,
+            "exp_year": payment_method.card.exp_year
+        }
+
+    return render_template('es/restore_subscription.html', card=card_data, clientId=client.clientId)
 
 
 @app.route("/login")
