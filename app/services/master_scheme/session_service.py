@@ -4,8 +4,13 @@ from typing import Optional
 from datetime import  timedelta
 from ...extensions import db 
 from datetime import datetime, timezone
+# from app.utils.types import ActionType, ResourceTypes
+# from app import audit_log
+# from flask import g
 
-
+# @audit_log(action=ActionType.CREATE,
+#            resource_type=ResourceTypes.USER_SESSION,
+#            resource_id_arg="userId")
 def create_session(userId: int, refreshToken: str, inactivity_minutes:int, ipAddress:str, userAgent:str = None) -> Session:
     now = datetime.now(timezone.utc)
     session = Session(
@@ -21,6 +26,10 @@ def create_session(userId: int, refreshToken: str, inactivity_minutes:int, ipAdd
     db.session.commit()
     return session
 
+
+# @audit_log(action=ActionType.READ,
+#            resource_type=ResourceTypes.USER_SESSION,
+#            resource_id_arg="userId", description="Consultar session por id usuario")
 def get_session_active_by_user_id(userId: int)->Optional[Session]:
     session = Session.query.filter_by(userId=userId, isActive=True).order_by(Session.sessionId.desc()).first()
     if not session:
@@ -35,23 +44,31 @@ def get_session_active_by_refresh_token(refreshToken:str)->Optional[Session]:
     
     return session
 
+# @audit_log(action=ActionType.UPDATE,
+#            resource_type=ResourceTypes.USER_SESSION,
+#            resource_id_arg="sessionId")
 def invalidar_sesiones_por_id_session(sessionId: int):
     session = Session.query.filter_by(sessionId=sessionId).first()
-    
     if session:
         session.isActive = False
+
         db.session.commit()
     return True
 
+# @audit_log(action=ActionType.UPDATE,
+#            resource_type=ResourceTypes.USER_SESSION,
+#            resource_id_arg="sessionId")
 def actualizar_actividad_sesion(sessionId: int, inactivity_minutes: int):
     from datetime import datetime, timezone
     now = datetime.now(timezone.utc)
             
     session = Session.query.filter_by(sessionId=sessionId).first()
     if session:
-        from datetime import datetime
+
         session.lastAccessDate = now
         session.expirationDate = now + timedelta(minutes=inactivity_minutes)
+        
+
         db.session.commit()
     return True
 
@@ -68,6 +85,9 @@ def actualizar_actividad_sesion(sessionId: int, inactivity_minutes: int):
     
 
 from typing import List, Optional
+# @audit_log(action=ActionType.READ,
+#            resource_type=ResourceTypes.USER_SESSION,
+#            resource_id_arg="user_id", description="consultar sessiones abiertas por id usuario")
 def get_open_sessions(user_id: int) -> List[Optional[Session]]:
     #rows = db.fetch_data("SELECT * FROM usuariossesiones where bactivo = TRUE AND idusuario = %s", (int(user_id), ))
     sessions = Session.query.filter_by(userId=int(user_id), isActive=True).all()
@@ -86,6 +106,9 @@ def get_open_sessions(user_id: int) -> List[Optional[Session]]:
 
     return sessions
 
+# @audit_log(action=ActionType.UPDATE,
+#            resource_type=ResourceTypes.USER_SESSION,
+#            resource_id_arg="sessionId", description="Cerrar session")
 def close_session(sessionId, user_id:int) -> dict:
     #value = db.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion = %s AND idusuario = %s", (sessionId, int(user_id), ))
     session = Session.query.filter_by(sessionId=sessionId, userId=user_id).first()
@@ -96,6 +119,9 @@ def close_session(sessionId, user_id:int) -> dict:
     return {"sessionId": sessionId}
 
 
+# @audit_log(action=ActionType.UPDATE,
+#            resource_type=ResourceTypes.USER_SESSION,
+#            resource_id_arg="sessionId", description="Cerrar todas las sesiones excepto actual")
 def close_all_session_except_current(sessionId, user_id:int) -> dict:
     """Cierra todas las sesiones activas de un usuario excepto la actual"""
     #value = db.execute_non_query("UPDATE usuariossesiones SET bactivo = FALSE WHERE idusuariosesion <> %s AND idusuario = %s", (sessionId, int(user_id), ))
@@ -111,7 +137,9 @@ def close_all_session_except_current(sessionId, user_id:int) -> dict:
     return {"sessionId": sessionId}
 
 
-
+# @audit_log(action=ActionType.UPDATE,
+#            resource_type=ResourceTypes.USER_SESSION,
+#            resource_id_arg="user_id", description="Cerrar todas las sesiones del usuario")
 def close_all_session(user_id: int, commit = True) -> dict:
     """Cierra todas las sesiones activas de un usuario de forma masiva"""
     try:

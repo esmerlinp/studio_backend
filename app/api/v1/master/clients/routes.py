@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.api.v1.clients.controller import (get_client_preferences, new_cliente, 
+from app.api.v1.master.clients.controller import (get_client_preferences, new_cliente, 
                                            get_logs, onboard_client, get_storage_info,
                                            get_all_clients, get_client, get_plan, 
                                            change_plan, get_client_plans, 

@@ -12,15 +12,12 @@ from app.services.master_scheme.password_service import validate_password_policy
 from datetime import datetime, timezone
 from app.utils.responses import success, error
 from app.utils.helpers import send_email_template, generate_reset_token
-from flask import request
+from flask import request, g
 from dotenv import load_dotenv
 import os
 
 
-ACTION_CREATE = "create"
-ACTION_UPDATE = "update"
-ACTION_DELETE = "delete"
-ACTION_READ   = "read"
+
 
 
 def get_user_scheme(user_id:int)-> Optional[str]:
@@ -151,7 +148,7 @@ def get_user_by_user_name_with_passwd(user_name) -> Optional[User]:
     return user
 
 
-@audit_log(action=ACTION_UPDATE, resource_type="usuarios",description="Change password")
+
 def change_user_password(user_id:int, new_password:int, sessionId=None) -> Optional[User]:
     
     
@@ -290,7 +287,7 @@ def insert_user_onboard(
 
 
 
-@audit_log(action=ACTION_CREATE, resource_type="usuarios",description="Create an user")
+
 def insert_user(
     *,
     username: str,
@@ -356,6 +353,8 @@ def insert_user(
     )
 
     try:
+        g.audit_new_values = new_user.to_dict()
+        
         db.session.add(new_user)
         if commit:
             db.session.commit()
@@ -385,11 +384,7 @@ def insert_user(
 
 
 
-@audit_log(
-    action=ACTION_UPDATE,
-    resource_type="usuarios",
-    description="Update user"
-)
+
 def update_user(
     *,
     user_id: int,
@@ -412,6 +407,7 @@ def update_user(
     if not user:
         raise ValueError("Usuario no encontrado")
 
+    g.audit_old_values = user.to_dict()
     # ----------------------------------
     # Cambio de contraseña (opcional)
     # ----------------------------------
@@ -454,6 +450,9 @@ def update_user(
         user.mustChangePassword = must_change_password
 
     try:
+        
+        
+        g.audit_new_values = user.to_dict()
         db.session.commit()
         return user
 

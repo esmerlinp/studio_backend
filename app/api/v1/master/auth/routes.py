@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.api.v1.auth.controller import sessions, close_session, login, logout, refresh_token
+from app.api.v1.master.auth.controller import sessions, close_session, login, logout, refresh_token
 
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/v1/auth')

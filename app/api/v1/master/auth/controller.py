@@ -1,12 +1,17 @@
-from flask import request
-from app.services.master_scheme import user_service
+
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import track_activity
+from app import track_activity, track_and_log, audit_log
 from app.services.master_scheme import auth_service, session_service
 from app.utils.responses import success, error
 from app.utils import i18n
+from app.utils.types import ActionType, ResourceTypes
 
 @jwt_required()
+@track_and_log(
+    action=ActionType.READ, 
+    resource_type=ResourceTypes.USER_SESSION, 
+    description="Consultar sessiones"
+)
 def sessions():
     try:
         user_id = get_jwt_identity()
@@ -18,7 +23,12 @@ def sessions():
 
 
 @jwt_required()
-@track_activity
+@track_and_log(
+    action=ActionType.LOGOUT, 
+    resource_type=ResourceTypes.USER_SESSION, 
+    resource_id_arg="sessionId",
+    description="cerrar session"
+)
 def close_session(sessionId):
     try:
         user_id = get_jwt_identity()
@@ -33,7 +43,11 @@ def login():
 
 
 @jwt_required()
-@track_activity
+@track_and_log(
+    action=ActionType.LOGOUT, 
+    resource_type=ResourceTypes.USER_SESSION, 
+    description="Salir del sistema"
+)
 def logout(sessionId):
     try:
         user_id = get_jwt_identity()
@@ -44,7 +58,11 @@ def logout(sessionId):
 
 
 @jwt_required(refresh=True)
-@track_activity
+@track_and_log(
+    action=ActionType.UPDATE, 
+    resource_type=ResourceTypes.USER_SESSION, 
+    description="Generar nuevo token (refresh_token)"
+)
 def refresh_token():
     try:
         identity = get_jwt_identity()     # recupera el mismo identity guardado en el refresh token

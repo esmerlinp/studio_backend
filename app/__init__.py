@@ -1,10 +1,10 @@
 from functools import wraps
 from flask import jsonify
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from flask import Flask
 from dotenv import load_dotenv
 import os
-from .extensions import mail, db
+from .extensions import mail, db, limiter
 from app.services.master_scheme.session_service import get_session_active_by_user_id, invalidar_sesiones_por_id_session, actualizar_actividad_sesion
 from app.services.master_scheme.log_service import log_action
 
@@ -14,6 +14,7 @@ from app.models.master_scheme.user_roles_model import UserRole
 from app.models.master_scheme.roles_model import Role
 from datetime import datetime, timezone
 from werkzeug.middleware.proxy_fix import ProxyFix
+from flask import g, request
 
 INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 
@@ -66,10 +67,93 @@ def create_app():
     
 
     db.init_app(app)
-  
+    
+    # Vinculamos el limitador a la aplicación
+    limiter.init_app(app)
+
 
     return app
 
+
+
+# from functools import wraps
+# from datetime import datetime, timezone
+# from flask import jsonify, request
+# from flask_jwt_extended import get_jwt_identity
+
+def track_and_log(
+    action: str,
+    resource_type: str,
+    resource_id_arg: str | None = None,
+    description: str | None = None,
+):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                # --- PARTE 1: SEGURIDAD Y SESIÓN (track_activity) ---
+                user_id = get_jwt_identity()
+                session = get_session_active_by_user_id(userId=user_id)
+
+                if not session or not session.isActive:
+                    return jsonify({"msg": "Sesión inválida o expirada"}), 440
+                
+                user = User.query.get(user_id)
+                if not user or not user.isActive:                 
+                    return jsonify({
+                        "msg": "Cuenta inhabilitada. Contacte al administrador."
+                    }), 403
+
+                # Validar expiración física de la sesión
+                expiration = session.expirationDate
+                if expiration.tzinfo is None:
+                    expiration = expiration.replace(tzinfo=timezone.utc)
+
+                if expiration < datetime.now(timezone.utc):
+                    invalidar_sesiones_por_id_session(sessionId=session.sessionId)
+                    return jsonify({"msg": "Sesión expirada por inactividad"}), 440
+
+                # Actualizar timestamp de última actividad
+                actualizar_actividad_sesion(
+                    sessionId=session.sessionId, 
+                    inactivity_minutes=INACTIVITY_MINUTES
+                )
+
+                # --- PARTE 2: EJECUCIÓN DE LA FUNCIÓN ---
+                response = func(*args, **kwargs)
+
+                # --- PARTE 3: AUDITORÍA (audit_log) ---
+                # Solo auditamos si la respuesta fue exitosa (status 200-299)
+                # Opcional: puedes quitar esta validación si quieres auditar intentos fallidos
+                if isinstance(response, tuple):
+                    status_code = response[1]
+                else:
+                    status_code = 200
+
+                #if 200 <= status_code < 300:
+                #resource_id = None
+                resource_id = kwargs.get(resource_id_arg) if resource_id_arg in kwargs else None
+                # Extraer valores guardados en 'g' durante la ejecución de la función
+                old_vals = getattr(g, "audit_old_values", None)
+                new_vals = getattr(g, "audit_new_values", None)
+                
+                log_action(
+                    action=action,
+                    resource_type=resource_type,
+                    resource_id=resource_id,
+                    description=description,
+                    old_values=old_vals, # <--- Pasamos los diccionarios
+                    new_values=new_vals
+                )
+
+                return response
+
+            except Exception as e:
+                print(f"track_and_log error en {resource_type}:", str(e))
+                return jsonify({"msg": f"Error interno: {str(e)}"}), 500
+
+        return wrapper
+    return decorator
 
 def track_activity(func):
     @wraps(func)
@@ -133,17 +217,38 @@ def audit_log(
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
+            # --- PARTE 2: EJECUCIÓN DE LA FUNCIÓN ---
             response = fn(*args, **kwargs)
 
-            resource_id = None
-            if resource_id_arg and resource_id_arg in kwargs:
-                resource_id = kwargs.get(resource_id_arg)
+            # --- PARTE 3: AUDITORÍA (audit_log) ---
+            # Solo auditamos si la respuesta fue exitosa (status 200-299)
+            # Opcional: puedes quitar esta validación si quieres auditar intentos fallidos
+            if isinstance(response, tuple):
+                status_code = response[1]
+            else:
+                status_code = 200
 
+            #if 200 <= status_code < 300:
+            #resource_id = None
+            resource_id = kwargs.get(resource_id_arg) if resource_id_arg in kwargs else None
+            # Extraer valores guardados en 'g' durante la ejecución de la función
+            old_vals = getattr(g, "audit_old_values", None)
+            new_vals = getattr(g, "audit_new_values", None)
+            audit_resource_id = getattr(g, "audit_resource_id", None)
+            
+            if not resource_id:
+                resource_id = audit_resource_id
+            
+            user_id_from_jwt = get_jwt_identity()
+            
             log_action(
                 action=action,
                 resource_type=resource_type,
                 resource_id=resource_id,
-                description=description
+                description=description,
+                old_values=old_vals, # <--- Pasamos los diccionarios
+                new_values=new_vals,
+                user_id=user_id_from_jwt
             )
 
             return response

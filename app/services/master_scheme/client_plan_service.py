@@ -5,8 +5,9 @@ from app.models.master_scheme.client_plans_model import ClientPlan
 from app.models.master_scheme.plans_model import Plan
 from app.models.master_scheme.price_list_model import PriceList
 from dateutil.relativedelta import relativedelta
-
-
+from app import audit_log
+from app.utils.types import ActionType, ResourceTypes
+from flask import g
 
 
 def assign_plan_to_client_onboard(
@@ -64,6 +65,11 @@ def assign_plan_to_client_onboard(
     return client_plan
 
 
+
+@audit_log(action=ActionType.CREATE, 
+           resource_type=ResourceTypes.CLIENT_PLAN,
+           resource_id_arg="client_id", 
+           description="Asociar plan a cliente")
 def assign_plan_to_client(
     *,
     client_id: int,
@@ -116,6 +122,7 @@ def assign_plan_to_client(
 
     try:
         db.session.add(client_plan)
+        g.audit_new_values = client_plan.to_dict()
         if commit:
             db.session.commit()
         else:
@@ -128,6 +135,10 @@ def assign_plan_to_client(
 
 
 
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.CLIENT_PLAN,
+           resource_id_arg="client_id", 
+           description="Consultar plan activo de  cliente")
 def get_active_client_plan(client_id: int) -> Optional[ClientPlan]:
     today = date.today()
 
@@ -142,6 +153,11 @@ def get_active_client_plan(client_id: int) -> Optional[ClientPlan]:
 
 
 
+
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.CLIENT_PLAN,
+           resource_id_arg="id", 
+           description="Consultar plan")
 def get_active_plan(id: int) -> Optional[ClientPlan]:
     today = date.today()
 
@@ -154,6 +170,13 @@ def get_active_plan(id: int) -> Optional[ClientPlan]:
             ClientPlan.end_date >= today)
     ).order_by(ClientPlan.start_date.desc()).first()
     
+    
+    
+    
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.CLIENT_PLAN,
+           resource_id_arg="id", 
+           description="Consultar plan")
 def get_active_pending(id: int) -> Optional[ClientPlan]:
     today = date.today()
 
@@ -167,6 +190,10 @@ def get_active_pending(id: int) -> Optional[ClientPlan]:
     ).order_by(ClientPlan.start_date.desc()).first()
     
 
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.CLIENT_PLAN,
+           resource_id_arg="client_id", 
+           description="Consultar historico de planes del cliente")
 def get_client_plan_history(client_id: int) -> List[ClientPlan]:
     return ClientPlan.query.filter_by(
         client_id=client_id
@@ -174,6 +201,10 @@ def get_client_plan_history(client_id: int) -> List[ClientPlan]:
 
 
 
+@audit_log(action=ActionType.UPDATE, 
+           resource_type=ResourceTypes.CLIENT_PLAN,
+           resource_id_arg="client_plan_id", 
+           description="Actualizar plan")
 def update_client_plan(
     client_plan_id: int,
     *,
@@ -185,6 +216,7 @@ def update_client_plan(
     if not client_plan:
         return None
 
+    g.audit_old_values = client_plan.to_dict()
     if end_date is not None:
         client_plan.end_date = end_date
 
@@ -194,6 +226,8 @@ def update_client_plan(
         client_plan.status = status
 
     try:
+        g.audit_new_values = client_plan.to_dict()
+
         db.session.commit()
         return client_plan
     except Exception:
@@ -201,7 +235,10 @@ def update_client_plan(
         raise
 
 
-
+@audit_log(action=ActionType.UPDATE, 
+           resource_type=ResourceTypes.CLIENT_PLAN,
+           resource_id_arg="client_id", 
+           description="Cambiar plan de cliente")
 def change_client_plan(
     *,
     client_id: int,
@@ -214,6 +251,8 @@ def change_client_plan(
     if not current_plan:
         raise ValueError("Client has no active plan")
 
+    g.audit_old_values = current_plan.to_dict()
+
     # Finalizar plan actual
     current_plan.end_date = change_date
     current_plan.status = "CANCELLED"
@@ -222,18 +261,27 @@ def change_client_plan(
         db.session.flush()
 
         # Asignar nuevo plan
-        return assign_plan_to_client(
+        new_plan = assign_plan_to_client(
             client_id=client_id,
             plan_id=new_plan_id,
             price_list_id=new_price_list_id,
             start_date=change_date
         )
+        
+        g.audit_new_values = new_plan.to_dict()
+
+        return new_plan
 
     except Exception:
         db.session.rollback()
         raise
 
 
+
+@audit_log(action=ActionType.UPDATE, 
+           resource_type=ResourceTypes.PLAN,
+           resource_id_arg="client_plan_id", 
+           description="Cancelar plan")
 def cancel_client_plan(
     client_plan_id: int,
     cancel_date: Optional[date] = None
@@ -243,10 +291,13 @@ def cancel_client_plan(
     if not client_plan:
         return False
 
+    g.audit_old_values = client_plan.to_dict()
+    
     client_plan.status = "CANCELLED"
     client_plan.end_date = cancel_date or date.today()
 
     try:
+        g.audit_new_values = client_plan.to_dict()
         db.session.commit()
         return True
     except Exception:

@@ -2,10 +2,11 @@ from flask import request
 from werkzeug.security import generate_password_hash
 from app.services.master_scheme import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import track_activity, require_role
+from app import track_activity, require_role, track_and_log
 from app.utils.responses import success, error
 from app.utils.helpers import generate_reset_token, send_reset_email
 from app.utils import i18n
+from app.utils.types import ActionType, ResourceTypes   
 from uuid import uuid4
 
 from app.services.master_scheme.user_client_service import get_client_by_user
@@ -71,6 +72,7 @@ def get_my_client():
         error(message="not found")
     return success(data=data.to_dict())
 
+
 @jwt_required()
 @track_activity
 def change_password():
@@ -97,7 +99,7 @@ def change_password():
 
 
 
-
+@track_activity
 def create_user():
     try:
         

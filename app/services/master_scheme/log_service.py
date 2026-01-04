@@ -11,20 +11,35 @@ def log_action(
     description: str | None = None,
     old_values: dict | None = None,
     new_values: dict | None = None,
+    user_id: int | None = None, # Parámetro manual
 ):
     try:
+        # 1. Intentar obtener identidad si user_id no fue pasado manualmente
+        final_user_id = user_id
+        if final_user_id is None:
+            try:
+                # get_jwt_identity() falla si se llama fuera de un contexto JWT protegido
+                # sin el parámetro optional=True en decoradores, pero aquí lo manejamos:
+                final_user_id = get_jwt_identity()
+            except Exception:
+                final_user_id = None
+
+        # 2. Crear el registro
         audit = AuditLog(
-            user_id=get_jwt_identity(),
+            user_id=final_user_id,
             action=action,
             resource_type=resource_type,
             resource_id=resource_id,
             description=description,
-            ip_address=request.remote_addr,
-            user_agent=request.headers.get("User-Agent"),
+            # request.remote_addr puede fallar si no hay contexto de petición
+            ip_address=request.remote_addr if request else "0.0.0.0",
+            user_agent=request.headers.get("User-Agent") if request else "Internal/System",
             old_values=old_values,
             new_values=new_values
         )
+        
         db.session.add(audit)
         db.session.commit()
-    except Exception:
+    except Exception as e:
         db.session.rollback()
+        print(f"Error crítico en log_action: {str(e)}")

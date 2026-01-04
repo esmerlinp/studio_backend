@@ -10,7 +10,7 @@ from app.services.master_scheme.client_plan_service import get_active_client_pla
 from app.utils.responses import success
 from flask import request
 from app.utils.responses import success, error
-
+from app import limiter
 
 #Consumir rutas protegidas con el JWT
 #El cliente debe enviar el token en el header: Authorization: Bearer <token>
@@ -132,6 +132,7 @@ def new_cliente():
     return success(data=client.to_dict())
 
 
+@limiter.limit("5 per minute") # Muy restrictivo para evitar ataques DoS al crear clientes
 def onboard_client():
     try:
         data = request.get_json()

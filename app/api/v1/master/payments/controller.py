@@ -1,5 +1,5 @@
 from flask import  request, jsonify, render_template
-from ....extensions import db
+from app import db
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 #from app import track_activity, require_role

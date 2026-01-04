@@ -1,14 +1,14 @@
 from flask import request, redirect, render_template, jsonify
 from flask_jwt_extended import JWTManager
-from app.api.v1.users.routes import users_bp
-from app.api.v1.auth.routes import auth_bp
-from app.api.v1.clients.routes import client_bp
-from app.api.v1.plan.routes import plans_bp
-from app.api.v1.payments.routes import payment_bp, billing_bp
-from app.api.v1.student.routes import students_bp
-from app.api.v1.dynamics.routes import dynamic_fields_bp
-from app.api.v1.notifications.routes import notification_bp
-from app.api.v1.country.routes import countries_bp
+from app.api.v1.master.users.routes import users_bp
+from app.api.v1.master.auth.routes import auth_bp
+from app.api.v1.master.clients.routes import client_bp
+from app.api.v1.master.plan.routes import plans_bp
+from app.api.v1.master.payments.routes import payment_bp, billing_bp
+from app.api.v1.base.student.routes import students_bp
+from app.api.v1.master.dynamics.routes import dynamic_fields_bp
+from app.api.v1.master.notifications.routes import notification_bp
+from app.api.v1.master.country.routes import countries_bp
 from app.services.master_scheme.user_service import change_user_password, update_user, get_user_scheme, get_user_by_id
 from app import create_app
 from app.utils import i18n
@@ -22,9 +22,14 @@ from sqlalchemy import text
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+
+
 load_dotenv()
 
 app = create_app()
+
+
+
 app.wsgi_app = ProxyFix(
     app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1
 )
@@ -47,11 +52,6 @@ app.register_blueprint(countries_bp)
 # ------------------------------
 culture = "es-DO"
 i18n.setup_gettext("es")
-
-
-@app.route('/health')
-def health():
-    return 'OK', 200
 
 
 #endpoints que consultas en esquema master que no requieren validacion de jwt
@@ -79,6 +79,20 @@ MASTER_PUBLIC_ENDPOINTS = {
     "payments.show_restore_view",
     "countries.get_countries"
 }
+
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({
+        "success": False,
+        "msg": "Demasiadas peticiones. Por favor, intenta más tarde.",
+        "description": str(e.description)
+    }), 429
+
+
+@app.route('/health')
+def health():
+    return 'OK', 200
 
 
 @app.route("/host")

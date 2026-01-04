@@ -15,17 +15,19 @@ from app.models.client_scheme.log_model import AuditLog
 from app.services.master_scheme.client_plan_service import assign_plan_to_client_onboard
 from app.services.master_scheme.user_service import  insert_user_onboard
 from app.services.master_scheme.user_client_service import  assign_user_to_client_onboard
-from uuid import uuid4
 from datetime import date
 import uuid
 from sqlalchemy import func
-
+from flask import g
 from typing import Optional, List
 from app.services.master_scheme.payment_service import request_suscription
 from app.utils.helpers import send_email_template
 import os
 from dotenv import load_dotenv
 import stripe
+from app import audit_log
+from app.utils.types import ActionType, ResourceTypes
+
 
 
 def set_schema(schema_name: str):
@@ -166,6 +168,7 @@ def validate_schema_name(schema: str):
     if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", schema):
         raise ValueError("Invalid schema name")
 
+
 def create_client_onboard(
     *,
     contact_name: str| None = None,
@@ -179,7 +182,7 @@ def create_client_onboard(
     """
     Crea un cliente en master.clientes y su esquema de base de datos
     """
-    uuid = str(uuid4())
+    uuid = str(uuid.uuid4())
     new_client = Client(
         uuid=uuid,
         name=business_name,
@@ -201,6 +204,10 @@ def create_client_onboard(
     client = get_client_by_uuid(uuid)
     return client
 
+
+@audit_log(action=ActionType.CREATE, 
+           resource_type=ResourceTypes.CLIENT, 
+           description="Crear cliente")
 def create_client(
     *,
     name: str,
@@ -224,7 +231,7 @@ def create_client(
     """
     Crea un cliente en master.clientes y su esquema de base de datos
     """
-    uuid = str(uuid4())
+    uuid = str(uuid.uuid4())
     new_client = Client(
         uuid=uuid,
         name=name,
@@ -269,6 +276,9 @@ def create_client(
     client = get_client_by_uuid(uuid)
     return client
 
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.CLIENT, 
+           description="Consultar preferencias de cliente")
 def get_client_preferences():
   
   client_preferences = [
@@ -330,10 +340,16 @@ def get_client_preferences():
     
   return {"user_id": 1, "preferences": []}
 
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.AUDIT, 
+           description="Consultar Log")
 def get_client_logs()-> List[AuditLog]:    
     logs = AuditLog.query.all()
     return logs
   
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.CLIENT, 
+           description="Consultar clientes")
 def get_clients() -> List[Client]:    
     """
     Obtiene todos los clientes. 
@@ -342,18 +358,36 @@ def get_clients() -> List[Client]:
     # .options(joinedload(Client.plan)) <-- Solo si tienes relaciones
     return Client.query.order_by(Client.clientId.desc()).all()
   
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.CLIENT, 
+           resource_id_arg="clientId", 
+           description="Consultar cliente por id")
 def get_client_by_id(clientId)-> Optional[Client]:    
     client = Client.query.get(clientId)
     return client
   
+
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.CLIENT, 
+           resource_id_arg="uuid", 
+           description="Consultar cliente por uuid")
 def get_client_by_uuid(uuid)-> Client:    
     client = Client.query.filter_by(uuid = uuid).first()
     return client
 
+
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.INVOICE, 
+           resource_id_arg="client_id", 
+           description="Consultar Ordenes de pago de cliente")
 def get_client_payment_orders(client_id)-> List[PaymentTransaction]:    
     orders = PaymentTransaction.query.filter_by(clientId =client_id).all()
     return orders
 
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.INVOICE, 
+           resource_id_arg="client_id", 
+           description="Consultar Ordenes de pago de cliente por estatus")
 def get_client_payment_orders_by_status(client_id, status_order)-> List[PaymentTransaction]:    
     orders = PaymentTransaction.query.filter_by(clientId =client_id, status=status_order).all()
     return orders
@@ -391,10 +425,21 @@ def has_available_storage(client_id: int, new_file_size_mb: float) -> tuple[bool
 
     return True, None
 
+
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.STORAGE, 
+           resource_id_arg="client_id", 
+           description="Consultar almacenamiento consumido por un cliente")
 def storage_info(client_id) -> ClientStorage:
     storage = ClientStorage.query.filter_by(client_id=client_id).first()
     return storage
     
+
+
+@audit_log(action=ActionType.UPDATE, 
+           resource_type=ResourceTypes.STORAGE, 
+           resource_id_arg="client_id", 
+           description="Actualiza el contador de almacenamiento consumido por un cliente")
 def update_client_storage_usage(client_id: int, size_mb: float, operation: str = "add"):
     """
     Actualiza el contador de almacenamiento consumido por un cliente.
@@ -407,6 +452,7 @@ def update_client_storage_usage(client_id: int, size_mb: float, operation: str =
         # 1. Buscar el registro de almacenamiento del cliente
         storage_record = ClientStorage.query.filter_by(client_id=client_id).first()
 
+        g.audit_old_values = storage_record.to_dict()
         # 2. Si no existe (primer archivo del cliente), lo creamos
         if not storage_record:
             if operation == "subtract":
@@ -426,6 +472,8 @@ def update_client_storage_usage(client_id: int, size_mb: float, operation: str =
             storage_record.used_storage_mb = max(0, storage_record.used_storage_mb - size_mb)
 
         storage_record.last_updated = func.now()
+
+        g.audit_new_values = storage_record.to_dict()
 
         # 4. Confirmar cambios
         db.session.commit()

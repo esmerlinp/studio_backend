@@ -1,6 +1,6 @@
 
 from flask import Blueprint
-from app.api.v1.payments.controller import (
+from app.api.v1.master.payments.controller import (
     stripe_webhook, payment_success, payment_cancel, 
     cancel_subscription, restore_canceled_subscription, show_restore_view)
 

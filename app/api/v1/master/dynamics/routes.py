@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.api.v1.dynamics import controller
+from app.api.v1.master.dynamics import controller
 
 # Definición del Blueprint con su prefijo de versión
 dynamic_fields_bp = Blueprint('dynamic_fields', __name__, url_prefix='/api/v1/dynamic-fields')

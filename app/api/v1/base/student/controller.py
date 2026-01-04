@@ -1,10 +1,13 @@
 from flask import request
 from app.services.client_scheme import student_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import track_activity, require_role
+from app import track_activity, require_role, track_and_log, log_action
 from app.utils.responses import success, error
 from app.utils import i18n
+from app.utils.types import ActionType, ResourceTypes
 from app.services.master_scheme.documents_service import upload_to_gcs
+
+
 
 @jwt_required()
 @track_activity
@@ -43,6 +46,7 @@ def create_student():
     except Exception as e:
         return error(str(e), 400)
 
+
 @jwt_required()
 @track_activity
 def update_student(student_id: int):
@@ -52,6 +56,9 @@ def update_student(student_id: int):
     if not data:
         return error(i18n._("api.invalid_payload"), 400)
 
+    
+
+    
     student = student_service.update_student(student_id, data)
     if not student:
         return error(i18n._("student.not_found"), 404)

@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.api.v1.notifications.controller import get_notifications, mark_read, create
+from app.api.v1.master.notifications.controller import get_notifications, mark_read, create
 
 
 notification_bp = Blueprint('notifications', __name__, url_prefix='/api/v1/user/notifications')

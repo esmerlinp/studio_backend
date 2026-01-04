@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.api.v1.users.controller import get_user, get_users, create_user, me, get_user_by_name, change_password, forgot_password, add_default_user_preferences, update_user_preferences, get_my_client
+from app.api.v1.master.users.controller import get_user, get_users, create_user, me, get_user_by_name, change_password, forgot_password, add_default_user_preferences, update_user_preferences, get_my_client
 
 
 users_bp = Blueprint('users', __name__, url_prefix='/api/v1/users')

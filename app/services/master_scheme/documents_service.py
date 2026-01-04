@@ -1,6 +1,6 @@
 import uuid
 from google.cloud import storage
-from flask import current_app
+from flask import g
 import os
 from dotenv import load_dotenv
 from app.utils.helpers import get_file_size
@@ -37,6 +37,7 @@ def upload_to_gcs(user_id, file,  location_folder="general"):
         # 2. Generar un nombre de archivo único
         extension = os.path.splitext(file.filename)[1]
         unique_filename = f"{folder}/{uuid.uuid4()}{extension}"
+        g.audit_new_values = unique_filename
 
         # 3. Crear el blob (el objeto en GCS)
         blob = bucket.blob(unique_filename)

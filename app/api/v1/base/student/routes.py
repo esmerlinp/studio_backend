@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.api.v1.student.controller import get_students, get_student, create_student, update_student, delete_student, upload_student_file
+from app.api.v1.base.student.controller import get_students, get_student, create_student, update_student, delete_student, upload_student_file
 
 students_bp = Blueprint('students', __name__, url_prefix='/api/v1/students')
 

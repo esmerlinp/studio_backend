@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.api.v1.plan.controller import get_plans, create_plan, get_prices_list, add_price_list
+from app.api.v1.master.plan.controller import get_plans, create_plan, get_prices_list, add_price_list
 from flask import request
 
 plans_bp = Blueprint('plans', __name__, url_prefix='/api/v1/plans')

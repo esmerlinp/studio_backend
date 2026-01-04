@@ -4,6 +4,7 @@ from app.models.client_scheme.student_model import Student # Ajusta el import se
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from app.utils.helpers import generate_download_url
+from flask import g
 def get_all_students() -> List[Student]:
     """Retorna todos los estudiantes del esquema actual."""
     return Student.query.all()
@@ -72,6 +73,8 @@ def create_student(data: Dict[str, Any]) -> Student:
             custom_attributes=data.get('custom_attributes', {})
         )
         db.session.add(new_student)
+        g.audit_new_values = new_student
+                
         db.session.commit()
         return new_student
     except SQLAlchemyError as e:
@@ -88,6 +91,10 @@ def update_student(student_id: int, data: Dict[str, Any]) -> Optional[Student]:
         return None
 
     try:
+        
+        # 1. Guardar valores viejos (antes del cambio)
+        g.audit_old_values = student.to_dict()
+    
         # Actualización de campos fijos
         for key, value in data.items():
             if hasattr(student, key) and key != 'custom_attributes':
@@ -100,6 +107,10 @@ def update_student(student_id: int, data: Dict[str, Any]) -> Optional[Student]:
             current_attrs.update(data['custom_attributes'])
             student.custom_attributes = current_attrs
 
+        
+        # 3. Guardar valores nuevos (después del cambio)
+        g.audit_new_values = data
+    
         db.session.commit()
         return student
     except SQLAlchemyError as e:
@@ -114,6 +125,8 @@ def delete_student(student_id: int) -> bool:
     
     try:
         db.session.delete(student)
+        g.audit_old_values = student.to_dict()
+        
         db.session.commit()
         return True
     except SQLAlchemyError as e:
