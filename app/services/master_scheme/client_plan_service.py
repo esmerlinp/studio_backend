@@ -68,7 +68,6 @@ def assign_plan_to_client_onboard(
 
 @audit_log(action=ActionType.CREATE, 
            resource_type=ResourceTypes.CLIENT_PLAN,
-           resource_id_arg="client_id", 
            description="Asociar plan a cliente")
 def assign_plan_to_client(
     *,
@@ -85,6 +84,7 @@ def assign_plan_to_client(
     if not plan or not plan.is_active:
         raise ValueError("Invalid or inactive plan")
 
+    g.audit_resource_id = plan.id
     # Validar lista de precios
     price_list = PriceList.query.get(price_list_id)
     if not price_list or not price_list.is_active:
@@ -142,7 +142,7 @@ def assign_plan_to_client(
 def get_active_client_plan(client_id: int) -> Optional[ClientPlan]:
     today = date.today()
 
-    return ClientPlan.query.filter(
+    client_plan = ClientPlan.query.filter(
         ClientPlan.client_id == client_id,
         ClientPlan.status == "ACTIVE",
         ClientPlan.start_date <= today,
@@ -151,7 +151,8 @@ def get_active_client_plan(client_id: int) -> Optional[ClientPlan]:
             ClientPlan.end_date >= today)
     ).order_by(ClientPlan.start_date.desc()).first()
 
-
+    g.audit_resource_id = client_plan.id
+    return client_plan
 
 
 @audit_log(action=ActionType.READ, 
@@ -161,7 +162,7 @@ def get_active_client_plan(client_id: int) -> Optional[ClientPlan]:
 def get_active_plan(id: int) -> Optional[ClientPlan]:
     today = date.today()
 
-    return ClientPlan.query.filter(
+    client_plan = ClientPlan.query.filter(
         ClientPlan.id == id,
         ClientPlan.status == "ACTIVE",
         ClientPlan.start_date <= today,
@@ -170,7 +171,8 @@ def get_active_plan(id: int) -> Optional[ClientPlan]:
             ClientPlan.end_date >= today)
     ).order_by(ClientPlan.start_date.desc()).first()
     
-    
+    g.audit_resource_id = client_plan.id
+    return client_plan
     
     
 @audit_log(action=ActionType.READ, 
@@ -195,11 +197,12 @@ def get_active_pending(id: int) -> Optional[ClientPlan]:
            resource_id_arg="client_id", 
            description="Consultar historico de planes del cliente")
 def get_client_plan_history(client_id: int) -> List[ClientPlan]:
-    return ClientPlan.query.filter_by(
+    client_plan = ClientPlan.query.filter_by(
         client_id=client_id
     ).order_by(ClientPlan.start_date.desc()).all()
-
-
+    
+    g.audit_resource_id = client_plan.id
+    return client_plan
 
 @audit_log(action=ActionType.UPDATE, 
            resource_type=ResourceTypes.CLIENT_PLAN,
@@ -215,7 +218,8 @@ def update_client_plan(
     client_plan = ClientPlan.query.get(client_plan_id)
     if not client_plan:
         return None
-
+    
+    g.audit_resource_id = client_plan.id
     g.audit_old_values = client_plan.to_dict()
     if end_date is not None:
         client_plan.end_date = end_date
@@ -251,6 +255,7 @@ def change_client_plan(
     if not current_plan:
         raise ValueError("Client has no active plan")
 
+    g.audit_resource_id = current_plan.id
     g.audit_old_values = current_plan.to_dict()
 
     # Finalizar plan actual
@@ -279,7 +284,7 @@ def change_client_plan(
 
 
 @audit_log(action=ActionType.UPDATE, 
-           resource_type=ResourceTypes.PLAN,
+           resource_type=ResourceTypes.CLIENT_PLAN,
            resource_id_arg="client_plan_id", 
            description="Cancelar plan")
 def cancel_client_plan(
@@ -290,7 +295,7 @@ def cancel_client_plan(
     client_plan = ClientPlan.query.get(client_plan_id)
     if not client_plan:
         return False
-
+    g.audit_resource_id = client_plan.id
     g.audit_old_values = client_plan.to_dict()
     
     client_plan.status = "CANCELLED"

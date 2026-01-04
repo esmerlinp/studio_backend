@@ -1,8 +1,8 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity, require_role
-from app.services.master_scheme.client_service import (get_client_preferences, get_client_logs, 
+from app.services.master_scheme.client_service import (get_client_preferences, get_client_logs, get_logs_by_entity,
                                                        onboard_client_service, storage_info, 
-                                                       create_client, get_clients, 
+                                                       create_client, get_clients,
                                                        get_client_by_id, get_client_payment_orders)
 
 from app.services.master_scheme.user_client_service import get_client_by_user   
@@ -11,14 +11,89 @@ from app.utils.responses import success
 from flask import request
 from app.utils.responses import success, error
 from app import limiter
+from datetime import date
 
 #Consumir rutas protegidas con el JWT
 #El cliente debe enviar el token en el header: Authorization: Bearer <token>
+ADMIN_ROLES = ["OWNER", "ADMIN", "SUPER_ADMIN", "SYS_ADMIN", "AUDITOR"]
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES)
+def get_my_institution():
+    user_id = get_jwt_identity()  
+    data = get_client_by_user(user_id=user_id)
+    if not data:
+        error(message="not found")
+    return success(data=data.to_dict())
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES)
+def get_my_payments():
+    user_id = get_jwt_identity()  
+    data = get_client_by_user(user_id=user_id)
+    payments = get_client_payment_orders(data.clientId)
+    
+    return success(data=[d.to_dict() for d in payments])
+
+# @jwt_required()
+# @track_activity
+# @require_role(ADMIN_ROLES)
+# def get_my_invoices():
+#     user_id = get_jwt_identity()  
+#     data = get_client_by_user(user_id=user_id)
+#     payments = get_client_payment_orders(data.clientId)
+    
+#     return success(data=[d.to_dict() for d in payments])
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES)
+def get_my_personal_logs():    
+    log = get_client_logs()
+    return success(data=log)
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES)
+def get_my_personal_logs_by_entity(entityName):
+    log = get_logs_by_entity(entityName)
+    return success(data=[d.to_dict() for d in log])
 
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
+@require_role(ADMIN_ROLES)
+def get_my_storage_usage():
+    identity = get_jwt_identity()  
+    client = get_client_by_user(user_id=identity)
+    if client:
+        storage = storage_info(client_id=client.clientId)
+        return success(data=storage.to_dict())
+    return success(data={})
+
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES)
+def get_my_subscription():
+    
+    user_id = get_jwt_identity()  
+    data = get_client_by_user(user_id=user_id)
+    plan = get_active_client_plan(client_id=data.clientId)
+    
+    if not plan:
+        today = date.today()
+        plan = assign_plan_to_client(client_id=data.clientId, plan_id=2, price_list_id=2, start_date=today, commit=True)
+        
+    return success(data=plan.to_dict())
+
+
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES)
 def get_client_preferences():
     preferences = get_client_preferences()
     if not preferences:
@@ -28,15 +103,15 @@ def get_client_preferences():
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
+@require_role(ADMIN_ROLES)
 def get_logs():
-
     logs = get_client_logs()
     return success(data=[log.to_dict() for log in logs])
 
+
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
+@require_role(ADMIN_ROLES)
 def get_client_payments(clientId):
 
     orders = get_client_payment_orders(client_id=clientId)
@@ -46,7 +121,7 @@ def get_client_payments(clientId):
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
+@require_role(ADMIN_ROLES)
 def get_client_plans(clientId):
 
     logs = get_client_plan_history(client_id=clientId)
@@ -54,7 +129,7 @@ def get_client_plans(clientId):
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
+@require_role(ADMIN_ROLES)
 def get_plan(clientId):
     plan = get_active_client_plan(client_id=clientId)
     
@@ -68,7 +143,7 @@ def get_plan(clientId):
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
+@require_role(ADMIN_ROLES)
 def change_plan():
     data = request.get_json()
     plan = change_client_plan(client_id=data.get("client_id"), new_plan_id=data.get("new_plan_id"), new_price_list_id=data.get("new_price_list_id"))
@@ -77,7 +152,7 @@ def change_plan():
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
+@require_role(ADMIN_ROLES)
 def get_client(clientId):
     data = get_client_by_id(clientId=clientId)
     if not data:
@@ -89,24 +164,16 @@ def get_client(clientId):
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN", "SUPPORT"])
+@require_role(ADMIN_ROLES)
 def get_all_clients():
     data = get_clients()
     return success(data=[d.to_dict() for d in data])
 
-@jwt_required()
-@track_activity
-def get_storage_info():
-    identity = get_jwt_identity()  
-    client = get_client_by_user(user_id=identity)
-    if client:
-        storage = storage_info(client_id=client.clientId)
-        return success(data=storage.to_dict())
-    return success(data={})
+
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
+@require_role(ADMIN_ROLES)
 def new_cliente():
     data = request.get_json()
 

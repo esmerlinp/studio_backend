@@ -197,7 +197,17 @@ def get_user_by_id(user_id:int) -> Optional[User]:
 
 
 def get_all_users() -> List[User]:
-    users = User.query.all()        
+    users = User.query.all()   
+    return users
+    
+def get_client_users(user_id) -> List[User]:
+    cliente_del_usuario = UsuarioCliente.query.filter_by(user_id=user_id).first()
+    
+    users = db.session.query(User)\
+        .join(UsuarioCliente, User.userId==UsuarioCliente.user_id)\
+        .filter(UsuarioCliente.client_uuid == cliente_del_usuario.client_uuid)\
+        .all()
+        
     return users
     
 

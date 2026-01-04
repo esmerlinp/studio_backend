@@ -3,11 +3,17 @@ from ...extensions import db
 from app.models.client_scheme.student_model import Student # Ajusta el import según tu estructura
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
-from app.utils.helpers import generate_download_url
+from app.utils.helpers import generate_download_url, paginate_query
 from flask import g
-def get_all_students() -> List[Student]:
+
+
+def get_all_students() -> dict:
     """Retorna todos los estudiantes del esquema actual."""
-    return Student.query.all()
+    
+    query = Student.query\
+        .order_by(Student.id)
+    data_dict, data_model = paginate_query(query=query)
+    return data_dict
 
 def get_student_by_id(student_id: int) -> Optional[Student]:
     student = Student.query.get(student_id)

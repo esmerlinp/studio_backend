@@ -14,7 +14,8 @@ from app.services.master_scheme.documents_service import upload_to_gcs
 def get_students():
     """Obtiene la lista de todos los estudiantes del esquema actual."""
     data = student_service.get_all_students()
-    return success(data=[student.to_dict() for student in data])
+    return success(data=data)
+
 
 @jwt_required()
 @track_activity

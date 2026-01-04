@@ -11,6 +11,7 @@ from app.models.master_scheme.client_storage_model import ClientStorage
 from app.models.master_scheme.client_plans_model import ClientPlan
 from app.models.master_scheme.price_list_model import PriceList
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
+from app.models.master_scheme.pyments.invoice_model import Invoice
 from app.models.client_scheme.log_model import AuditLog
 from app.services.master_scheme.client_plan_service import assign_plan_to_client_onboard
 from app.services.master_scheme.user_service import  insert_user_onboard
@@ -21,7 +22,7 @@ from sqlalchemy import func
 from flask import g
 from typing import Optional, List
 from app.services.master_scheme.payment_service import request_suscription
-from app.utils.helpers import send_email_template
+from app.utils.helpers import send_email_template, paginate_query
 import os
 from dotenv import load_dotenv
 import stripe
@@ -343,9 +344,22 @@ def get_client_preferences():
 @audit_log(action=ActionType.READ, 
            resource_type=ResourceTypes.AUDIT, 
            description="Consultar Log")
-def get_client_logs()-> List[AuditLog]:    
-    logs = AuditLog.query.all()
+def get_client_logs()-> dict:    
+    query = AuditLog.query.order_by(AuditLog.created_at.desc())
+    data_dict, data_model = paginate_query(query=query)
+        
+    return data_dict
+
+
+
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.AUDIT, 
+           description="Consultar Log")
+def get_logs_by_entity(resource_type:str)-> List[AuditLog]:    
+    logs = AuditLog.query.filter_by(resource_type=resource_type).all()
     return logs
+
+
   
 @audit_log(action=ActionType.READ, 
            resource_type=ResourceTypes.CLIENT, 
@@ -383,6 +397,15 @@ def get_client_by_uuid(uuid)-> Client:
 def get_client_payment_orders(client_id)-> List[PaymentTransaction]:    
     orders = PaymentTransaction.query.filter_by(clientId =client_id).all()
     return orders
+
+# @audit_log(action=ActionType.READ, 
+#            resource_type=ResourceTypes.INVOICE, 
+#            resource_id_arg="client_id", 
+#            description="Consultar Ordenes de pago de cliente")
+# def get_client_payment_orders(client_id)-> List[PaymentTransaction]:  
+
+#     invoices = Invoice.query.filter_by(clientId =client_id).all()
+#     return invoices
 
 @audit_log(action=ActionType.READ, 
            resource_type=ResourceTypes.INVOICE, 

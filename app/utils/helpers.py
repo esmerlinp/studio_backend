@@ -6,11 +6,26 @@ import os
 from dotenv import load_dotenv
 from app.models.client_scheme.dynamic_field_model import DynamicField
 
-
-
 import datetime
 from google.cloud import storage
 
+
+
+def paginate_query(query):
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    return {
+        "info": [item.to_dict() for item in pagination.items],
+        "meta": {
+            "total": pagination.total,
+            "pages": pagination.pages,
+            "current_page": pagination.page
+        }
+    }, pagination
+    
 def generate_download_url(blob_name):
     """Genera una URL firmada para un archivo específico."""
     storage_client = storage.Client()

@@ -33,7 +33,8 @@ def me():
 @require_role(["SUPER_ADMIN", "SYS_ADMIN"])
 def get_users():
     # data = db.fetch_data('SELECT * FROM usuarios')
-    users = user_service.get_all_users()
+    user_id = get_jwt_identity()
+    users = user_service.get_client_users(user_id=user_id)
     result = []
     if users:
         result = [user.to_dict() for user in users]
@@ -63,14 +64,6 @@ def get_user_by_name(userName):
     return success(data=user.to_dict(), message=i18n._("common.users.retrieved_successfully"), status_code=200)
 
 
-@jwt_required()
-@track_activity
-def get_my_client():
-    user_id = get_jwt_identity()  
-    data = get_client_by_user(user_id=user_id)
-    if not data:
-        error(message="not found")
-    return success(data=data.to_dict())
 
 
 @jwt_required()

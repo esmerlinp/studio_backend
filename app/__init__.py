@@ -236,7 +236,7 @@ def audit_log(
             new_vals = getattr(g, "audit_new_values", None)
             audit_resource_id = getattr(g, "audit_resource_id", None)
             
-            if not resource_id:
+            if audit_resource_id:
                 resource_id = audit_resource_id
             
             user_id_from_jwt = get_jwt_identity()
