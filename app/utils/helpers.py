@@ -7,6 +7,27 @@ from dotenv import load_dotenv
 from app.models.client_scheme.dynamic_field_model import DynamicField
 
 
+
+import datetime
+from google.cloud import storage
+
+def generate_download_url(blob_name):
+    """Genera una URL firmada para un archivo específico."""
+    storage_client = storage.Client()
+    bucket_name = os.getenv("GCS_BUCKET_NAME")
+
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+
+    url = blob.generate_signed_url(
+        version="v4",
+        # La URL expirará en 15 minutos
+        expiration=datetime.timedelta(minutes=15),
+        # Método permitido
+        method="GET",
+    )
+    return url
+
 def get_serializer():
     return URLSafeTimedSerializer(
         secret_key=current_app.config["SECRET_KEY"],

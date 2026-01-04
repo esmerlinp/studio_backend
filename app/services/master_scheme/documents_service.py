@@ -49,12 +49,12 @@ def upload_to_gcs(user_id, file,  location_folder="general"):
         # Si es privado, deberías usar blob.generate_signed_url
         
         # Hacer el archivo público después de subirlo
-        blob.make_public()
+        #blob.make_public()
         
          # IMPORTANTE: Actualizar el contador de uso
         client_service.update_client_storage_usage(cliente.clientId, file_size_mb)
         
-        return blob.public_url
+        return unique_filename
 
     except Exception as e:
         print(f"Error en GCS Upload: {str(e)}")

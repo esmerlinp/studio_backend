@@ -149,6 +149,8 @@ def set_schema():
     # 5. Cambio de Schema con Manejo de Errores Robusto
     schema_name = get_user_scheme(user_id=user_id)
     
+    print(schema_name)
+    
     # if not schema_name:
     #     return error("Ambiente no configurado", 500)
 

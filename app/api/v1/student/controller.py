@@ -20,7 +20,9 @@ def get_student(student_id: int):
     student = student_service.get_student_by_id(student_id)
     if not student:
         return error(i18n._("student.not_found"), 404)
-    return success(data=student.to_dict())
+    estudiante_dic = student.to_dict()
+    estudiante_dic["photoUrl"] = student.temporary_url
+    return success(data=estudiante_dic)
 
 @jwt_required()
 @track_activity

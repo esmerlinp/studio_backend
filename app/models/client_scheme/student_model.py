@@ -65,7 +65,6 @@ class Student(db.Model):
             "genderId": self.genderId,
             "enrollmentDate": self.enrollmentDate.isoformat() if self.enrollmentDate else None,
             "status": self.status,
-            "photoUrl": self.photoUrl,
             "previousSchoolId": self.previousSchoolId,
             "custom_attributes": self.custom_attributes
         }

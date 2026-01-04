@@ -3,13 +3,23 @@ from ...extensions import db
 from app.models.client_scheme.student_model import Student # Ajusta el import según tu estructura
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
+from app.utils.helpers import generate_download_url
 def get_all_students() -> List[Student]:
     """Retorna todos los estudiantes del esquema actual."""
     return Student.query.all()
 
 def get_student_by_id(student_id: int) -> Optional[Student]:
-    """Busca un estudiante por su ID primario."""
-    return Student.query.get(student_id)
+    student = Student.query.get(student_id)
+    if not student:
+        return None
+
+    # Generamos la URL firmada usando la ruta guardada en la DB
+    if student.photoUrl:
+        # Usamos setattr para crear un atributo que NO sea una columna de la DB
+        # o simplemente lo asignamos a una propiedad nueva:
+        student.temporary_url = generate_download_url(student.photoUrl)
+    
+    return student
 
 def get_student_by_code(code: str) -> Optional[Student]:
     """Busca un estudiante por su código institucional."""
