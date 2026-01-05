@@ -15,7 +15,7 @@ from app.models.master_scheme.roles_model import Role
 from datetime import datetime, timezone
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import g, request
-
+from app.errors import register_error_handlers
 INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 
 
@@ -72,6 +72,7 @@ def create_app():
     limiter.init_app(app)
 
 
+    register_error_handlers(app)
     return app
 
 

@@ -68,7 +68,6 @@ def schema_exists(schema_name: str) -> bool:
     result = db.session.execute(query, {"schema": schema_name}).scalar()
     return bool(result)
 
-
 def create_client_schema(new_schema: str, base_schema: str = "cliente"):
     sql = f"""
     CREATE SCHEMA IF NOT EXISTS {new_schema};
@@ -163,14 +162,7 @@ def request_suscription(plan_identity, billing_cycle="month") -> dict:
         db.session.rollback()
         print(f"❌ ERROR GENERAL EN REQUEST_SUSCRIPTION: {str(e)}")
         return {"status": "error", "message": str(e)}
-    
-
-
-
-
-
-
-    
+        
 def send_goodbye_email(client_email, contact_name, business_name):
     load_dotenv()
     base_url=os.getenv("BASE_URL")
@@ -216,7 +208,7 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
     # 3. Extender vigencia del Plan
     client_plan = ClientPlan.query.get(transaction.clientPlanId)
     if client_plan:
-        client_plan.status = "ACTIVE" # Asegúrate que el nombre de columna sea correcto
+        client_plan.status = "ACTIVE" 
 
         
     client = Client.query.get(transaction.clientId)
@@ -230,17 +222,22 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
         if not schema_exists(client.schemaName):
             create_client_schema(client.schemaName)
         
-        # --- ACTIVACIÓN DE USUARIO Y ENVÍO DE CLAVE ---
-        relacion = UsuarioCliente.query.filter_by(client_uuid=client.uuid).first()
-        user = User.query.get(relacion.user_id)
-        if user:
-            user.isActive = True
-            #db.session.flush() # Asegura que tenemos los datos del usuario listos
-            
-            # ENVIAR EMAIL DE CONFIGURACIÓN DE CLAVE (Solo la primera vez/Trial)
-            #if is_trial:
-                # Aquí asumo que esta función genera el token y envía el link de password
-                # send_confirmation_account_email(user.userId, client.contactName, user.email)
+        # --- ACTIVACIÓN DE USUARIOS ---
+        
+        user_ids_subquery = db.session.query(UsuarioCliente.user_id).filter(
+            UsuarioCliente.client_uuid == client.uuid
+        ).subquery()
+        
+        User.query.filter(User.userId.in_(user_ids_subquery), User.is_disabled_by_client==False).update(
+            {"isActive": True}, synchronize_session=False
+        )
+        
+        
+        # relacion = UsuarioCliente.query.filter_by(client_uuid=client.uuid).first()
+        # user = User.query.get(relacion.user_id)
+        # if user:
+        #     user.isActive = True
+
     db.session.flush()
     if commit:
         db.session.commit()
@@ -480,8 +477,7 @@ def handle_subscription_updated(subscription):
             
             stripe_status = subscription['status']
             client_plan.status = stripe_status.upper()
-            print(client)
-            print(stripe_status)
+
             # if stripe_status == 'active':
             #     client_plan.status = 'ACTIVE'
             # elif stripe_status in ['past_due', 'unpaid']:

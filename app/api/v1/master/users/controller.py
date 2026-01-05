@@ -6,7 +6,7 @@ from app import track_activity, require_role, track_and_log
 from app.utils.responses import success, error
 from app.utils.helpers import generate_reset_token, send_reset_email
 from app.utils import i18n
-from app.utils.types import ActionType, ResourceTypes   
+from app.utils.helpers import send_confirmation_account_email
 from uuid import uuid4
 
 from app.services.master_scheme.user_client_service import get_client_by_user
@@ -88,29 +88,42 @@ def change_password():
     except Exception as e:
         return error(message=str(e), status_code=500)
     
+@jwt_required()
+@track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN", "ADMIN", "OWNER"])
+def inactivate_user(userId):
+    admin_user_id = get_jwt_identity()
+    user = user_service.deactivate_user(user_id=userId, admin_user_id=admin_user_id)
+    return success(data=user.to_dict())
 
 
 
 
 @track_activity
+@require_role(["SUPER_ADMIN", "SYS_ADMIN", "ADMIN", "OWNER"])
 def create_user():
     try:
+        admin_user_id = get_jwt_identity()
         
         username = request.json.get('userName')
         firstName = request.json.get('firstName')
         lastName = request.json.get('lastName')
         email = request.json.get('email')
-        uuid = str(uuid4())
-        password = request.json.get('password')
-        
+       
+        client = get_client_by_user(user_id=admin_user_id)
         user = user_service.insert_user(
             username=username,
             first_name=firstName,
             last_name=lastName,
             email=email,
-            uuid=uuid,
-            password=password,
+            client_uuid=client.uuid,
+            must_change_password=True
         )
+        
+        if user:
+            #Enviar email al usuario para la activacion de la cuenta y cambio de password
+            send_confirmation_account_email(user_id=user.userId, user_name=user.username, email=user.email)
+            
 
         return success(data=user.to_dict(), message=i18n._("common.users.created_successfully"), status_code=200)
 

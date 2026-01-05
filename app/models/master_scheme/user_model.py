@@ -25,6 +25,7 @@ class User(db.Model):
     lastPasswordChangeDate = db.Column("dfechaultcambiocont",db.DateTime, nullable=False)
     password = db.Column("scontrasena", db.String(500), nullable=False)
     rol = db.Column("srol", db.String(20), nullable=True, default=None)
+    is_disabled_by_client = db.Column('binactivadoporelcliente', db.Boolean, default=False)
     
     # preferences = db.relationship(
     #     "UserPreference",
@@ -33,7 +34,10 @@ class User(db.Model):
     #     cascade="all, delete"
     # )
     
-
+    def can_login(self):
+        """Verifica si el usuario tiene permitido el acceso técnico y administrativo."""
+        return self.is_active and not self.is_disabled_by_client
+    
     def to_dict(self, include_sensitive=False):
         data = {
             "userId": self.userId,

@@ -9,12 +9,14 @@ from app.models.client_scheme.password_policy_model import PasswordPolicy
 from app.models.master_scheme.client_model import Client
 from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.services.master_scheme.password_service import validate_password_policy
+from app.services.master_scheme.user_client_service import assign_user_to_client
 from datetime import datetime, timezone
 from app.utils.responses import success, error
-from app.utils.helpers import send_email_template, generate_reset_token
+from app.utils.helpers import send_email_template, generate_reset_token, send_confirmation_account_email
 from flask import request, g
 from dotenv import load_dotenv
 import os
+from uuid import uuid4
 
 
 
@@ -30,12 +32,9 @@ def get_user_scheme(user_id:int)-> Optional[str]:
         
     return None
     
-    
-    
 def get_user_preferences(user_id) -> Optional[UserPreference]:
     prefs = UserPreference.query.filter_by(userId=user_id).first()
     return prefs
-
 
 def add_default_user_preferences_onboard(user_id:int,language="es", theme="light", timezone="America/Santo_Domingo", date_format="DD/MM/YYYY", 
                         receive_not_email = True, 
@@ -89,9 +88,6 @@ def add_default_user_preferences(user_id:int,language="es", theme="light", timez
     
     return prefs
 
-        
-
-
 def update_user_preference(
     user_id: int,
     language: str | None = None,
@@ -142,12 +138,9 @@ def update_user_preference(
 
     return prefs
 
-
 def get_user_by_user_name_with_passwd(user_name) -> Optional[User]:
     user = User.query.filter_by(username=user_name).first()
     return user
-
-
 
 def change_user_password(user_id:int, new_password:int, sessionId=None) -> Optional[User]:
     
@@ -184,18 +177,14 @@ def get_user_by_user_name(user_name) -> Optional[User]:
     user = User.query.filter_by(username=user_name).first()
     return user
 
-
 def get_user_by_email(email) -> Optional[User]:
     user = User.query.filter_by(email=email).first()
     return user
-
 
 def get_user_by_id(user_id:int) -> Optional[User]:
     user = User.query.filter_by(userId=user_id).first()
     return user
     
-
-
 def get_all_users() -> List[User]:
     users = User.query.all()   
     return users
@@ -210,10 +199,6 @@ def get_client_users(user_id) -> List[User]:
         
     return users
     
-
-
-
-
 def insert_user_onboard(
     *,
     username: str,
@@ -294,23 +279,18 @@ def insert_user_onboard(
     
     return user
 
-
-
-
-
 def insert_user(
     *,
     username: str,
     first_name: str,
     last_name: str,
     email: str,
-    uuid: str,
-    password: str,
+    client_uuid:str,
+    password: str = "aosU-18fh-stys-3Get*",
     photo: Optional[str] = None,
     is_active: bool = False,
     is_confirmed_user: bool = False,
     must_change_password: bool = False,
-    commit:bool = True,
     send_confirm_email = False,
     default_password = False
 ) -> User:
@@ -320,6 +300,7 @@ def insert_user(
     
     #Valida politicas de la contrasena
     load_dotenv()
+    uuid = str(uuid4())
     
     if not default_password:
         policy = PasswordPolicy.query.first()
@@ -334,10 +315,14 @@ def insert_user(
         
     u = get_user_by_user_name(user_name=username)    
     if u:
+        if not u.isActive and not u.isConfirmedUser:
+            send_confirmation_account_email(user_id=u.userId, user_name=u.username, email=u.email)
         raise ValueError("Usuario ya existe")
     
     u = get_user_by_email(email=email)
     if u:
+        if not u.isActive and not u.isConfirmedUser:
+            send_confirmation_account_email(user_id=u.userId, user_name=u.username, email=u.email)
         raise ValueError("email ya existe")
     
     
@@ -363,14 +348,17 @@ def insert_user(
     )
 
     try:
-        g.audit_new_values = new_user.to_dict()
+        
         
         db.session.add(new_user)
-        if commit:
-            db.session.commit()
-        else:
-            db.session.flush()
+        db.session.flush()
         
+        g.audit_new_values = new_user.to_dict()
+        #Relacionar el usuario al cliente.
+        assign_user_to_client(user_id=new_user.userId, client_uuid=client_uuid, commit=False)
+        
+        db.session.commit()
+
         #Enviar Email de confirmacion.
         user = get_user_by_user_name(user_name=username)
         if send_confirm_email:
@@ -389,11 +377,6 @@ def insert_user(
         if commit:
             db.session.rollback()
         raise e
-
-    
-
-
-
 
 def update_user(
     *,
@@ -469,3 +452,34 @@ def update_user(
     except Exception as e:
         db.session.rollback()
         raise e
+
+
+def deactivate_user(user_id, admin_user_id):
+    # 1. Obtener las relaciones
+    cliente_usuario_a_inactivar = UsuarioCliente.query.filter_by(user_id=user_id).first()
+    cliente_del_usuario_administrador = UsuarioCliente.query.filter_by(user_id=admin_user_id).first()
+
+    # 2. Validar que ambos existan (No sean None)
+    if not cliente_usuario_a_inactivar or not cliente_del_usuario_administrador:
+        # Si falta alguno, es un error de "No encontrado" o "Sesión inválida"
+        raise ValueError("No se pudo verificar la relación del usuario con la institución.")
+
+    # 3. Validar que pertenezcan al mismo cliente (ID de la institución)
+    if cliente_usuario_a_inactivar.client_uuid != cliente_del_usuario_administrador.client_uuid:
+        # Esto es un intento de violación de seguridad (un admin tratando de editar otra escuela)
+        raise PermissionError("Acceso denegado: El usuario no pertenece a su institución.")
+        
+    user = User.query.filter_by(userId=user_id).first()
+    if not user:
+        raise ValueError("Usuario no encontrado")
+    
+    try:
+        user.isActive = False
+        user.is_disabled_by_client = True
+        db.session.commit()
+        
+        return user
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    

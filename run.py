@@ -29,7 +29,6 @@ load_dotenv()
 app = create_app()
 
 
-
 app.wsgi_app = ProxyFix(
     app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1
 )
@@ -130,7 +129,7 @@ def schema_exists(schema_name):
     return result
 
 @app.before_request
-def set_schema():
+def before_request():
     # 1. Forzar HTTPS
     if not request.is_secure and os.getenv('FLASK_ENV') != 'development':
         return redirect(request.url.replace('http://', 'https://', 1), code=301)
@@ -369,6 +368,7 @@ def reset_password():
 
 
         schema_name = get_user_scheme(user_id=user_id)
+        print(schema_name)
         db.session.execute(
             text(f"SET search_path TO {schema_name}, public")
         )
