@@ -10,6 +10,7 @@ class NCFSequence(db.Model):
     current_number = db.Column('inumeroactual', db.Integer, default=1)
     max_number = db.Column('inumeromaximo', db.Integer)
     is_active = db.Column('bactivo', db.Boolean, default=True)
+    expiration_date = db.Column('dfechavencimiento', db.Date, nullable=True)
 
     def get_next_ncf(self):
         # Genera el string formateado: B0100000001
@@ -17,6 +18,17 @@ class NCFSequence(db.Model):
         ncf = f"{self.prefix}{self.type_ncf}{formatted_number}"
         return ncf
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "type_ncf": self.type_ncf,
+            "prefix": self.prefix,
+            "current_number": self.current_number,
+            "max_number": self.max_number,
+            "is_Active": self.is_active,
+            "expiration_date": self.expiration_date
+        }
+        
 class NCFLog(db.Model):
     __tablename__ = 'ncflog'
     __table_args__ = {'schema': 'master'}
@@ -26,3 +38,12 @@ class NCFLog(db.Model):
     ncf_assigned = db.Column('sncfasignado', db.String(11))
     stripe_invoice_id = db.Column('stripe_invoice_id', db.String(50))
     created_at = db.Column('dfechacreacion', db.DateTime, default=db.func.current_timestamp())
+    
+    def to_dict(self):
+        return {
+            "id":self.id,
+            "client_id": self.client_id,
+            "ncf_assigned": self.ncf_assigned,
+            "stripe_invoice_id":self.stripe_invoice_id,
+            "create_at":self.created_at
+        }

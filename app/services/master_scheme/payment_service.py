@@ -6,6 +6,7 @@ from app.models.master_scheme.user_model import User
 from app.models.master_scheme.ncf_model import NCFSequence, NCFLog
 from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.services.master_scheme.session_service import close_all_session
+from app.services.master_scheme.ncf_service import NCFService
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
 from app.services.master_scheme.client_plan_service import  get_active_pending
 from app.models.master_scheme.client_model import Client
@@ -13,9 +14,8 @@ from datetime import datetime, timezone
 from app.services.master_scheme.payment_factory import get_current_provider
 from ...extensions import db
 
-
 from app.utils.helpers import send_email_template
-from datetime import timedelta
+from datetime import timedelta, date
 from dotenv import load_dotenv
 from sqlalchemy import text
 import stripe
@@ -364,10 +364,14 @@ def handle_invoice_created(invoice, app_name):
 
             if seq.current_number > seq.max_number:
                 raise Exception(f"Secuencia NCF {tipo_ncf_requerido} agotada")
+            
+            if seq.expiration_date and seq.expiration_date < date.today():
+                raise Exception(f"La secuencia {tipo_ncf_requerido} ha vencido el {seq.expiration_date}")
                 
             # 2. Generar NCF (Lógica simplificada)
             #seq = NCFSequence.query.filter_by(type_ncf='01', is_active=True).first()
             nuevo_ncf = seq.get_next_ncf()
+
         
             # 5. Actualizar la factura en Stripe con CUSTOM FIELDS
             # Esto es lo que aparece en el PDF oficial de Stripe
