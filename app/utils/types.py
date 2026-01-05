@@ -66,3 +66,4 @@ class ActionType(str, Enum):
     DOWNLOAD = "DOWNLOAD"
     UPLOAD = "UPLOAD"
     PRINT = "PRINT"
+    ERROR = "ERROR"

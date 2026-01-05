@@ -256,10 +256,6 @@ def audit_log(
         return wrapper
     return decorator
 
-
-
-
-
 def require_role(role_codes:list[str]):
     """
     Permite acceso si el usuario tiene AL MENOS UNO de los roles indicados.

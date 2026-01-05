@@ -7,7 +7,6 @@ from app.services.master_scheme.session_service import close_session, create_ses
 from app.utils.responses import success, error
 from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.models.master_scheme.client_model import Client
-from app.api.v1.master.payments.controller import show_restore_view
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
 
 

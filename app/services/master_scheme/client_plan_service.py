@@ -277,7 +277,7 @@ def change_client_plan(
 
         return new_plan
 
-    except Exception:
+    except Exception as e:
         db.session.rollback()
         raise
 
