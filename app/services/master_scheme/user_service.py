@@ -310,8 +310,7 @@ def insert_user(
 
             if not is_valid:
                 raise ValueError(errors)  # 👈 solo lógica de negocio
-    else:
-        password = "aosU-18fh-stys-3Get"
+
         
     u = get_user_by_user_name(user_name=username)    
     if u:
