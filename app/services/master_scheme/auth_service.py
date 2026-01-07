@@ -9,6 +9,9 @@ from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.models.master_scheme.client_model import Client
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
 
+from app.utils.helpers import send_email_template
+from dotenv import load_dotenv
+import os
 
 INACTIVITY_MINUTES = 10  # tiempo de inactividad permitido
 JWT_ACCESS_TOKEN_EXPIRES = 24   # horas
@@ -41,8 +44,11 @@ def validar_login_payload(data):
 # Rutas
 # -----------------------------
 def login():
+    load_dotenv()
+    app_name = os.getenv("APP_NAME")
     data = request.json
     error_data = validar_login_payload(data)
+    
 
     if error_data:
         return jsonify({"error": error_data}), 400
@@ -134,8 +140,17 @@ def login():
             "redirect_url":f"/billing/restore?clientId={clientId}&token={access_token}"
             
         }), 403
-
-
+    from datetime import datetime
+    send_email_template(subject="Notificación de Inicio de Sesión", 
+                        to=[user.email], 
+                        path_template="emails/es/notification_login.html",
+                        app_name=app_name,
+                        nombre_usuario=user.firstName,
+                        ip_address=session_create.ipAddress,
+                        dispositivo=session_create.userAgent,
+                        fecha_hora=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+                        email_usuario=user.email
+                        )
     return success(data=response_data, message="Login successful", status_code=200)
 
 

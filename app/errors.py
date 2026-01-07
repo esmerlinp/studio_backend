@@ -2,7 +2,8 @@ import logging
 import traceback
 from flask import jsonify, request, g
 from datetime import datetime
-
+from app.exceptions import AuditedError
+from app import log_action
 # Configuración básica del logging
 logging.basicConfig(
     filename='errors.log',
@@ -11,6 +12,29 @@ logging.basicConfig(
 )
 
 def register_error_handlers(app):
+    
+    @app.errorhandler(AuditedError)
+    def handle_audited_error(e):
+        # 1. Registrar en la tabla de auditoría (DB)
+        # Usamos los datos que vienen dentro de la excepción
+        log_action(
+            action=e.action_type,
+            resource_type=e.resource_type,
+            description=f"OPERACIÓN FALLIDA: {e.message}",
+            new_values=e.extra_data,
+            status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
+        )
+
+        # 2. También lo guardamos en el archivo .log para el equipo técnico
+        import logging
+        logging.warning(f"AuditedError: {e.message} | User: {g.get('user_id')}")
+
+        # 3. Respondemos al Frontend
+        return jsonify({
+            "status": "error",
+            "msg": e.message,
+            "type": "AUDITED_EXCEPTION"
+        }), 400
     
     
     @app.errorhandler(Exception)

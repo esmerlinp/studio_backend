@@ -12,6 +12,7 @@ def log_action(
     old_values: dict | None = None,
     new_values: dict | None = None,
     user_id: int | None = None, # Parámetro manual
+    status:str | None = None
 ):
     try:
         # 1. Intentar obtener identidad si user_id no fue pasado manualmente

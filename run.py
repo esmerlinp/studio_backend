@@ -8,6 +8,7 @@ from app.api.v1.master.payments.routes import payment_bp, billing_bp
 from app.api.v1.base.student.routes import students_bp
 from app.api.v1.master.dynamics.routes import dynamic_fields_bp
 from app.api.v1.master.notifications.routes import notification_bp
+from app.api.v1.master.log.routes import admin_bp
 from app.api.v1.master.country.routes import countries_bp
 from app.services.master_scheme.user_service import change_user_password, update_user, get_user_scheme, get_user_by_id
 from app import create_app
@@ -18,7 +19,7 @@ import os
 from dotenv import load_dotenv
 from app.extensions import db
 from sqlalchemy import text
-
+from app.exceptions import AuditedError
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -45,6 +46,7 @@ app.register_blueprint(dynamic_fields_bp)
 app.register_blueprint(payment_bp)
 app.register_blueprint(billing_bp)
 app.register_blueprint(countries_bp)
+app.register_blueprint(admin_bp)
 
 # ------------------------------
 # Configuración de idioma
@@ -91,6 +93,14 @@ def ratelimit_handler(e):
 
 @app.route('/health')
 def health():
+    from app.utils.types import ResourceTypes, ActionType
+    if 1==1:
+        raise AuditedError(
+                message="Intento de generar NCF con secuencia agotada",
+                resource_type=ResourceTypes.NCF,
+                action_type=ActionType.CREATE,
+                extra_data={}
+            )
     return 'OK', 200
 
 
