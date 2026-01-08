@@ -13,20 +13,18 @@ from app.api.v1.master.country.routes import countries_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app
 from app.utils import i18n
-from app.utils.helpers import verify_reset_token, send_email
+from app.utils.helpers import verify_reset_token
 from app.utils.responses import error
 import os
 from dotenv import load_dotenv
 from app.extensions import db
 from sqlalchemy import text
-from app.exceptions import AuditedError
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 
 load_dotenv()
-
 app = create_app()
 
 
@@ -59,8 +57,6 @@ i18n.setup_gettext("es")
 #aca no debe haber solicitudes a esquemas de clientes
 MASTER_PUBLIC_ENDPOINTS = {
     "health",
-    "host",
-    "test_mail",
     "client_form",
     "main_page",
     "restore",
@@ -82,63 +78,11 @@ MASTER_PUBLIC_ENDPOINTS = {
 }
 
 
-@app.errorhandler(429)
-def ratelimit_handler(e):
-    return jsonify({
-        "success": False,
-        "msg": "Demasiadas peticiones. Por favor, intenta más tarde.",
-        "description": str(e.description)
-    }), 429
-
 
 @app.route('/health')
 def health():
-    from app.utils.types import ResourceTypes, ActionType
-    if 1==1:
-        raise AuditedError(
-                message="Intento de generar NCF con secuencia agotada",
-                resource_type=ResourceTypes.NCF,
-                action_type=ActionType.CREATE,
-                extra_data={}
-            )
     return 'OK', 200
-
-
-@app.route("/host")
-def host():
-    return {"host": request.host_url}
-
-
-@app.route('/test-mail')
-def test_mail():
-    try:
-        import logging
-        import smtplib
-
-        # Esto forzará a imprimir el log del protocolo SMTP en la consola de Google Cloud
-        smtplib.SMTP.debuglevel = 1 
-        logging.basicConfig(level=logging.DEBUG)
-
-        send_email(subject="Prueba Akdmia",
-                      message="Si lees esto, el correo funciona desde Cloud Run",
-                      to=["esmerlinep@gmail.com"])
-
-        return "Correo enviado con éxito"
-    except Exception as e:
-        return f"Error enviando correo: {str(e)}"
-    
-    
-
-def schema_exists(schema_name):
-    query = text("""
-        SELECT EXISTS (
-            SELECT 1 FROM information_schema.schemata WHERE schema_name = :schema
-        )
-    """)
-    result = db.session.execute(query, {"schema": schema_name}).scalar()
-    return result
-            
-                
+           
 @app.before_request
 def before_request():
     # 1. Forzar HTTPS
@@ -174,11 +118,7 @@ def before_request():
 
     # 5. Cambio de Schema con Manejo de Errores Robusto
     schema_name = get_user_scheme(user_id=user_id)
-    print(schema_name)
-    
-    # if not schema_name:
-    #     return error("Ambiente no configurado", 500)
-
+ 
     try:
         # Intentamos el cambio directamente (es más rápido que preguntar si existe)
         db.session.execute(text(f"SET search_path TO {schema_name}"))
@@ -195,84 +135,6 @@ def before_request():
             500
         )
         
-#@app.before_request
-def set_schema_old():
-
-    if not request.is_secure and os.getenv('FLASK_ENV') != 'development':
-        url = request.url.replace('http://', 'https://', 1)
-        return redirect(url, code=301)
-    
-    # 🔎 Endpoint actual
-    endpoint = request.endpoint
-    #print(endpoint)
-    # Si la ruta no existe (404), no intentes validar JWT
-    if endpoint is None:
-        return
-
-    if request.path.startswith('/api/v1/payments/webhook'):
-        return
-    
-    # 🔓 Endpoints públicos → NO validación de usuario
-    if endpoint in MASTER_PUBLIC_ENDPOINTS:
-        # db.session.execute(
-        #     text("SET search_path TO public")
-        # )
-        return
-
-    # 🔐 A partir de aquí TODO requiere usuario
-    verify_jwt_in_request()
-
-    user_id = get_jwt_identity()
-    if not user_id:
-        return error("No autenticado", 401)
-
-    user = get_user_by_id(user_id=user_id)
-    if not user:
-        return error("Usuario no existe", 401)
-
-    if not user.isConfirmedUser:
-        return error(
-            "La cuenta no está confirmada. Revisa tu correo electrónico para activarla.",
-            403
-        )
-
-    if user.mustChangePassword:
-        return error(
-            "Debes cambiar tu contraseña antes de continuar.",
-            403
-        )
-
-    # 🔀 Cambiar schema del cliente
-    schema_name = get_user_scheme(user_id=user_id)
-    
-
-    def schema_exists(schema_name):
-        query = text("""
-            SELECT EXISTS (
-                SELECT 1 FROM information_schema.schemata WHERE schema_name = :schema
-            )
-        """)
-        result = db.session.execute(query, {"schema": schema_name}).scalar()
-        return result
-    
-    try:
-        if schema_name and schema_exists(schema_name):
-            db.session.execute(
-                text(f"SET search_path TO {schema_name}, public")
-            )
-        else:
-             return error(
-                "ha ocurrido un error al verificar su ambiente de trabajo, favor contacte a soporte de inmediato.",
-                500
-            )
-    except Exception as e:
-        db.session.rollback()
-        # Intentar reconectar si la conexión se perdió
-        db.session.execute(
-            text(f"SET search_path TO {schema_name}, public")
-        )
-
-
 @app.route("/")
 def main_page():
     return render_template('es/main.html')
@@ -331,7 +193,6 @@ def restore():
 
     return render_template('es/restore_subscription.html', card=card_data, clientId=client.clientId)
 
-
 @app.route("/login")
 def login():
     app_name = os.getenv("APP_NAME")
@@ -340,8 +201,6 @@ def login():
 @app.route("/dashboard")
 def dashboard():
     return render_template("es/dashboard.html")
-
-
 
 @app.route("/reset-password")
 def reset_password_page():
@@ -352,20 +211,10 @@ def reset_password_page():
 
     return render_template("emails/es/reset_password.html")
 
-
 @app.route("/create-client")
 def client_form():
     return render_template('es/create_client_page.html', 
                             submit_url='/login')
-    
-@app.route("/plans")
-def plans_page():
-    return render_template('es/plans.html', 
-                            app_name=os.getenv("APP_NAME"))
-    
-
-
-
 
 @app.post("/auth/reset-password")
 def reset_password():
@@ -403,8 +252,7 @@ def reset_password():
             "success": False,
             "message": "Usuario no encontrado"
         }, 404
-        
-        
+              
 @app.route("/confirmation-account")
 def confirmation_account():
     token = request.args.get("token")
@@ -413,9 +261,6 @@ def confirmation_account():
         return render_template("errors/token_invalid.html"), 400
 
     return render_template("es/confirmation_template.html")
-
-
-
 
 
 if __name__ == '__main__':

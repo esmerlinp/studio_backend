@@ -17,7 +17,12 @@ logging.basicConfig(
 def register_error_handlers(app):
     
 
-            
+    @app.errorhandler(429)
+    def ratelimit_handler(e):
+        return error(message={
+                "msg": "Demasiadas peticiones. Por favor, intenta más tarde.",
+                "description": str(e.description)
+                }, status_code=429)  
     
     @app.errorhandler(AuditedError)
     def handle_audited_error(e):

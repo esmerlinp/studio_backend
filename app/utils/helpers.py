@@ -5,11 +5,19 @@ from app.extensions import mail
 import os
 from dotenv import load_dotenv
 from app.models.client_scheme.dynamic_field_model import DynamicField
-
+from sqlalchemy import text
 import datetime
 from google.cloud import storage
+from app import db
 
-
+def schema_exists(schema_name):
+    query = text("""
+        SELECT EXISTS (
+            SELECT 1 FROM information_schema.schemata WHERE schema_name = :schema
+        )
+    """)
+    result = db.session.execute(query, {"schema": schema_name}).scalar()
+    return result
 
 def paginate_query(query):
     page = request.args.get('page', 1, type=int)
