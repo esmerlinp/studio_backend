@@ -37,7 +37,7 @@ def close_session(sessionId):
     except Exception as e:
         return error(message=str(e), status_code=500)
 
-
+@jwt_required(optional=True) # Permite entrar sin token
 def login():
     return auth_service.login()
 

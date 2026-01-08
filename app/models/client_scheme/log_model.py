@@ -82,6 +82,14 @@ class AuditLog(db.Model):
         db.JSON,
         nullable=True
     )
+    
+    #Clasificación de la operación: DML (Cambios), ERROR, WARNING o Eventos de Sesión
+    accion_type = db.Column(
+        "stipoaccion",
+        db.String(20),
+        nullable=False,
+        default="DML"
+    )
 
     # -------------------------
     # Cuándo
@@ -101,6 +109,7 @@ class AuditLog(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "action": self.action,
+            "accion_type": self.accion_type,
             "resource_type": self.resource_type,
             "resource_id": self.resource_id,
             "description": self.description,

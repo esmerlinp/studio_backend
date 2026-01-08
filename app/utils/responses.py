@@ -1,16 +1,18 @@
 from flask import jsonify
 
-def success(data, message="OK", status_code=200):
+def success(data, message="OK", status_code=200, redirect_url=None):
     return jsonify({
         "success": True,
         "msg": message,
-        "data": data
+        "data": data,
+        "redirect_url":redirect_url
     }), status_code
 
 
 def error(message, status_code=400, redirect_url=None):
     return jsonify({
         "success": False,
-        "msg": message,
+        "error": message,
+        "data": {},
         "redirect_url":redirect_url
     }), status_code

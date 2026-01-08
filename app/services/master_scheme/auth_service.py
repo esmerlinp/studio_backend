@@ -1,14 +1,17 @@
-from flask import  request, jsonify
+from flask import  request, jsonify, g
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
-from datetime import timedelta
+from datetime import timedelta, datetime
 from app.services.master_scheme.user_service import get_user_by_user_name_with_passwd, get_user_by_id, get_user_preferences, add_default_user_preferences
 from app.services.master_scheme.session_service import close_session, create_session, get_session_active_by_refresh_token
 from app.utils.responses import success, error
 from app.models.master_scheme.user_client_model import UsuarioCliente
+from app.services.master_scheme.user_client_service import get_client_by_user
 from app.models.master_scheme.client_model import Client
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
-
+from app.exceptions import AuditedError
+from app import log_action
+from app.utils.types import ResourceTypes, ActionType
 from app.utils.helpers import send_email_template
 from dotenv import load_dotenv
 import os
@@ -43,6 +46,7 @@ def validar_login_payload(data):
 # -----------------------------
 # Rutas
 # -----------------------------
+
 def login():
     load_dotenv()
     app_name = os.getenv("APP_NAME")
@@ -67,15 +71,24 @@ def login():
     if not user:
         return error("Invalid username or password", status_code=401)
 
+    g.user_id = user.userId
+    relacion = UsuarioCliente.query.filter_by(user_id=user.userId).first()
+    client = Client.query.filter_by(uuid=relacion.client_uuid).first()
+    if client:
+        g.scheme = client.schemaName
+
     if not verificar_password(user.password, password):
+        raise AuditedError("Credenciales inválidas",
+                            resource_type=ResourceTypes.USER_SESSION,
+                            action_type=ActionType.LOGIN, user_id=user.userId, status_code=401)
         return jsonify({"error": "Credenciales inválidas"}), 401
     
     is_restore = False
-    clientId=0
+    #clientId=0
     if not user.isActive:
         if user.rol in ("OWNER", "ADMIN"):
-            relacion = UsuarioCliente.query.filter_by(user_id=user.userId).first()
-            client = Client.query.filter_by(uuid=relacion.client_uuid).first()
+            #relacion = UsuarioCliente.query.filter_by(user_id=user.userId).first()
+            #client = Client.query.filter_by(uuid=relacion.client_uuid).first()
             if not client.isActive:
                 trans = PaymentTransaction.query.filter_by(clientId=client.clientId, status="APPROVED").all()
                 if trans:
@@ -140,7 +153,7 @@ def login():
             "redirect_url":f"/billing/restore?clientId={clientId}&token={access_token}"
             
         }), 403
-    from datetime import datetime
+    
     send_email_template(subject="Notificación de Inicio de Sesión", 
                         to=[user.email], 
                         path_template="emails/es/notification_login.html",
@@ -151,6 +164,9 @@ def login():
                         fecha_hora=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
                         email_usuario=user.email
                         )
+    
+    log_action(action=ActionType.LOGIN, resource_type=ResourceTypes.USER_SESSION,
+                resource_id=user.userId, description="Login successful", user_id=user.userId)
     return success(data=response_data, message="Login successful", status_code=200)
 
 

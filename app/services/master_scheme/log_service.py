@@ -1,9 +1,11 @@
 from flask import request
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.models.client_scheme.log_model import AuditLog
 from ...extensions import db
+from flask import g
+from sqlalchemy import text
 
-
+@jwt_required(optional=True) # Permite entrar sin token
 def log_action(
     action: str,
     resource_type: str,
@@ -23,8 +25,14 @@ def log_action(
                 # sin el parámetro optional=True en decoradores, pero aquí lo manejamos:
                 final_user_id = get_jwt_identity()
             except Exception:
-                final_user_id = None
+                final_user_id = 0
 
+
+        if not getattr(g, "scheme", None):
+            # Intentamos el cambio directamente (es más rápido que preguntar si existe)
+            return
+        db.session.execute(text(f"SET search_path TO {g.scheme}"))
+                
         # 2. Crear el registro
         audit = AuditLog(
             user_id=final_user_id,
@@ -36,7 +44,9 @@ def log_action(
             ip_address=request.remote_addr if request else "0.0.0.0",
             user_agent=request.headers.get("User-Agent") if request else "Internal/System",
             old_values=old_values,
-            new_values=new_values
+            new_values=new_values,
+            accion_type = status
+            
         )
         
         db.session.add(audit)

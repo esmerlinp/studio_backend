@@ -1,4 +1,4 @@
-from flask import request, redirect, render_template, jsonify
+from flask import request, redirect, render_template, jsonify, g
 from flask_jwt_extended import JWTManager
 from app.api.v1.master.users.routes import users_bp
 from app.api.v1.master.auth.routes import auth_bp
@@ -10,7 +10,7 @@ from app.api.v1.master.dynamics.routes import dynamic_fields_bp
 from app.api.v1.master.notifications.routes import notification_bp
 from app.api.v1.master.log.routes import admin_bp
 from app.api.v1.master.country.routes import countries_bp
-from app.services.master_scheme.user_service import change_user_password, update_user, get_user_scheme, get_user_by_id
+from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app
 from app.utils import i18n
 from app.utils.helpers import verify_reset_token, send_email
@@ -137,7 +137,8 @@ def schema_exists(schema_name):
     """)
     result = db.session.execute(query, {"schema": schema_name}).scalar()
     return result
-
+            
+                
 @app.before_request
 def before_request():
     # 1. Forzar HTTPS
@@ -159,6 +160,8 @@ def before_request():
     try:
         verify_jwt_in_request()
         user_id = get_jwt_identity()
+        g.user_id = user_id
+        
     except Exception:
         return error("No autenticado", 401)
 
@@ -171,7 +174,6 @@ def before_request():
 
     # 5. Cambio de Schema con Manejo de Errores Robusto
     schema_name = get_user_scheme(user_id=user_id)
-    
     print(schema_name)
     
     # if not schema_name:
@@ -179,7 +181,9 @@ def before_request():
 
     try:
         # Intentamos el cambio directamente (es más rápido que preguntar si existe)
-        db.session.execute(text(f"SET search_path TO {schema_name}, cliente"))
+        db.session.execute(text(f"SET search_path TO {schema_name}"))
+        g.scheme = schema_name
+        
     except Exception as e:
         db.session.rollback()
         # Si falla, verificamos si es por conexión perdida o por esquema inexistente
