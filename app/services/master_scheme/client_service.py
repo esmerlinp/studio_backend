@@ -16,7 +16,7 @@ from app.models.client_scheme.log_model import AuditLog
 from app.services.master_scheme.client_plan_service import assign_plan_to_client_onboard
 from app.services.master_scheme.user_service import  insert_user_onboard
 from app.services.master_scheme.user_client_service import  assign_user_to_client_onboard
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import uuid
 from flask import g
 from typing import Optional, List
@@ -27,6 +27,9 @@ from dotenv import load_dotenv
 import stripe
 from app import audit_log
 from app.utils.types import ActionType, ResourceTypes
+
+import subprocess
+from google.cloud import storage
 
 
 
@@ -504,3 +507,61 @@ def update_client_storage_usage(client_id: int, size_mb: float, operation: str =
         db.session.rollback()
         print(f"Error actualizando cuota de almacenamiento: {str(e)}")
         return False
+    
+    
+    
+
+
+
+
+
+    
+def export_client_data(schema_name):
+    """
+    Genera un archivo .sql del esquema del cliente y lo sube a GCS.
+    """
+    file_name = f"backup_{schema_name}_{uuid.uuid4().hex}.sql"
+    local_path = f"/tmp/{file_name}"
+    
+    # Configuración de la base de datos (puedes sacarlo de tu config)
+    db_uri = os.getenv("DATABASE_URL") 
+    
+    try:
+        # 1. Ejecutar pg_dump solo para el esquema del cliente
+        # El comando: pg_dump -n nombre_esquema > archivo.sql
+        command = [
+            "pg_dump",
+            f"--schema={schema_name}",
+            "--no-owner", # Para que el cliente pueda restaurarlo en otra DB
+            f"--file={local_path}",
+            db_uri
+        ]
+        
+        subprocess.run(command, check=True)
+
+        # 2. Subir a GCS en una carpeta de 'exports'
+        client = storage.Client()
+        bucket = client.bucket(os.getenv("GCS_BUCKET_NAME"))
+        blob = bucket.blob(f"exports/{schema_name}/{file_name}")
+        
+        blob.upload_from_filename(local_path)
+
+        # 3. Generar URL firmada válida por 1 hora
+        url = blob.generate_signed_url(
+            version="v4",
+            # La URL expirará en 15 minutos
+            expiration=timedelta(minutes=60),
+            # Método permitido
+            method="GET",
+        )
+
+        # Limpiar archivo local
+        if os.path.exists(local_path):
+            os.remove(local_path)
+
+        return url
+
+    except Exception as e:
+        if os.path.exists(local_path):
+            os.remove(local_path)
+        raise Exception(f"Error exportando data: {str(e)}")

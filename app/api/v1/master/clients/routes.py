@@ -3,7 +3,7 @@ from app.api.v1.master.clients.controller import (get_client_preferences, new_cl
                                            get_logs, onboard_client,
                                            get_all_clients, get_client, get_plan, 
                                            change_plan, get_client_plans, 
-                                           get_client_payments)
+                                           get_client_payments, handle_export_data)
 
 
 client_bp = Blueprint('clients', __name__, url_prefix='/api/v1/clients')
@@ -26,5 +26,6 @@ client_bp.get("/logs")(get_logs)
 
 client_bp.post("/")(new_cliente)
 client_bp.post("/onboard")(onboard_client)
+client_bp.post("/export-data")(handle_export_data)
 
 

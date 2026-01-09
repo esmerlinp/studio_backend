@@ -2,13 +2,13 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity, require_role
 from app.services.master_scheme.client_service import (get_client_preferences, get_client_logs, get_logs_by_entity,
                                                        onboard_client_service, storage_info, 
-                                                       create_client, get_clients,
+                                                       create_client, get_clients, export_client_data,
                                                        get_client_by_id, get_client_payment_orders)
 
 from app.services.master_scheme.user_client_service import get_client_by_user   
 from app.services.master_scheme.client_plan_service import get_active_client_plan, assign_plan_to_client, change_client_plan, get_client_plan_history
 from app.utils.responses import success
-from flask import request
+from flask import request, g
 from app.utils.responses import success, error
 from app import limiter
 from datetime import date
@@ -220,4 +220,37 @@ def onboard_client():
         
         return error(f"Error interno del servidor {e}", 500)
     
-    
+
+
+
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES)
+def handle_export_data():
+    user_id = get_jwt_identity()
+    # Asumimos que g.scheme contiene el esquema actual del cliente
+    schema = getattr(g, "scheme", None)
+
+    if not schema:
+        return error(message="No se pudo determinar el esquema")
+
+    try:
+        download_url = export_client_data(schema)
+        
+        # # Opcional: Registrar en auditoría
+        # log_action(
+        #     action="EXPORT",
+        #     resource_type="DATABASE",
+        #     description=f"El usuario solicitó descarga total de datos del esquema {schema}",
+        #     status="DML"
+        # )
+
+        return success(data={
+            "success": True,
+            "download_url": download_url,
+            "expires_in": "1 hour"
+        })
+
+    except Exception as e:
+        return error(message=str(e), status_code=500)

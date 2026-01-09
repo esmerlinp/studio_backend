@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import g, request
 from app.errors import register_error_handlers
+
+
 INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 
 
@@ -59,7 +61,7 @@ def create_app():
         MAIL_DEFAULT_SENDER=os.getenv("MAIL_DEFAULT_SENDER"),
     )
     
-    
+
     
 
     # 🔑 ESTA LÍNEA ES LA QUE TE FALTA
@@ -73,6 +75,10 @@ def create_app():
 
 
     register_error_handlers(app)
+    
+
+    
+    
     return app
 
 
