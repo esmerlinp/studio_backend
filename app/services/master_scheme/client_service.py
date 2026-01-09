@@ -16,9 +16,8 @@ from app.models.client_scheme.log_model import AuditLog
 from app.services.master_scheme.client_plan_service import assign_plan_to_client_onboard
 from app.services.master_scheme.user_service import  insert_user_onboard
 from app.services.master_scheme.user_client_service import  assign_user_to_client_onboard
-from datetime import date
+from datetime import date, datetime
 import uuid
-from sqlalchemy import func
 from flask import g
 from typing import Optional, List
 from app.services.master_scheme.payment_service import request_suscription
@@ -494,8 +493,7 @@ def update_client_storage_usage(client_id: int, size_mb: float, operation: str =
             # Aseguramos que el contador no baje de cero
             storage_record.used_storage_mb = max(0, storage_record.used_storage_mb - size_mb)
 
-        storage_record.last_updated = func.now()
-
+        storage_record.last_updated = datetime.utcnow()
         g.audit_new_values = storage_record.to_dict()
 
         # 4. Confirmar cambios

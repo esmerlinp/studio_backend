@@ -10,6 +10,7 @@ from app.api.v1.master.dynamics.routes import dynamic_fields_bp
 from app.api.v1.master.notifications.routes import notification_bp
 from app.api.v1.master.log.routes import admin_bp
 from app.api.v1.master.country.routes import countries_bp
+from app.api.v1.base.storage.routes import documents_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app
 from app.utils import i18n
@@ -45,6 +46,7 @@ app.register_blueprint(payment_bp)
 app.register_blueprint(billing_bp)
 app.register_blueprint(countries_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(documents_bp)
 
 # ------------------------------
 # Configuración de idioma
@@ -81,7 +83,9 @@ MASTER_PUBLIC_ENDPOINTS = {
 
 @app.route('/health')
 def health():
-    return 'OK', 200
+    from flask_limiter.util import get_remote_address
+    get_remote_address()
+    return f'OK - {get_remote_address()}', 200
            
 @app.before_request
 def before_request():

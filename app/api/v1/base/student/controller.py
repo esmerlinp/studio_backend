@@ -92,12 +92,13 @@ def upload_student_file(student_id):
     
     file = request.files['file']
 
+
     try:
         
-        file_url = upload_to_gcs(user_id, file, location_folder="students")
+        file_storage = upload_to_gcs(user_id, file, entity_name=ResourceTypes.STUDENT, entity_record=student_id)
 
         studen_data = {
-            "photoUrl": file_url
+            "photoUrl": file_storage.path_gcs
         }
         data = student_service.update_student(student_id=student_id, data=studen_data)
 

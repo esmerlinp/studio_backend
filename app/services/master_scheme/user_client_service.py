@@ -71,8 +71,11 @@ def get_client_by_user(user_id: int) -> Client:
     """
     Retorna el cliente del usuario.
     """
-    relacion = UsuarioCliente.query.filter_by(user_id=user_id).first()
-    cliente = Client.query.filter_by(uuid=relacion.client_uuid).first()
+    cliente = db.session.query(Client)\
+        .join(UsuarioCliente, Client.uuid == UsuarioCliente.client_uuid)\
+        .filter(UsuarioCliente.user_id == user_id)\
+        .first()
+        
     return cliente
 
 
