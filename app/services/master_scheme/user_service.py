@@ -17,6 +17,7 @@ from flask import request, g
 from dotenv import load_dotenv
 import os
 from uuid import uuid4
+from app.utils.types import Roles
 
 
 
@@ -257,7 +258,7 @@ def insert_user_onboard(
         tokenExpirationDate=None,
         lastPasswordChangeDate=datetime.now(timezone.utc),
         password=generate_password_hash(password),
-        rol="OWNER"
+        rol=Roles.OWNER
     )
 
 
@@ -343,7 +344,7 @@ def insert_user(
         tokenExpirationDate=None,
         lastPasswordChangeDate=datetime.now(timezone.utc),
         password=generate_password_hash(password),
-        rol="USER"
+        rol=Roles.USER
     )
 
     try:
@@ -373,8 +374,7 @@ def insert_user(
         return user
 
     except Exception as e:
-        if commit:
-            db.session.rollback()
+        db.session.rollback()
         raise e
 
 def update_user(

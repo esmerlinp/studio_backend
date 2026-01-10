@@ -6,7 +6,7 @@ from app.models.master_scheme.plans_model import Plan
 from app.models.master_scheme.price_list_model import PriceList
 from dateutil.relativedelta import relativedelta
 from app import audit_log
-from app.utils.types import ActionType, ResourceTypes
+from app.utils.types import ActionType, ResourceTypes, states
 from flask import g
 
 
@@ -17,7 +17,7 @@ def assign_plan_to_client_onboard(
     price_list_id: int,
     start_date: date,
     end_date: Optional[date] = None,
-    status= "ACTIVE"
+    status=states.ACTIVE
 ) -> ClientPlan:
 
     # Validar plan
@@ -40,7 +40,7 @@ def assign_plan_to_client_onboard(
     # Evitar dos planes activos simultáneos
     active_plan = ClientPlan.query.filter(
         ClientPlan.client_id == client_id,
-        ClientPlan.status == "ACTIVE",
+        ClientPlan.status == states.ACTIVE,
         ClientPlan.start_date <= start_date,
         db.or_(
             ClientPlan.end_date.is_(None),
@@ -100,7 +100,7 @@ def assign_plan_to_client(
     # Evitar dos planes activos simultáneos
     active_plan = ClientPlan.query.filter(
         ClientPlan.client_id == client_id,
-        ClientPlan.status == "ACTIVE",
+        ClientPlan.status == states.ACTIVE,
         ClientPlan.start_date <= start_date,
         db.or_(
             ClientPlan.end_date.is_(None),
@@ -144,7 +144,7 @@ def get_active_client_plan(client_id: int) -> Optional[ClientPlan]:
 
     client_plan = ClientPlan.query.filter(
         ClientPlan.client_id == client_id,
-        ClientPlan.status == "ACTIVE",
+        ClientPlan.status == states.ACTIVE,
         ClientPlan.start_date <= today,
         db.or_(
             ClientPlan.end_date.is_(None),
@@ -164,7 +164,7 @@ def get_active_plan(id: int) -> Optional[ClientPlan]:
 
     client_plan = ClientPlan.query.filter(
         ClientPlan.id == id,
-        ClientPlan.status == "ACTIVE",
+        ClientPlan.status == states.ACTIVE,
         ClientPlan.start_date <= today,
         db.or_(
             ClientPlan.end_date.is_(None),
@@ -184,7 +184,7 @@ def get_active_pending(id: int) -> Optional[ClientPlan]:
 
     return ClientPlan.query.filter(
         ClientPlan.id == id,
-        ClientPlan.status == "PENDING_PAYMENT",
+        ClientPlan.status == states.PENDING_PAYMENT,
         ClientPlan.start_date <= today,
         db.or_(
             ClientPlan.end_date.is_(None),
@@ -225,7 +225,7 @@ def update_client_plan(
         client_plan.end_date = end_date
 
     if status is not None:
-        if status not in ("ACTIVE", "SUSPENDED", "CANCELLED"):
+        if status not in (states.ACTIVE, states.SUSPENDED, states.CANCELLED):
             raise ValueError("Invalid status")
         client_plan.status = status
 
@@ -260,7 +260,7 @@ def change_client_plan(
 
     # Finalizar plan actual
     current_plan.end_date = change_date
-    current_plan.status = "CANCELLED"
+    current_plan.status = states.CANCELLED
 
     try:
         db.session.flush()
@@ -298,7 +298,7 @@ def cancel_client_plan(
     g.audit_resource_id = client_plan.id
     g.audit_old_values = client_plan.to_dict()
     
-    client_plan.status = "CANCELLED"
+    client_plan.status = states.CANCELLED
     client_plan.end_date = cancel_date or date.today()
 
     try:

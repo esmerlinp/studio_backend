@@ -1,4 +1,5 @@
-
+from app.models.master_scheme.client_model import Client
+from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
 from app.models.master_scheme.pyments.invoice_model import Invoice
 from app.models.master_scheme.client_plans_model import ClientPlan
 from app.models.master_scheme.client_model import Client
@@ -6,20 +7,17 @@ from app.models.master_scheme.user_model import User
 from app.models.master_scheme.ncf_model import NCFSequence, NCFLog
 from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.services.master_scheme.session_service import close_all_session
-from app.services.master_scheme.ncf_service import NCFService
-from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
-from app.services.master_scheme.client_plan_service import  get_active_pending
-from app.models.master_scheme.client_model import Client
-from datetime import datetime, timezone
 from app.services.master_scheme.payment_factory import get_current_provider
-from ...extensions import db
+from app.services.master_scheme.client_plan_service import  get_active_pending
 
+from datetime import datetime, timezone, timedelta, date
+from ...extensions import db
 from app.utils.helpers import send_email_template
-from datetime import timedelta, date
+from app.utils.types import states
 from dotenv import load_dotenv
 from sqlalchemy import text
-import stripe
-import os
+import stripe, os
+
 
 
 # @app.route('/api/v1/billing/portal-session', methods=['GET'])
@@ -120,7 +118,7 @@ def request_suscription(plan_identity, billing_cycle="month") -> dict:
             amount=0 if is_trial else amount,
             currency=currency,
             internalReference=order_id,
-            status="PENDING",
+            status=states.PENDING,
         )
         db.session.add(new_trans)
         db.session.commit()
@@ -153,7 +151,7 @@ def request_suscription(plan_identity, billing_cycle="month") -> dict:
 
         except Exception as stripe_err:
             # Si falla Stripe, marcamos la transacción como fallida
-            new_trans.status = "FAILED"
+            new_trans.status = states.FAILED
             db.session.commit()
             print(f"❌ ERROR EN STRIPE PROVIDER: {str(stripe_err)}")
             return {"status": "error", "message": f"Error en Stripe: {str(stripe_err)}"}
@@ -181,7 +179,7 @@ def send_goodbye_email(client_email, contact_name, business_name):
              
 def process_successful_payment(transaction, stripe_obj, app_name, is_trial, commit=True):
     # 1. Actualizar/Confirmar Transacción
-    transaction.status = "APPROVED"
+    transaction.status = states.APPROVED
     transaction.rawResponse = stripe_obj
     
 
@@ -208,7 +206,7 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
     # 3. Extender vigencia del Plan
     client_plan = ClientPlan.query.get(transaction.clientPlanId)
     if client_plan:
-        client_plan.status = "ACTIVE" 
+        client_plan.status = states.ACTIVE
 
         
     client = Client.query.get(transaction.clientId)
@@ -447,7 +445,7 @@ def handle_invoice_paid(invoice_data, app_name):
                     externalReference=invoice_data.get('payment_intent'),
                     amount=invoice_data.get('amount_paid') / 100,
                     currency=invoice_data.get('currency').upper(),
-                    status="APPROVED",
+                    status=states.APPROVED,
                     paymentDate=payment_date_dt,
                     rawResponse=invoice_data
                 )
@@ -469,7 +467,7 @@ def handle_subscription_updated(subscription):
         #client_plan = ClientPlan.query.filter_by(client_id=client.clientId, status='CANCELED').first()
         client_plan = ClientPlan.query.filter(
             ClientPlan.client_id == client.clientId, 
-            ClientPlan.status != 'CANCELED'
+            ClientPlan.status != states.CANCELLED
         ).first()
         if client_plan:
             #new_end_date = datetime.fromtimestamp(subscription['current_period_end']).date()
@@ -492,11 +490,11 @@ def handle_subscription_deleted(subscription):
     
     if client:
         client_plan = ClientPlan.query.filter_by(client_id=client.clientId).filter(
-            ClientPlan.status.in_(['ACTIVE', 'PAST_DUE', 'TRIAL'])
+            ClientPlan.status.in_([states.ACTIVE, states.PAST_DUE, states.TRIAL])
         ).first()
 
         if client_plan:
-            client_plan.status = 'CANCELED'
+            client_plan.status = states.CANCELLED
             client_plan.end_date = datetime.now().date() 
 
             user_ids_subquery = db.session.query(UsuarioCliente.user_id).filter(
@@ -528,7 +526,7 @@ def handle_subscription_trial_will_end(subscription, app_name):
     if client:
         # 2. Obtener la fecha exacta en la que se hará el cobro
         trial_end_date = datetime.fromtimestamp(subscription['trial_end']).date()
-        client_plan = ClientPlan.query.filter_by(client_id=client.clientId, status='ACTIVE').first()
+        client_plan = ClientPlan.query.filter_by(client_id=client.clientId, status=states.ACTIVE).first()
         plan_name = client_plan.plan.code if client_plan else "Suscripción"
         
         # 3. Enviar email recordatorio

@@ -1,6 +1,5 @@
-import uuid
+import uuid, os
 from flask import g
-import os
 from dotenv import load_dotenv
 from app.utils.helpers import get_file_size
 from app.services.master_scheme.user_client_service import get_client_by_user

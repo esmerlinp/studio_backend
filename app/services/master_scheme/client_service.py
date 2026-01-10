@@ -1,9 +1,14 @@
 
+import os, re, uuid, subprocess, stripe
 
+from flask import g
+from typing import Optional, List
 from sqlalchemy import text
-from ...extensions import db
-import re
+from dotenv import load_dotenv
+from google.cloud import storage
 from sqlalchemy.exc import IntegrityError
+
+from app import audit_log, db
 from app.models.master_scheme.client_model import Client
 from app.models.master_scheme.user_model import User
 from app.models.master_scheme.plans_model import Plan
@@ -11,25 +16,16 @@ from app.models.master_scheme.client_storage_model import ClientStorage
 from app.models.master_scheme.client_plans_model import ClientPlan
 from app.models.master_scheme.price_list_model import PriceList
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
-from app.models.master_scheme.pyments.invoice_model import Invoice
 from app.models.client_scheme.log_model import AuditLog
 from app.services.master_scheme.client_plan_service import assign_plan_to_client_onboard
 from app.services.master_scheme.user_service import  insert_user_onboard
 from app.services.master_scheme.user_client_service import  assign_user_to_client_onboard
-from datetime import date, datetime, timedelta
-import uuid
-from flask import g
-from typing import Optional, List
 from app.services.master_scheme.payment_service import request_suscription
+from datetime import date, datetime, timedelta
 from app.utils.helpers import send_email_template, paginate_query
-import os
-from dotenv import load_dotenv
-import stripe
-from app import audit_log
-from app.utils.types import ActionType, ResourceTypes
+from app.utils.types import ActionType, ResourceTypes, states
 
-import subprocess
-from google.cloud import storage
+
 
 
 
@@ -81,7 +77,7 @@ def onboard_client_service(client_data, admin_user_data, plan_data):
                 plan_id=plan_data["plan_id"], 
                 price_list_id=plan_data["price_list_id"], 
                 start_date=date.today(),
-                status="PENDING_PAYMENT",
+                status=states.PENDING_PAYMENT,
             )
             db.session.flush()
             

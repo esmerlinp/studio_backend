@@ -3,7 +3,6 @@ from uuid import UUID
 from app import db
 from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.models.master_scheme.client_model import Client
-from sqlalchemy.exc import IntegrityError
 from typing import List
 
 from app.utils.types import ActionType, ResourceTypes

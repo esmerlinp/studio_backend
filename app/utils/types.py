@@ -67,3 +67,20 @@ class ActionType(str, Enum):
     UPLOAD = "UPLOAD"
     PRINT = "PRINT"
     ERROR = "ERROR"
+    
+class Roles(str, Enum):
+    ADMIN = "ADMIN"
+    OWNER = "OWNER"
+    USER = "USER"
+    
+class states(str, Enum):
+    APPROVED = "APPROVED"
+    ACTIVE="ACTIVE"
+    PENDING="PENDING"
+    PENDING_PAYMENT="PENDING_PAYMENT"
+    SUSPENDED="SUSPENDED"
+    CANCELLED="CANCELED"
+    FAILED="FAILED"
+    PAST_DUE="PAST_DUE"
+    TRIAL="TRIAL"
+

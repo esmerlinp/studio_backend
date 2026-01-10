@@ -6,27 +6,21 @@ from app.services.master_scheme.user_service import get_user_by_user_name_with_p
 from app.services.master_scheme.session_service import close_session, create_session, get_session_active_by_refresh_token
 from app.utils.responses import success, error
 from app.models.master_scheme.user_client_model import UsuarioCliente
-from app.services.master_scheme.user_client_service import get_client_by_user
 from app.models.master_scheme.client_model import Client
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
 from app.exceptions import AuditedError
-from app import log_action
-from app.utils.types import ResourceTypes, ActionType
+from app import log_action, INACTIVITY_MINUTES
+from app.utils.types import ResourceTypes, ActionType, Roles as r, states
 from app.utils.helpers import send_email_template
 from dotenv import load_dotenv
 import os
 
-INACTIVITY_MINUTES = 10  # tiempo de inactividad permitido
 JWT_ACCESS_TOKEN_EXPIRES = 24   # horas
 
 
 # -----------------------------
 # Helpers
 # -----------------------------
-def verificar_password(hash_stored: str, password: str) -> bool:
-    """Verifica la contraseña comparando con el hash almacenado."""
-    return check_password_hash(hash_stored, password)
-
 
 def validar_login_payload(data):
     """Valida que el payload contenga los campos requeridos."""
@@ -60,11 +54,7 @@ def login():
     username = data["username"]
     password = data["password"]
 
-    # Consulta del usuario
-    # user = db.fetch_one(
-    #     "SELECT * FROM usuarios WHERE susuario = %s",
-    #     (username,)
-    # )
+
     user = get_user_by_user_name_with_passwd(user_name=username)
 
 
@@ -77,20 +67,18 @@ def login():
     if client:
         g.scheme = client.schemaName
 
-    if not verificar_password(user.password, password):
+    if not check_password_hash(user.password, password):
         raise AuditedError("Credenciales inválidas",
                             resource_type=ResourceTypes.USER_SESSION,
                             action_type=ActionType.LOGIN, user_id=user.userId, status_code=401)
-        return jsonify({"error": "Credenciales inválidas"}), 401
+
     
     is_restore = False
-    #clientId=0
+
     if not user.isActive:
-        if user.rol in ("OWNER", "ADMIN"):
-            #relacion = UsuarioCliente.query.filter_by(user_id=user.userId).first()
-            #client = Client.query.filter_by(uuid=relacion.client_uuid).first()
+        if user.rol in (r.OWNER, r.ADMIN):
             if not client.isActive:
-                trans = PaymentTransaction.query.filter_by(clientId=client.clientId, status="APPROVED").all()
+                trans = PaymentTransaction.query.filter_by(clientId=client.clientId, status=states.APPROVED).all()
                 if trans:
                     is_restore = True
                     clientId = client.clientId
@@ -141,18 +129,12 @@ def login():
     response_data['sessionId'] = session_create.sessionId
     response_data['preferences'] = preferences.preferences
     
-    if is_restore:                 
-        # return error(message="Tu suscripción ha expirado. Por favor, reanúdala para continuar.", 
-        #             access_token=access_token, 
-        #             status_code=403, redirect_url="/billing/restore") # 403 Forbidden es más preciso que 400
-        return jsonify({
-            "success": False,
-            "msg": "Tu suscripción ha expirado. Por favor, reanúdala para continuar.",
-            "access_token":access_token,
-            "clientId":clientId,
-            "redirect_url":f"/billing/restore?clientId={clientId}&token={access_token}"
-            
-        }), 403
+    if is_restore:  
+        return error(message="Tu suscripción ha expirado. Por favor, reanúdala para continuar.", 
+                data={"access_token":access_token},
+                redirect_url=f"/billing/restore?clientId={clientId}&token={access_token}", 
+                status_code=403)               
+
     
     send_email_template(subject="Notificación de Inicio de Sesión", 
                         to=[user.email], 
@@ -167,6 +149,7 @@ def login():
     
     log_action(action=ActionType.LOGIN, resource_type=ResourceTypes.USER_SESSION,
                 resource_id=user.userId, description="Login successful", user_id=user.userId)
+    
     return success(data=response_data, message="Login successful", status_code=200)
 
 

@@ -4,9 +4,7 @@ from typing import Optional
 from datetime import  timedelta
 from ...extensions import db 
 from datetime import datetime, timezone
-# from app.utils.types import ActionType, ResourceTypes
-# from app import audit_log
-# from flask import g
+
 
 # @audit_log(action=ActionType.CREATE,
 #            resource_type=ResourceTypes.USER_SESSION,
