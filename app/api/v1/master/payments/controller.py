@@ -2,7 +2,6 @@ from flask import  request, jsonify, render_template
 from app import db
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
-#from app import track_activity, require_role
 
 from app.services.master_scheme.user_client_service import get_user_by_client
 from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
@@ -13,8 +12,7 @@ from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.models.master_scheme.user_model import User
 from app.utils.responses import error, success
 from dotenv import load_dotenv
-import os
-import stripe
+import os, stripe
 from werkzeug.security import check_password_hash
 from app.utils.helpers import send_confirmation_account_email
 from app.services.master_scheme.payment_service import (handle_checkout_session_completed, handle_invoice_created, handle_invoice_paid,

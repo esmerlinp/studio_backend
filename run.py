@@ -11,6 +11,7 @@ from app.api.v1.master.notifications.routes import notification_bp
 from app.api.v1.master.log.routes import admin_bp
 from app.api.v1.master.country.routes import countries_bp
 from app.api.v1.base.storage.routes import documents_bp
+from app.api.v1.base.roles.routes import roles_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app
 from app.utils import i18n
@@ -47,6 +48,7 @@ app.register_blueprint(billing_bp)
 app.register_blueprint(countries_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(documents_bp)
+app.register_blueprint(roles_bp)
 
 # ------------------------------
 # Configuración de idioma

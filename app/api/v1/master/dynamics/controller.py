@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required
 from app import track_activity, require_role
 from app.utils.responses import success, error
 from app.utils import i18n
-
+from app.utils.types import Roles as r
 @jwt_required()
 @track_activity
 def get_entity_fields(entityType: str):
@@ -17,6 +17,7 @@ def get_entity_fields(entityType: str):
 
 @jwt_required()
 @track_activity
+@require_role([r.ADMIN, r.OWNER, r.SUPER_ADMIN, r.SYS_ADMIN, r.ROOT])
 def create_field():
     """Solo el Super Admin puede crear nuevas definiciones globales."""
     data = request.get_json()

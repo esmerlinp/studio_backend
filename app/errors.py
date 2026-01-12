@@ -33,7 +33,7 @@ def register_error_handlers(app):
             log_action(
                 action=e.action_type,
                 resource_type=e.resource_type,
-                description=f"OPERACIÓN FALLIDA: {e.message}",
+                description=f"OPERACIÓN FALLIDA: {e}",
                 new_values=e.extra_data,
                 user_id=e.user_id,
                 status="ERROR" # Puedes agregar un campo status a tu tabla de auditoría
@@ -41,7 +41,7 @@ def register_error_handlers(app):
         else:
             # 2. También lo guardamos en el archivo .log para el equipo técnico
            
-            logging.warning(f"AuditedError: {e.message} | User: {g.get('user_id')}")
+            logging.warning(f"AuditedError: {e} | User: {g.get('user_id')}")
 
         # 3. Respondemos al Frontend
         return error(message={
@@ -61,7 +61,7 @@ def register_error_handlers(app):
             log_action(
                 action=ActionType.ERROR,
                 resource_type=request.method,
-                description=f"OPERACIÓN FALLIDA: {e.message}\n Usuario: {getattr(g, 'user_id', 'Anónimo')}",
+                description=f"OPERACIÓN FALLIDA: {e}\n Usuario: {getattr(g, 'user_id', 'Anónimo')}",
                 new_values={error_details},
                 status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
             )
@@ -94,7 +94,7 @@ def register_error_handlers(app):
             log_action(
                 action=ActionType.ERROR,
                 resource_type=request.method,
-                description=f"OPERACIÓN FALLIDA: {e.message}\n Usuario: {getattr(g, 'user_id', 'Anónimo')}",
+                description=f"OPERACIÓN FALLIDA: {e}\n Usuario: {getattr(g, 'user_id', 'Anónimo')}",
                 new_values={error_details},
                 status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
             )

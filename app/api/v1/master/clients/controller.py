@@ -12,14 +12,14 @@ from flask import request, g
 from app.utils.responses import success, error
 from app import limiter
 from datetime import date
-
+from app.utils.types import Roles as r
 #Consumir rutas protegidas con el JWT
 #El cliente debe enviar el token en el header: Authorization: Bearer <token>
-ADMIN_ROLES = ["OWNER", "ADMIN", "SUPER_ADMIN", "SYS_ADMIN", "AUDITOR"]
+ADMIN_ROLES = [r.OWNER, r.ADMIN, r.SUPER_ADMIN, r.SYS_ADMIN]
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_my_institution():
     user_id = get_jwt_identity()  
     data = get_client_by_user(user_id=user_id)
@@ -27,9 +27,10 @@ def get_my_institution():
         error(message="not found")
     return success(data=data.to_dict())
 
+
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_my_payments():
     user_id = get_jwt_identity()  
     data = get_client_by_user(user_id=user_id)
@@ -49,14 +50,14 @@ def get_my_payments():
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_my_personal_logs():    
     log = get_client_logs()
     return success(data=log)
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_my_personal_logs_by_entity(entityName):
     log = get_logs_by_entity(entityName)
     return success(data=[d.to_dict() for d in log])
@@ -64,7 +65,7 @@ def get_my_personal_logs_by_entity(entityName):
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_my_storage_usage():
     identity = get_jwt_identity()  
     client = get_client_by_user(user_id=identity)
@@ -76,7 +77,7 @@ def get_my_storage_usage():
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_my_subscription():
     
     user_id = get_jwt_identity()  
@@ -93,7 +94,7 @@ def get_my_subscription():
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_client_preferences():
     preferences = get_client_preferences()
     if not preferences:
@@ -103,7 +104,7 @@ def get_client_preferences():
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_logs():
     logs = get_client_logs()
     return success(data=[log.to_dict() for log in logs])
@@ -111,9 +112,8 @@ def get_logs():
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_client_payments(clientId):
-
     orders = get_client_payment_orders(client_id=clientId)
     return success(data=[o.to_dict() for o in orders])
 
@@ -121,7 +121,7 @@ def get_client_payments(clientId):
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_client_plans(clientId):
 
     logs = get_client_plan_history(client_id=clientId)
@@ -129,7 +129,7 @@ def get_client_plans(clientId):
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
 def get_plan(clientId):
     plan = get_active_client_plan(client_id=clientId)
     
@@ -152,7 +152,7 @@ def change_plan():
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role([r.ROOT])
 def get_client(clientId):
     data = get_client_by_id(clientId=clientId)
     if not data:
@@ -164,7 +164,7 @@ def get_client(clientId):
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role([r.ROOT])
 def get_all_clients():
     data = get_clients()
     return success(data=[d.to_dict() for d in data])
@@ -173,7 +173,7 @@ def get_all_clients():
 
 @jwt_required()
 @track_activity
-@require_role(ADMIN_ROLES)
+@require_role([r.ROOT])
 def new_cliente():
     data = request.get_json()
 

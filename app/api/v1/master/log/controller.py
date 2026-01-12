@@ -3,9 +3,10 @@ import os
 from flask_jwt_extended import jwt_required
 from app import track_activity, require_role
 from app.utils.responses import error, success
+from app.utils.types import Roles as r
 
 LOG_FILE_PATH = 'errors.log'
-ADMIN_ROLES = ["OWNER", "ADMIN", "SUPER_ADMIN", "SYS_ADMIN", "AUDITOR"]
+ADMIN_ROLES = [r.SUPER_ADMIN, r.ROOT]
 
 
 @jwt_required()

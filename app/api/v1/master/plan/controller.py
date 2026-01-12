@@ -4,26 +4,26 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity, require_role
 from app.services.master_scheme import plan_service
 from app.utils.responses import success, error
-from app.utils import i18n
+from app.utils import i18n,types
+from app import limiter
 
 
-
+@limiter.limit("20 per minute")
 def get_plans():
     data = plan_service.get_plans()
     return success(data=[notif.to_dict() for notif in data])
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
+@require_role([types.Roles.ROOT, types.Roles.SUPER_ADMIN])
 def get_prices_list(plan_id: int = None):
     data = price_list_service.get_price_lists(plan_id)
     return success(data=[notif.to_dict() for notif in data])
 
 
-
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
+@require_role([types.Roles.ROOT, types.Roles.SUPER_ADMIN])
 def create_plan():
     code = request.json.get("code", None)
     name = request.json.get("name", None)
@@ -47,7 +47,7 @@ def create_plan():
 
 @jwt_required()
 @track_activity
-@require_role(["SUPER_ADMIN", "SYS_ADMIN"])
+@require_role([types.Roles.ROOT, types.Roles.SUPER_ADMIN])
 def add_price_list():
     plan_id = request.json.get("plan_id", None)
     billing_cycle = request.json.get("billing_cycle", None)

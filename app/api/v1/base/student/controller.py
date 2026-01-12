@@ -1,7 +1,7 @@
 from flask import request
 from app.services.client_scheme import student_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import track_activity, require_role, track_and_log, log_action
+from app import track_activity, require_role
 from app.utils.responses import success, error
 from app.utils import i18n
 from app.utils.types import ActionType, ResourceTypes

@@ -53,7 +53,7 @@ class ResourceTypes:
     AUDIT = "auditoria"
     STUDENT = "estudiantes"
     GRADE = "grados"
-    
+    DYNAMICS_FIELDS="camposdinamicos"
     
 class ActionType(str, Enum):
     CREATE = "CREATE"
@@ -69,9 +69,13 @@ class ActionType(str, Enum):
     ERROR = "ERROR"
     
 class Roles(str, Enum):
+    ROOT="ROOT"
     ADMIN = "ADMIN"
     OWNER = "OWNER"
     USER = "USER"
+    SUPER_ADMIN="SUPER_ADMIN"
+    SYS_ADMIN="SYS_ADMIN"
+    AUDITOR="AUDITOR"
     
 class states(str, Enum):
     APPROVED = "APPROVED"
