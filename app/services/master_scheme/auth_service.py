@@ -92,15 +92,7 @@ def login():
 
     identity = str(user.userId)   # identity debe ser string
 
-    # ACCESS TOKEN con claims adicionales
-    access_token = create_access_token(
-        identity=identity,
-        expires_delta=timedelta(hours=24),
-        additional_claims={
-            "username": user.username,
-            "email": user.email,
-        }
-    )
+
     
     refresh_token = create_refresh_token(identity=identity)
     
@@ -118,7 +110,20 @@ def login():
         preferences = new_pref
             
     
-    
+    # ACCESS TOKEN con claims adicionales
+    lang = preferences.preferences.get("language", "es")
+    access_token = create_access_token(
+        identity=identity,
+        expires_delta=timedelta(hours=24),
+        additional_claims={
+            "username": user.username,
+            "email": user.email,
+            "language": lang,
+            "hourFormat": preferences.preferences.get("hourFormat", 24),
+            "timezone": preferences.preferences.get("timezone", "UTC"),
+            "dateFormat": preferences.preferences.get("dateFormat", "DD-MM-YYYY"),
+        }
+    )
 
     response_data = user.to_dict()
     response_data['accessToken'] = access_token
@@ -135,7 +140,7 @@ def login():
     
     send_email_template(subject=i18n._("email.subject.login_notification"), 
                         to=[user.email], 
-                        path_template=f"emails/{i18n.get_locale()}/notification_login.html",
+                        path_template=f"emails/{lang}/notification_login.html",
                         app_name=app_name,
                         nombre_usuario=user.firstName,
                         ip_address=session_create.ipAddress,

@@ -1,5 +1,4 @@
 from flask import request, redirect, render_template, jsonify, g
-from flask_jwt_extended import JWTManager
 from app.api.v1.master.users.routes import users_bp
 from app.api.v1.master.auth.routes import auth_bp
 from app.api.v1.master.clients.routes import client_bp
@@ -21,7 +20,7 @@ import os
 from dotenv import load_dotenv
 from app.extensions import db
 from sqlalchemy import text
-from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request, JWTManager, get_jwt
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
@@ -53,8 +52,8 @@ app.register_blueprint(roles_bp)
 # ------------------------------
 # Configuración de idioma
 # ------------------------------
-culture = "es-DO"
-i18n.setup_gettext("en")
+#culture = "es-DO"
+#i18n.setup_gettext("en")
 
 
 #endpoints que consultas en esquema master que no requieren validacion de jwt
@@ -94,6 +93,28 @@ def before_request():
     # 1. Forzar HTTPS
     if not request.is_secure and os.getenv('FLASK_ENV') != 'development':
         return redirect(request.url.replace('http://', 'https://', 1), code=301)
+    
+    
+    try:
+        # 1. Verifica si hay un token válido en la petición sin bloquearla
+        verify_jwt_in_request(optional=True)
+        claims = get_jwt()
+        
+        # 2. Si el token existe y tiene el claim 'lang'
+        if claims and "language" in claims:
+            lang = claims["language"]
+        else:
+            # Idioma por defecto si no hay token o no tiene el claim
+            lang = "es"
+            
+        # 3. Iniciar i18n con el lenguaje obtenido
+        i18n.setup_gettext(lang)
+
+        
+    except Exception:
+        # En caso de error (token malformado, etc.), fallback al inglés
+        i18n.setup_gettext("es")
+        
     
     endpoint = request.endpoint
     if endpoint is None:

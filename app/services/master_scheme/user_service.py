@@ -19,7 +19,7 @@ import os
 from uuid import uuid4
 from app.utils.types import Roles
 from app.utils import i18n
-
+from sqlalchemy.orm.attributes import flag_modified
 
 
 
@@ -90,6 +90,8 @@ def add_default_user_preferences(user_id:int,language="es", theme="light", timez
     
     return prefs
 
+
+
 def update_user_preference(
     user_id: int,
     language: str | None = None,
@@ -102,41 +104,40 @@ def update_user_preference(
 ) -> UserPreference:
     prefs = UserPreference.query.filter_by(userId=user_id).first()
 
-    # Crear si no existe
     if not prefs:
         prefs = add_default_user_preferences(user_id=user_id)
+        db.session.add(prefs) # Asegurar que esté en la sesión
 
-
-    # Asegurar que preferences sea un dict
+    # 1. Asegurar estructura base para evitar KeyError
     if prefs.preferences is None:
         prefs.preferences = {}
-
-    # Actualizar solo lo que venga
-    if language is not None:
-        prefs.preferences["language"] = language
     
+    if "notifications" not in prefs.preferences:
+        prefs.preferences["notifications"] = {}
 
-    if hour_format is not None:
-        prefs.preferences["hourFormat"] = hour_format
-
-    if theme is not None:
-        prefs.preferences["theme"] = theme
-
-    if timezone_ is not None:
-        prefs.preferences["timeZone"] = timezone_
-
-    if date_format is not None:
-        prefs.preferences["dateFormat"] = date_format
-
+    # 2. Actualizar valores
+    if language is not None: prefs.preferences["language"] = language
+    if theme is not None: prefs.preferences["theme"] = theme
+    if timezone_ is not None: prefs.preferences["timeZone"] = timezone_
+    if date_format is not None: prefs.preferences["dateFormat"] = date_format
+    if hour_format is not None: prefs.preferences["hourFormat"] = hour_format
+    
+    # Manejo seguro de anidados
     if receive_not_email is not None:
         prefs.preferences["notifications"]["email"] = receive_not_email
-
     if push_notifications is not None:
-        prefs.preferences['notifications']["push"] = push_notifications
+        prefs.preferences["notifications"]["push"] = push_notifications
 
+    # 3. EL TRUCO MÁGICO: Forzar la detección de cambios
+    flag_modified(prefs, "preferences")
+    
     prefs.updatedAt = datetime.now(timezone.utc)
-    #TODO: No esta actualizando en la base de datos VERIFICAR
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        raise e
 
     return prefs
 
