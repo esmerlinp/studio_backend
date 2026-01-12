@@ -4,7 +4,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: es\n"
 
-
+# --- Comunes y Sesiones ---
 msgid "common.open_sessions_retrieved_successfully"
 msgstr "Sesiones abiertas obtenidas correctamente"
 
@@ -13,7 +13,6 @@ msgstr "Sesión cerrada correctamente"
 
 msgid "common.token_refreshed_successfully"
 msgstr "Token actualizado correctamente"
-
 
 msgid "common.auth.reset_password_email_sent_if_exists"
 msgstr "Si el correo existe, se enviará un enlace"
@@ -32,3 +31,336 @@ msgstr "Usuario obtenido correctamente"
 
 msgid "common.users.not_found"
 msgstr "Usuario no encontrado"
+
+# --- Autenticación y Seguridad ---
+msgid "auth.not_authenticated"
+msgstr "No autenticado"
+
+msgid "auth.user_not_found"
+msgstr "Usuario no encontrado"
+
+msgid "auth.invalid_token"
+msgstr "Token inválido o expirado"
+
+msgid "auth.password_updated_success"
+msgstr "Contraseña actualizada correctamente"
+
+msgid "auth.session_invalid"
+msgstr "Sesión inválida o expirada"
+
+msgid "auth.account_disabled"
+msgstr "Cuenta inhabilitada. Contacte al administrador de su institución."
+
+msgid "auth.session_expired_inactivity"
+msgstr "Sesión expirada por inactividad"
+
+msgid "auth.session_track_error"
+msgstr "Error en seguimiento de sesión"
+
+msgid "auth.sessions_closed_count"
+msgstr "Se cerraron %d sesiones."
+
+msgid "error.auth.empty_payload"
+msgstr "El cuerpo de la solicitud está vacío"
+
+msgid "error.auth.empty_username"
+msgstr "El nombre de usuario es obligatorio"
+
+msgid "error.auth.empty_password"
+msgstr "La contraseña es obligatoria"
+
+msgid "error.auth.invalid_credentials"
+msgstr "Usuario o contraseña incorrectos"
+
+msgid "error.auth.account_inactive_detail"
+msgstr "Tu cuenta se encuentra inactiva. Esto puede deberse a un pago pendiente o a una revisión administrativa. Por favor, contacta al administrador de tu institución."
+
+msgid "error.auth.subscription_expired"
+msgstr "Tu suscripción ha expirado. Por favor, reanúdala para continuar."
+
+msgid "error.auth.session_creation_failed"
+msgstr "Error al crear la sesión de usuario"
+
+msgid "error.auth.session_not_found"
+msgstr "Sesión no encontrada o ya cerrada"
+
+msgid "error.auth.incomplete_data"
+msgstr "Datos incompletos para procesar la solicitud"
+
+msgid "error.auth.insufficient_permissions"
+msgstr "Nivel de privilegios insuficiente"
+
+msgid "auth.insufficient_permissions"
+msgstr "Permisos insuficientes. Se requiere uno de: %(roles)s"
+
+# --- Sistema e Infraestructura ---
+msgid "system.environment_unavailable"
+msgstr "Su ambiente de trabajo no está disponible. Contacte a soporte."
+
+msgid "error.too_many_requests"
+msgstr "Demasiadas peticiones. Por favor, intenta más tarde."
+
+msgid "error.unexpected_error"
+msgstr "Ha ocurrido un error inesperado."
+
+msgid "error.internal_server"
+msgstr "Error interno del servidor:"
+
+msgid "error.unknown"
+msgstr "Error desconocido"
+
+# --- Auditoría y Logs ---
+msgid "audit.operation_failed"
+msgstr "OPERACIÓN FALLIDA"
+
+msgid "audit.internal_error"
+msgstr "ERROR INTERNO"
+
+msgid "audit.permission_denied_log"
+msgstr "El usuario está autenticado pero no tiene permiso para ese recurso"
+
+msgid "error.log.not_found"
+msgstr "El archivo de registro (log) no existe aún."
+
+msgid "error.log.read_failed"
+msgstr "No se pudo leer el archivo de registro debido a un error del sistema."
+
+# --- Planes y Suscripciones ---
+msgid "error.plan.code_exists"
+msgstr "El código del plan ya existe"
+
+msgid "error.plan.not_found"
+msgstr "Plan no encontrado"
+
+msgid "error.plan.invalid_or_inactive"
+msgstr "El plan seleccionado no es válido o está inactivo"
+
+msgid "error.price_list.invalid_or_inactive"
+msgstr "La lista de precios no es válida o está inactiva"
+
+msgid "error.price_list.mismatch"
+msgstr "La lista de precios no corresponde al plan seleccionado"
+
+msgid "error.client_plan.already_active"
+msgstr "El cliente ya posee un plan activo para este periodo"
+
+msgid "error.client_plan.invalid_status"
+msgstr "El estado del plan proporcionado no es válido"
+
+msgid "error.client_plan.no_active_found"
+msgstr "El cliente no tiene un plan activo para realizar el cambio"
+
+# --- Pagos y Stripe ---
+msgid "error.payment.invalid_url"
+msgstr "El proveedor de pagos no devolvió una URL válida"
+
+msgid "error.payment.provider_error"
+msgstr "Error en el proveedor de pagos: %(error)s"
+
+msgid "error.payment.no_stripe_profile"
+msgstr "El cliente no tiene un perfil de Stripe asociado"
+
+msgid "error.payment.auth_required"
+msgstr "Se requiere autenticación bancaria (SCA)"
+
+msgid "error.payment.failed_retry"
+msgstr "El pago inicial falló. Por favor intenta con otra tarjeta."
+
+msgid "error.payment.generic_process"
+msgstr "Error procesando la solicitud de pago"
+
+msgid "error.payment.invalid_subscription"
+msgstr "Suscripción no válida"
+
+msgid "error.payment.unknown_status"
+msgstr "Estado de pago pendiente o desconocido"
+
+msgid "error.payment.initial_failed"
+msgstr "El pago inicial falló. Revisa tu configuración en Stripe."
+
+msgid "success.payment.restored"
+msgstr "Suscripción restaurada con éxito"
+
+msgid "success.payment.cancelled"
+msgstr "Suscripción cancelada exitosamente"
+
+msgid "success.payment.active"
+msgstr "Suscripción activa"
+
+msgid "success.payment.pending_test_clock"
+msgstr "Suscripción creada (Pendiente de proceso por Test Clock)"
+
+# --- Gestión de Clientes y Onboarding ---
+msgid "common.missing_client_id"
+msgstr "Falta el parámetro clientId"
+
+msgid "error.onboard.stripe_failed"
+msgstr "Cuenta creada, pero hubo un error con Stripe: %(error)s"
+
+msgid "error.client.invalid_schema"
+msgstr "Nombre de esquema inválido"
+
+msgid "error.client.already_exists"
+msgstr "Ya existe un cliente con los datos proporcionados"
+
+msgid "error.client.not_found"
+msgstr "No se encontró la información de la institución."
+
+msgid "error.client.export_failed"
+msgstr "Error exportando data: %s"
+
+msgid "error.client.preferences_not_found"
+msgstr "No se encontraron preferencias configuradas para el cliente."
+
+msgid "error.client.schema_not_determined"
+msgstr "No se pudo determinar el esquema de datos para la operación."
+
+msgid "error.user_already_exists"
+msgstr "El nombre de usuario ya existe"
+
+msgid "error.email_already_exists"
+msgstr "El correo electrónico ya está registrado"
+
+msgid "error.verify_institution_relation_failed"
+msgstr "No se pudo verificar la relación del usuario con la institución."
+
+msgid "error.access_denied_institution_mismatch"
+msgstr "Acceso denegado: El usuario no pertenece a su institución."
+
+# --- Facturación Fiscal (NCF) ---
+msgid "ncf.label.type"
+msgstr "Tipo de Comprobante"
+
+msgid "ncf.value.tax_credit"
+msgstr "Crédito Fiscal"
+
+msgid "ncf.value.final_consumer"
+msgstr "Consumidor Final"
+
+msgid "ncf.label.ncf"
+msgstr "NCF"
+
+msgid "ncf.label.document"
+msgstr "RNC/Cédula Cliente"
+
+msgid "ncf.footer.valid_document"
+msgstr "Gracias por su pago. Este documento es un comprobante fiscal válido."
+
+msgid "error.ncf.no_active_sequence"
+msgstr "No hay secuencias activas para el tipo NCF: %s"
+
+msgid "error.ncf.exhausted"
+msgstr "Secuencia agotada para tipo %s. Contacte a soporte."
+
+msgid "error.ncf.expired"
+msgstr "La secuencia %(type)s ha vencido el %(date)s"
+
+# --- Almacenamiento y Documentos ---
+msgid "error.storage.limit_reached"
+msgstr "Has alcanzado el límite de almacenamiento de tu plan. Mejora tu plan para subir más archivos."
+
+msgid "error.storage.limit_exceeded_detail"
+msgstr "Límite excedido. Tu plan permite %(limit)s GB. Uso actual: %(current)s GB."
+
+msgid "success.storage.uploaded"
+msgstr "Archivo subido con éxito."
+
+msgid "success.storage.deleted"
+msgstr "Documento eliminado correctamente."
+
+msgid "error.storage.no_file"
+msgstr "No se proporcionó ningún archivo en la solicitud."
+
+msgid "error.storage.document_not_found"
+msgstr "El documento solicitado no existe o no tiene permisos para verlo."
+
+msgid "error.storage.process_failed"
+msgstr "Fallo en el proceso de almacenamiento"
+
+# --- Roles y Campos Dinámicos ---
+msgid "error.role.delete_failed"
+msgstr "No se pudo eliminar el rol debido a un error interno."
+
+msgid "error.role.code_exists"
+msgstr "El código de rol '%s' ya existe."
+
+msgid "error.role.name_exists"
+msgstr "El nombre de rol '%s' ya existe."
+
+msgid "error.role.integrity_error"
+msgstr "Error de integridad: Datos duplicados o inválidos."
+
+msgid "error.role.internal_error"
+msgstr "No se pudo crear el rol debido a un error interno."
+
+msgid "success.dynamic_field.created"
+msgstr "El campo personalizado ha sido definido y guardado correctamente."
+
+msgid "error.dynamic_field.invalid_type"
+msgstr "El tipo de campo especificado no es válido."
+
+msgid "error.dynamic_field.duplicate_name"
+msgstr "Ya existe un campo con este nombre para la entidad seleccionada."
+
+msgid "error.dynamic_field_undefined"
+msgstr "El campo '%(key)s' no está definido para %(entity)s. Por favor, regístralo primero."
+
+# --- Asuntos de Email ---
+msgid "email.subject.confirmation"
+msgstr "Confirmación de Cuenta"
+
+msgid "email.subject.reset_password"
+msgstr "Cambio de contraseña"
+
+msgid "email.subject.login_notification"
+msgstr "Notificación de Inicio de Sesión"
+
+msgid "email.subject.complete_registration"
+msgstr "Completa tu registro en %s"
+
+msgid "email.subject.subscription_ended"
+msgstr "Tu suscripción ha finalizado"
+
+msgid "email.subject.trial_welcome"
+msgstr "¡Bienvenido a tu prueba gratuita de %(plan)s en %(app)s!"
+
+msgid "email.subject.invoice_ready"
+msgstr "Tu Factura %(num)s - %(app)s"
+
+msgid "email.subject.payment_failed"
+msgstr "Acción requerida: Error en el pago de tu suscripción"
+
+msgid "email.subject.trial_ending"
+msgstr "Tu periodo de prueba en %(app)s termina pronto"
+
+# --- Misceláneos ---
+msgid "common.user"
+msgstr "Usuario"
+
+msgid "success.auth.login"
+msgstr "Inicio de sesión exitoso"
+
+msgid "success.auth.logout"
+msgstr "Cierre de sesión exitoso"
+
+msgid "msg.client.one_hour"
+msgstr "1 hora"
+
+# --- Validación de Contraseñas ---
+msgid "error.password.empty"
+msgstr "La contraseña no puede estar vacía"
+
+msgid "error.password.min_length"
+msgstr "La contraseña debe tener al menos %d caracteres"
+
+msgid "error.password.require_uppercase"
+msgstr "La contraseña debe contener al menos una letra mayúscula"
+
+msgid "error.password.require_lowercase"
+msgstr "La contraseña debe contener al menos una letra minúscula"
+
+msgid "error.password.require_numbers"
+msgstr "La contraseña debe contener al menos un número"
+
+msgid "error.password.require_special"
+msgstr "La contraseña debe contener al menos un carácter especial"

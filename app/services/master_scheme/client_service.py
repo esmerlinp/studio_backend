@@ -24,7 +24,7 @@ from app.services.master_scheme.payment_service import request_suscription
 from datetime import date, datetime, timedelta
 from app.utils.helpers import send_email_template, paginate_query
 from app.utils.types import ActionType, ResourceTypes, states
-
+from app.utils import i18n  # Importar el módulo de idiomas
 
 
 
@@ -127,10 +127,12 @@ def onboard_client_service(client_data, admin_user_data, plan_data):
         
         if not subscription_data or subscription_data.get("status") != "success":
             # Aquí ya no hacemos rollback de los datos anteriores porque ya son válidos
-            error_msg = subscription_data.get("message", "Error desconocido en Stripe")
+            #error_msg = subscription_data.get("message", "Error desconocido en Stripe")
+            raw_error = subscription_data.get("message", i18n._("error.unknown"))
+            msg = i18n._("error.onboard.stripe_failed") % {'error': raw_error}
             return {
                 "status": "error",
-                "message": f"Cuenta creada, pero hubo un error con Stripe: {error_msg}",
+                "message": msg,
                 "client_id": client.clientId,
                 "retry_allowed": True # Informamos al front que puede reintentar solo el pago
             }
@@ -141,7 +143,7 @@ def onboard_client_service(client_data, admin_user_data, plan_data):
         # 7. Enviar email de respaldo
         try:
             send_email_template(
-                subject=f"Completa tu registro en {app_name}",
+                subject=i18n._("email.subject.complete_registration") % app_name,
                 to=[email],
                 path_template="emails/es/complete_subscription.html",
                 name=admin_user_data["first_name"],
@@ -165,7 +167,7 @@ def onboard_client_service(client_data, admin_user_data, plan_data):
        
 def validate_schema_name(schema: str):
     if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", schema):
-        raise ValueError("Invalid schema name")
+        raise ValueError(i18n._("error.client.invalid_schema"))
 
 
 def create_client_onboard(
@@ -264,7 +266,7 @@ def create_client(
     except IntegrityError as e:
         if commit:
           db.session.rollback()
-        raise ValueError("Ya existe un cliente con los datos proporcionados") from e
+        raise ValueError(i18n._("error.client.already_exists")) from e
 
     except Exception as e:
         if commit:
@@ -426,7 +428,7 @@ def has_available_storage(client_id: int, new_file_size_mb: float) -> tuple[bool
         .filter(ClientPlan.client_id == client_id).first()
 
     if not client_data:
-        return False, "Cliente o plan no encontrado."
+        return False, i18n._("error.client.not_found")
 
     client, plan = client_data
     limit_mb = plan.max_storage_gb * 1024 # Convertimos GB a MB para comparar
@@ -441,7 +443,10 @@ def has_available_storage(client_id: int, new_file_size_mb: float) -> tuple[bool
     projected_usage = current_usage_mb + new_file_size_mb
 
     if projected_usage > limit_mb:
-        msg = f"Límite excedido. Tu plan permite {plan.storage_limit_gb}GB. Uso actual: {round(current_usage_mb/1024, 2)}GB."
+        msg = i18n._("error.storage.limit_exceeded_detail") % {
+            'limit': plan.max_storage_gb,
+            'current': round(current_usage_mb/1024, 2)
+        }
         return False, msg
 
     return True, None
@@ -560,4 +565,4 @@ def export_client_data(schema_name):
     except Exception as e:
         if os.path.exists(local_path):
             os.remove(local_path)
-        raise Exception(f"Error exportando data: {str(e)}")
+        raise Exception(i18n._("error.client.export_failed") % str(e))

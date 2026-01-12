@@ -35,7 +35,7 @@ def create_student():
     data = request.get_json()
     
     if not data:
-        return error(i18n._("api.invalid_payload"), 400)
+        return error(i18n._("api.invalid_payload"), status_code=400)
 
     try:
         new_student = student_service.create_student(data)
@@ -45,7 +45,7 @@ def create_student():
             code=201
         )
     except Exception as e:
-        return error(str(e), 400)
+        return error(str(e), status_code=400)
 
 
 @jwt_required()
@@ -55,7 +55,7 @@ def update_student(student_id: int):
     data = request.get_json()
     print("student_id ", student_id)
     if not data:
-        return error(i18n._("api.invalid_payload"), 400)
+        return error(i18n._("api.invalid_payload"), status_code=400)
 
     
 

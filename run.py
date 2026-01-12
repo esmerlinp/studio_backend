@@ -113,12 +113,12 @@ def before_request():
         g.user_id = user_id
         
     except Exception:
-        return error("No autenticado", 401)
+        return error(i18n._("auth.not_authenticated"), 401)
 
     # 4. Obtener datos del usuario (Intenta optimizar esta función para que traiga el esquema de una vez)
     user = get_user_by_id(user_id=user_id)
     if not user:
-        return error("Usuario no existe", 401)
+        return error(i18n._("auth.user_not_found"), 401)
 
     # ... tus validaciones de isConfirmedUser y mustChangePassword ...
 
@@ -136,11 +136,8 @@ def before_request():
         app.logger.error(f"Error al cambiar esquema a {schema_name}: {str(e)}")
         
         # Opcional: Aquí podrías llamar a schema_exists solo si falló el SET
-        return error(
-            "Su ambiente de trabajo no está disponible. Contacte a soporte.",
-            500
-        )
-        
+        return error(i18n._("system.environment_unavailable"), 500)
+
 @app.route("/")
 def main_page():
     return render_template('es/main.html')
@@ -159,7 +156,7 @@ def restore():
     client_id = request.args.get('clientId')
     
     if not client_id:
-        return jsonify({"msg": "Falta el parámetro clientId"}), 400
+        return jsonify({"msg": i18n._("common.missing_client_id")}), 400
     
     client = db.session.get(Client, client_id)
     
@@ -233,7 +230,7 @@ def reset_password():
         user_id = verify_reset_token(token, max_age=3600)
 
         if user_id in (None, "expired"):
-            return {"error": "Token inválido o expirado"}, 400
+            return {"error": i18n._("auth.invalid_token")}, 400
 
 
         schema_name = get_user_scheme(user_id=user_id)
@@ -244,9 +241,9 @@ def reset_password():
         
         user = change_user_password(user_id=user_id, new_password=password)
         if not user:
-            return {"error": "Usuario no encontrado"}, 404
+            return {"error": i18n._("auth.user_not_found")}, 404
 
-        return {"message": "Contraseña actualizada correctamente"}
+        return {"message": i18n._("auth.password_updated_success")}
     except ValueError as e:
         return {
             "success": False,
@@ -256,7 +253,7 @@ def reset_password():
     except LookupError:
         return {
             "success": False,
-            "message": "Usuario no encontrado"
+            "message": i18n._("auth.user_not_found")
         }, 404
               
 @app.route("/confirmation-account")

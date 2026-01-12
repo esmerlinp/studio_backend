@@ -12,6 +12,7 @@ from app.exceptions import AuditedError
 from app import log_action, INACTIVITY_MINUTES
 from app.utils.types import ResourceTypes, ActionType, Roles as r, states
 from app.utils.helpers import send_email_template
+from app.utils import i18n
 from dotenv import load_dotenv
 import os
 
@@ -25,13 +26,13 @@ JWT_ACCESS_TOKEN_EXPIRES = 24   # horas
 def validar_login_payload(data):
     """Valida que el payload contenga los campos requeridos."""
     if not data:
-        return "Empty request payload"
+        return i18n._("error.auth.empty_payload")
 
     if not data.get("username"):
-        return "Empty username"
+        return i18n._("error.auth.empty_username")
 
     if not data.get("password"):
-        return "Empty password"
+        return i18n._("error.auth.empty_password")
 
     return None
 
@@ -59,7 +60,7 @@ def login():
 
 
     if not user:
-        return error("Invalid username or password", status_code=401)
+        return error(i18n._("error.auth.invalid_credentials"), status_code=401)
 
     g.user_id = user.userId
     relacion = UsuarioCliente.query.filter_by(user_id=user.userId).first()
@@ -68,7 +69,7 @@ def login():
         g.scheme = client.schemaName
 
     if not check_password_hash(user.password, password):
-        raise AuditedError("Credenciales inválidas",
+        raise AuditedError(i18n._("error.auth.invalid_credentials"),
                             resource_type=ResourceTypes.USER_SESSION,
                             action_type=ActionType.LOGIN, user_id=user.userId, status_code=401)
 
@@ -85,11 +86,7 @@ def login():
 
         else:            
             # Personalizamos el mensaje según el contexto (si tienes el campo de motivo)
-            mensaje_error = (
-                "Tu cuenta se encuentra inactiva. "
-                "Esto puede deberse a un pago pendiente o a una revisión administrativa. "
-                "Por favor, contacta al administrador de tu institución o a nuestro equipo de soporte."
-            )
+            mensaje_error = i18n._("error.auth.account_inactive_detail")
             return error(message=mensaje_error, status_code=401) # 403 Forbidden es más preciso que 400
 
 
@@ -110,14 +107,14 @@ def login():
     
     session = create_session(userId=user.userId, refreshToken=refresh_token, inactivity_minutes=INACTIVITY_MINUTES, ipAddress=request.remote_addr, userAgent=request.user_agent.string)
     if session is None:
-        return error("Error creating user session", status_code=500)
+        return error(i18n._("error.auth.session_creation_failed"), status_code=500)
     
     session_create = get_session_active_by_refresh_token(refreshToken=refresh_token)
     preferences = get_user_preferences(user_id=user.userId)
     if not preferences:
         new_pref = add_default_user_preferences(user_id=user.userId)
         if not new_pref:
-             return error("Error creating user preferences", status_code=500)
+            return error(i18n._("error.auth.preferences_error"), status_code=500)
         preferences = new_pref
             
     
@@ -130,13 +127,13 @@ def login():
     response_data['preferences'] = preferences.preferences
     
     if is_restore:  
-        return error(message="Tu suscripción ha expirado. Por favor, reanúdala para continuar.", 
+        return error(message=i18n._("error.auth.subscription_expired"),
                 data={"access_token":access_token},
                 redirect_url=f"/billing/restore?clientId={clientId}&token={access_token}", 
                 status_code=403)               
 
     
-    send_email_template(subject="Notificación de Inicio de Sesión", 
+    send_email_template(subject=i18n._("email.subject.login_notification"), 
                         to=[user.email], 
                         path_template="emails/es/notification_login.html",
                         app_name=app_name,
@@ -150,7 +147,7 @@ def login():
     log_action(action=ActionType.LOGIN, resource_type=ResourceTypes.USER_SESSION,
                 resource_id=user.userId, description="Login successful", user_id=user.userId)
     
-    return success(data=response_data, message="Login successful", status_code=200)
+    return success(data=response_data, message=i18n._("success.auth.login"), status_code=200)
 
 
 
@@ -161,7 +158,7 @@ def logout(user_id:int, sessionId:int):
 
     result = close_session(sessionId=sessionId, user_id=user_id)
     if sessionId != result.get("sessionId", 0):
-        return error("Session not found or already closed", status_code=404)
+        return error(i18n._("error.auth.session_not_found"), status_code=404)
         
     return success(data={"sessionId": sessionId}, message="Logout successful", status_code=200) 
 
@@ -173,7 +170,7 @@ def logout(user_id:int, sessionId:int):
 def refresh_token(user_id: int):
     user = get_user_by_id(user_id=int(user_id))
     if not user:
-        return error("User not found", status_code=404)
+        return error(i18n._("error.auth.user_not_found"), status_code=404)
     
     additional_claims={
         "username": user.username,
@@ -185,7 +182,7 @@ def refresh_token(user_id: int):
                                            additional_claims=additional_claims
                                         )
     if not new_access_token:
-        return error("Error generating new token", status_code=500)
+        return error(i18n._("error.auth.token_generation_failed"), status_code=500)
     
     result = {
         "accessToken": new_access_token

@@ -6,6 +6,7 @@ from app.exceptions import AuditedError
 from app import log_action
 from app.utils.responses import error
 from app.utils.types import ActionType
+from app.utils import i18n
 
 # Configuración básica del logging
 logging.basicConfig(
@@ -20,7 +21,7 @@ def register_error_handlers(app):
     @app.errorhandler(429)
     def ratelimit_handler(e):
         return error(message={
-                "msg": "Demasiadas peticiones. Por favor, intenta más tarde.",
+                "msg": i18n._("error.too_many_requests"),
                 "description": str(e.description)
                 }, status_code=429)  
     
@@ -33,7 +34,7 @@ def register_error_handlers(app):
             log_action(
                 action=e.action_type,
                 resource_type=e.resource_type,
-                description=f"OPERACIÓN FALLIDA: {e}",
+                description=f"{i18n._('audit.operation_failed')}: {e}",
                 new_values=e.extra_data,
                 user_id=e.user_id,
                 status="ERROR" # Puedes agregar un campo status a tu tabla de auditoría
@@ -61,13 +62,13 @@ def register_error_handlers(app):
             log_action(
                 action=ActionType.ERROR,
                 resource_type=request.method,
-                description=f"OPERACIÓN FALLIDA: {e}\n Usuario: {getattr(g, 'user_id', 'Anónimo')}",
+                description=f"{i18n._('audit.operation_failed')}: {e}\n {i18n._('common.user')}: {getattr(g, 'user_id', 'Anónimo')}",
                 new_values={error_details},
                 status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
             )
         else:
             log_msg = (
-                f"\n--- ERROR INTERNO ---\n"
+                f"\n--- {i18n._('audit.internal_error')} ---\n"
                 f"Ruta: {request.url}\n"
                 f"Método: {request.method}\n"
                 f"Usuario: {getattr(g, 'user_id', 'Anónimo')}\n"
@@ -79,7 +80,7 @@ def register_error_handlers(app):
         return error(
             message={
             "status": "error",
-            "msg": "Ha ocurrido un error inesperado.",
+            "msg": i18n._("error.unexpected_error"),
             "error_id": datetime.now().strftime("%Y%m%d%H%M%S")}, 
             status_code=500)
     
@@ -94,7 +95,7 @@ def register_error_handlers(app):
             log_action(
                 action=ActionType.ERROR,
                 resource_type=request.method,
-                description=f"OPERACIÓN FALLIDA: {e}\n Usuario: {getattr(g, 'user_id', 'Anónimo')}",
+                description=f"{i18n._('audit.operation_failed')}: {e}\n {i18n._('common.user')}: {getattr(g, 'user_id', 'Anónimo')}",
                 new_values={error_details},
                 status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
             )
@@ -114,16 +115,17 @@ def register_error_handlers(app):
 
             
         error_details = traceback.format_exc()
+        log_desc = i18n._("audit.permission_denied_log")
         if getattr(g, "scheme", None):
             log_action(
                 action=ActionType.ERROR,
                 resource_type=request.method,
-                description=f"El usuario está autenticado pero no tiene permiso para ese recurso: {str(e)} en {request.url}\n Usuario: {getattr(g, 'user_id', 'Anónimo')}",
+                description=f"{log_desc}: {str(e)} en {request.url}\n {i18n._('common.user')}: {getattr(g, 'user_id', 'Anónimo')}",
                 new_values={error_details},
                 status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
             )
         else:
-            logging.warning(f"El usuario está autenticado pero no tiene permiso para ese recurso: {str(e)} en {request.url}")
+            logging.warning(f"{log_desc}: {str(e)} en {request.url}")
             
         return error(message={
             "status": "error",
@@ -141,12 +143,12 @@ def register_error_handlers(app):
             log_action(
                 action=ActionType.ERROR,
                 resource_type=request.method,
-                description=f"RuntimeError: {str(e)} en {request.url} en {request.url}\n Usuario: {getattr(g, 'user_id', 'Anónimo')}",
+                description=f"RuntimeError: {str(e)} en {request.url}\n {i18n._('common.user')}: {getattr(g, 'user_id', 'Anónimo')}",
                 new_values={error_details},
                 status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
             )
         else:
-            logging.warning(f"RuntimeError: {str(e)} en {request.url}")
+            logging.warning(f"RuntimeError: {str(e)} - {request.url}")
            
             
         return error(message={

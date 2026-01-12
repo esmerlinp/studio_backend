@@ -9,7 +9,7 @@ from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.services.master_scheme.session_service import close_all_session
 from app.services.master_scheme.payment_factory import get_current_provider
 from app.services.master_scheme.client_plan_service import  get_active_pending
-
+from app.utils import i18n
 from datetime import datetime, timezone, timedelta, date
 from ...extensions import db
 from app.utils.helpers import send_email_template
@@ -96,7 +96,7 @@ def request_suscription(plan_identity, billing_cycle="month") -> dict:
         # 1. Obtener datos del plan
         plan_del_cliente = get_active_pending(id=plan_identity)
         if not plan_del_cliente:
-            return {"status": "error", "message": "Plan no encontrado"}
+            return {"status": "error", "message": i18n._("error.plan.not_found")}
 
         client_id = plan_del_cliente.client_id
         # Cambiamos la forma de consultar para asegurar que esté en la sesión actual
@@ -147,14 +147,15 @@ def request_suscription(plan_identity, billing_cycle="month") -> dict:
                     "stripe_id": stripe_session['external_id']
                 }
             else:
-                raise Exception("Stripe no devolvió una URL válida")
+                raise Exception(i18n._("error.payment.invalid_url"))
 
         except Exception as stripe_err:
             # Si falla Stripe, marcamos la transacción como fallida
             new_trans.status = states.FAILED
             db.session.commit()
             print(f"❌ ERROR EN STRIPE PROVIDER: {str(stripe_err)}")
-            return {"status": "error", "message": f"Error en Stripe: {str(stripe_err)}"}
+            msg = i18n._("error.payment.provider_error") % {'error': str(stripe_err)}
+            return {"status": "error", "message": msg}
 
     except Exception as e:
         db.session.rollback()
@@ -166,7 +167,7 @@ def send_goodbye_email(client_email, contact_name, business_name):
     base_url=os.getenv("BASE_URL")
     try:
         send_email_template(
-            subject="Tu suscripción a Akdmia ha finalizado",
+            subject=i18n._("email.subject.subscription_ended"),
             to=[client_email],
             path_template="emails/es/subscription_ended.html",
             name=contact_name,
@@ -251,7 +252,7 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
             d_fin = payment_date_dt + timedelta(days=client_plan.price_list.trial_days)
             # CASO TRIAL: Email de bienvenida a la prueba gratuita
             send_email_template(
-                subject=f"¡Bienvenido a tu prueba gratuita de {plan_name} en {app_name}!",
+                subject = i18n._("email.subject.trial_welcome") % {'plan': plan_name, 'app': app_name},
                 to=[email_to],
                 path_template="emails/es/trial_welcome.html", # Template específico
                 name=name_to,
@@ -268,7 +269,7 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
             
             # CASO PAGO REAL: Email de factura normal
             send_email_template(
-                subject=f"Tu Factura {num_factura} - {app_name}",
+                subject = i18n._("email.subject.invoice_ready") % {'num': num_factura, 'app': app_name},
                 to=[email_to],
                 path_template="emails/es/invoice_ready.html",
                 name=name_to,
@@ -314,7 +315,7 @@ def handle_invoice_payment_failed(invoice, app_name):
             db.session.commit()
 
         send_email_template(
-            subject="Acción requerida: Error en el pago de tu suscripción",
+            subject=i18n._("email.subject.payment_failed"),
             to=[client.billingEmail],
             path_template="emails/es/payment_failed.html",
             name=client.contactName,
@@ -366,21 +367,27 @@ def handle_invoice_created(invoice, app_name):
             # 2. Generar NCF (Lógica simplificada)
             #seq = NCFSequence.query.filter_by(type_ncf='01', is_active=True).first()
             nuevo_ncf = seq.get_next_ncf()
-
-        
+            label_comprobante = i18n._("ncf.label.type")
+            val_credito = i18n._("ncf.value.tax_credit")
+            val_consumidor = i18n._("ncf.value.final_consumer")
+            label_ncf = i18n._("ncf.label.ncf")
+            label_rnc = i18n._("ncf.label.document")
+            footer_msg = i18n._("ncf.footer.valid_document")
+            
+            
             # 5. Actualizar la factura en Stripe con CUSTOM FIELDS
             # Esto es lo que aparece en el PDF oficial de Stripe
             stripe.Invoice.modify(
                 invoice.id,
                 custom_fields=[
-                    {"name": "Tipo de Comprobante", "value": "Crédito Fiscal" if tipo_ncf_requerido == '01' else "Consumidor Final"},
-                    {"name": "NCF", "value": nuevo_ncf},
-                    {"name": "RNC/Cédula Cliente", "value": client.documentNumber if client.documentNumber else "N/A"}
+                    {"name": label_comprobante, "value": val_credito if tipo_ncf_requerido == '01' else val_consumidor},
+                    {"name": label_ncf, "value": nuevo_ncf},
+                    {"name": label_rnc, "value": client.documentNumber if client.documentNumber else "N/A"}
                 ],
                 statement_descriptor=f"Servicios {app_name}",
-                footer="Gracias por su pago. Este documento es un comprobante fiscal válido."
+                footer=footer_msg
             )
-            
+
             # 6. Guardar en el Log y actualizar contador
             ncf_log = NCFLog(
                 client_id=client.clientId,
@@ -531,7 +538,7 @@ def handle_subscription_trial_will_end(subscription, app_name):
         
         # 3. Enviar email recordatorio
         send_email_template(
-            subject=f"Tu periodo de prueba en {app_name} termina pronto",
+            subject=i18n._("email.subject.trial_ending") % {'app': app_name},
             to=[client.billingEmail],
             path_template="emails/es/trial_ending.html",
             name=client.contactName,

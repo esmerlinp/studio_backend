@@ -51,7 +51,7 @@ class StripeProvider:
                 ITBIS_ID = os.getenv('STRIPE_ITBIS_TAX_RATE')
                 tax_rates.append(ITBIS_ID)
             
-            
+            #TODO: Crear datos de contrato
             contract_summary = (
                 f"Suscripción {plan_period}. Renovación automática. "
                 "Cancelación disponible en cualquier momento desde el panel. "

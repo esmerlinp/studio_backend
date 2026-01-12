@@ -3,6 +3,8 @@ from app.models.master_scheme.ncf_model import NCFSequence, NCFLog
 from datetime import date
 from app.utils.types import ResourceTypes, ActionType
 from flask import g
+from app.utils import i18n  # Importar el módulo de idiomas
+
 class NCFService:
     
     
@@ -73,15 +75,19 @@ class NCFService:
             ).with_for_update().first()
 
             if not sequence:
-                raise Exception(f"No hay secuencias activas para el tipo NCF: {type_ncf}")
+                raise Exception(i18n._("error.ncf.no_active_sequence") % type_ncf)
 
             if sequence.current_number > sequence.max_number:
-                raise Exception(f"Secuencia agotada para tipo {type_ncf}. Contacte a soporte.")
+                raise Exception(i18n._("error.ncf.exhausted") % type_ncf)
 
             if sequence.expiration_date and sequence.expiration_date < date.today():
                 sequence.is_active = False # La auto-inhabilitamos
                 db.session.commit()
-                raise Exception(f"La secuencia {type_ncf} ha vencido el {sequence.expiration_date}")
+                msg = i18n._("error.ncf.expired") % {
+                                    'type': type_ncf, 
+                                    'date': sequence.expiration_date
+                                }
+                raise Exception(msg)
                         
             
             # 2. Generar el string formateado

@@ -4,7 +4,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: en\n"
 
-
+# --- Common and Sessions ---
 msgid "common.open_sessions_retrieved_successfully"
 msgstr "Open sessions retrieved successfully"
 
@@ -14,21 +14,353 @@ msgstr "Session closed successfully"
 msgid "common.token_refreshed_successfully"
 msgstr "Token refreshed successfully"
 
-
 msgid "common.auth.reset_password_email_sent_if_exists"
-msgstr "Si el correo existe, se enviará un enlace"
+msgstr "If the email exists, a link will be sent"
 
 msgid "common.users.created_successfully"
-msgstr "Usuario creado correctamente"
+msgstr "User created successfully"
 
 msgid "common.auth.password_changed_successfully"
-msgstr "Contraseña cambiada correctamente"
+msgstr "Password changed successfully"
 
 msgid "common.users.not_found_or_password_not_changed"
-msgstr "Usuario no encontrado o la contraseña no fue cambiada"
+msgstr "User not found or password was not changed"
 
 msgid "common.users.retrieved_successfully"
-msgstr "Usuario obtenido correctamente"
+msgstr "User retrieved successfully"
 
 msgid "common.users.not_found"
-msgstr "Usuario no encontrado"
+msgstr "User not found"
+
+# --- Authentication and Security ---
+msgid "auth.not_authenticated"
+msgstr "Not authenticated"
+
+msgid "auth.user_not_found"
+msgstr "User not found"
+
+msgid "auth.invalid_token"
+msgstr "Invalid or expired token"
+
+msgid "auth.password_updated_success"
+msgstr "Password updated successfully"
+
+msgid "auth.session_invalid"
+msgstr "Invalid or expired session"
+
+msgid "auth.account_disabled"
+msgstr "Account disabled. Please contact your institution's administrator."
+
+msgid "auth.session_expired_inactivity"
+msgstr "Session expired due to inactivity"
+
+msgid "auth.session_track_error"
+msgstr "Session tracking error"
+
+msgid "auth.sessions_closed_count"
+msgstr "%d sessions were closed."
+
+msgid "error.auth.empty_payload"
+msgstr "Request payload is empty"
+
+msgid "error.auth.empty_username"
+msgstr "Username is required"
+
+msgid "error.auth.empty_password"
+msgstr "Password is required"
+
+msgid "error.auth.invalid_credentials"
+msgstr "Invalid username or password"
+
+msgid "error.auth.account_inactive_detail"
+msgstr "Your account is currently inactive. This may be due to a pending payment or administrative review. Please contact your institution's administrator."
+
+msgid "error.auth.subscription_expired"
+msgstr "Your subscription has expired. Please renew it to continue."
+
+msgid "error.auth.session_creation_failed"
+msgstr "Error creating user session"
+
+msgid "error.auth.session_not_found"
+msgstr "Session not found or already closed"
+
+msgid "error.auth.incomplete_data"
+msgstr "Incomplete data to process the request"
+
+msgid "error.auth.insufficient_permissions"
+msgstr "Insufficient permissions"
+
+msgid "auth.insufficient_permissions"
+msgstr "Insufficient permissions. One of the following roles is required: %(roles)s"
+
+# --- System and Infrastructure ---
+msgid "system.environment_unavailable"
+msgstr "Your workspace is unavailable. Please contact support."
+
+msgid "error.too_many_requests"
+msgstr "Too many requests. Please try again later."
+
+msgid "error.unexpected_error"
+msgstr "An unexpected error has occurred."
+
+msgid "error.internal_server"
+msgstr "Internal server error:"
+
+msgid "error.unknown"
+msgstr "Unknown error"
+
+# --- Audit and Logs ---
+msgid "audit.operation_failed"
+msgstr "OPERATION FAILED"
+
+msgid "audit.internal_error"
+msgstr "INTERNAL ERROR"
+
+msgid "audit.permission_denied_log"
+msgstr "User is authenticated but does not have permission for this resource"
+
+msgid "error.log.not_found"
+msgstr "Log file does not exist yet."
+
+msgid "error.log.read_failed"
+msgstr "Could not read the log file due to a system error."
+
+# --- Plans and Subscriptions ---
+msgid "error.plan.code_exists"
+msgstr "Plan code already exists"
+
+msgid "error.plan.not_found"
+msgstr "Plan not found"
+
+msgid "error.plan.invalid_or_inactive"
+msgstr "The selected plan is invalid or inactive"
+
+msgid "error.price_list.invalid_or_inactive"
+msgstr "The price list is invalid or inactive"
+
+msgid "error.price_list.mismatch"
+msgstr "The price list does not match the selected plan"
+
+msgid "error.client_plan.already_active"
+msgstr "The client already has an active plan for this period"
+
+msgid "error.client_plan.invalid_status"
+msgstr "The provided plan status is invalid"
+
+msgid "error.client_plan.no_active_found"
+msgstr "The client does not have an active plan to perform the change"
+
+# --- Payments and Stripe ---
+msgid "error.payment.invalid_url"
+msgstr "The payment provider did not return a valid URL"
+
+msgid "error.payment.provider_error"
+msgstr "Payment provider error: %(error)s"
+
+msgid "error.payment.no_stripe_profile"
+msgstr "The client does not have an associated Stripe profile"
+
+msgid "error.payment.auth_required"
+msgstr "Bank authentication required (SCA)"
+
+msgid "error.payment.failed_retry"
+msgstr "The initial payment failed. Please try again with a different card."
+
+msgid "error.payment.generic_process"
+msgstr "Error processing the payment request"
+
+msgid "error.payment.invalid_subscription"
+msgstr "Invalid subscription"
+
+msgid "error.payment.unknown_status"
+msgstr "Pending or unknown payment status"
+
+msgid "error.payment.initial_failed"
+msgstr "The initial payment failed. Please check your Stripe settings."
+
+msgid "success.payment.restored"
+msgstr "Subscription restored successfully"
+
+msgid "success.payment.cancelled"
+msgstr "Subscription cancelled successfully"
+
+msgid "success.payment.active"
+msgstr "Subscription active"
+
+msgid "success.payment.pending_test_clock"
+msgstr "Subscription created (Pending Test Clock processing)"
+
+# --- Client Management and Onboarding ---
+msgid "common.missing_client_id"
+msgstr "Missing clientId parameter"
+
+msgid "error.onboard.stripe_failed"
+msgstr "Account created, but there was an error with Stripe: %(error)s"
+
+msgid "error.client.invalid_schema"
+msgstr "Invalid schema name"
+
+msgid "error.client.already_exists"
+msgstr "A client with the provided details already exists"
+
+msgid "error.client.not_found"
+msgstr "Institutional information not found."
+
+msgid "error.client.export_failed"
+msgstr "Error exporting data: %s"
+
+msgid "error.client.preferences_not_found"
+msgstr "No preferences found for the client."
+
+msgid "error.client.schema_not_determined"
+msgstr "Could not determine the data schema for the operation."
+
+msgid "error.user_already_exists"
+msgstr "Username already exists"
+
+msgid "error.email_already_exists"
+msgstr "Email is already registered"
+
+msgid "error.verify_institution_relation_failed"
+msgstr "Could not verify the user's relationship with the institution."
+
+msgid "error.access_denied_institution_mismatch"
+msgstr "Access denied: The user does not belong to your institution."
+
+# --- Fiscal Billing (NCF - Specific to DR context, but translated) ---
+msgid "ncf.label.type"
+msgstr "Receipt Type"
+
+msgid "ncf.value.tax_credit"
+msgstr "Tax Credit"
+
+msgid "ncf.value.final_consumer"
+msgstr "Final Consumer"
+
+msgid "ncf.label.ncf"
+msgstr "NCF (Fiscal ID)"
+
+msgid "ncf.label.document"
+msgstr "Client RNC/ID"
+
+msgid "ncf.footer.valid_document"
+msgstr "Thank you for your payment. This document is a valid fiscal receipt."
+
+msgid "error.ncf.no_active_sequence"
+msgstr "No active sequences found for NCF type: %s"
+
+msgid "error.ncf.exhausted"
+msgstr "Sequence exhausted for type %s. Please contact support."
+
+msgid "error.ncf.expired"
+msgstr "Sequence %(type)s expired on %(date)s"
+
+# --- Storage and Documents ---
+msgid "error.storage.limit_reached"
+msgstr "You have reached your plan's storage limit. Upgrade your plan to upload more files."
+
+msgid "error.storage.limit_exceeded_detail"
+msgstr "Limit exceeded. Your plan allows %(limit)s GB. Current usage: %(current)s GB."
+
+msgid "success.storage.uploaded"
+msgstr "File uploaded successfully."
+
+msgid "success.storage.deleted"
+msgstr "Document deleted successfully."
+
+msgid "error.storage.no_file"
+msgstr "No file provided in the request."
+
+msgid "error.storage.document_not_found"
+msgstr "The requested document does not exist or you do not have permission to view it."
+
+msgid "error.storage.process_failed"
+msgstr "Storage process failed"
+
+# --- Roles and Dynamic Fields ---
+msgid "error.role.delete_failed"
+msgstr "Could not delete role due to an internal error."
+
+msgid "error.role.code_exists"
+msgstr "Role code '%s' already exists."
+
+msgid "error.role.name_exists"
+msgstr "Role name '%s' already exists."
+
+msgid "error.role.integrity_error"
+msgstr "Integrity error: Duplicate or invalid data."
+
+msgid "error.role.internal_error"
+msgstr "Could not create role due to an internal error."
+
+msgid "success.dynamic_field.created"
+msgstr "Custom field defined and saved successfully."
+
+msgid "error.dynamic_field.invalid_type"
+msgstr "The specified field type is invalid."
+
+msgid "error.dynamic_field.duplicate_name"
+msgstr "A field with this name already exists for the selected entity."
+
+msgid "error.dynamic_field_undefined"
+msgstr "The field '%(key)s' is not defined for %(entity)s. Please register it first."
+
+# --- Email Subjects ---
+msgid "email.subject.confirmation"
+msgstr "Account Confirmation"
+
+msgid "email.subject.reset_password"
+msgstr "Password Reset"
+
+msgid "email.subject.login_notification"
+msgstr "Login Notification"
+
+msgid "email.subject.complete_registration"
+msgstr "Complete your registration at %s"
+
+msgid "email.subject.subscription_ended"
+msgstr "Your subscription has ended"
+
+msgid "email.subject.trial_welcome"
+msgstr "Welcome to your free trial of %(plan)s at %(app)s!"
+
+msgid "email.subject.invoice_ready"
+msgstr "Your Invoice %(num)s - %(app)s"
+
+msgid "email.subject.payment_failed"
+msgstr "Action Required: Subscription payment error"
+
+msgid "email.subject.trial_ending"
+msgstr "Your trial period at %(app)s is ending soon"
+
+# --- Miscellaneous ---
+msgid "common.user"
+msgstr "User"
+
+msgid "success.auth.login"
+msgstr "Login successful"
+
+msgid "success.auth.logout"
+msgstr "Logout successful"
+
+msgid "msg.client.one_hour"
+msgstr "1 hour"
+
+# --- Password Validation ---
+msgid "error.password.empty"
+msgstr "Password cannot be empty"
+
+msgid "error.password.min_length"
+msgstr "Password must be at least %d characters long"
+
+msgid "error.password.require_uppercase"
+msgstr "Password must contain at least one uppercase letter"
+
+msgid "error.password.require_lowercase"
+msgstr "Password must contain at least one lowercase letter"
+
+msgid "error.password.require_numbers"
+msgstr "Password must contain at least one number"
+
+msgid "error.password.require_special"
+msgstr "Password must contain at least one special character"

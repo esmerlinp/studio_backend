@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 import os
 from uuid import uuid4
 from app.utils.types import Roles
+from app.utils import i18n
 
 
 
@@ -233,11 +234,11 @@ def insert_user_onboard(
         
     u = get_user_by_user_name(user_name=username)    
     if u:
-        raise ValueError("Usuario ya existe")
+        raise ValueError(i18n._("error.user_already_exists"))
     
     u = get_user_by_email(email=email)
     if u:
-        raise ValueError("email ya existe")
+        raise ValueError(i18n._("error.email_already_exists"))
     
     
     new_user = User(
@@ -272,7 +273,7 @@ def insert_user_onboard(
         token = generate_reset_token(user.userId)
         confirmation_url = f"{request.host_url}/confirmation-account?token={token}"
         
-        send_email_template(subject="Confirmation Account", 
+        send_email_template(subject=i18n._("email.subject.confirmation"), 
                             to=[email],
                             path_template="emails/es/confirmation_email.html",
                             confirmation_url=confirmation_url, app_name=os.getenv("APP_NAME"), name=user.firstName
@@ -317,13 +318,13 @@ def insert_user(
     if u:
         if not u.isActive and not u.isConfirmedUser:
             send_confirmation_account_email(user_id=u.userId, user_name=u.username, email=u.email)
-        raise ValueError("Usuario ya existe")
+        raise ValueError(i18n._("error.user_already_exists"))
     
     u = get_user_by_email(email=email)
     if u:
         if not u.isActive and not u.isConfirmedUser:
             send_confirmation_account_email(user_id=u.userId, user_name=u.username, email=u.email)
-        raise ValueError("email ya existe")
+        raise ValueError(i18n._("error.email_already_exists"))
     
     
     new_user = User(
@@ -397,7 +398,7 @@ def update_user(
 
     user = User.query.filter_by(userId=user_id).first()
     if not user:
-        raise ValueError("Usuario no encontrado")
+        raise ValueError(i18n._("auth.user_not_found"))
 
     g.audit_old_values = user.to_dict()
     # ----------------------------------
@@ -461,16 +462,16 @@ def deactivate_user(user_id, admin_user_id):
     # 2. Validar que ambos existan (No sean None)
     if not cliente_usuario_a_inactivar or not cliente_del_usuario_administrador:
         # Si falta alguno, es un error de "No encontrado" o "Sesión inválida"
-        raise ValueError("No se pudo verificar la relación del usuario con la institución.")
+        raise ValueError(i18n._("error.verify_institution_relation_failed"))
 
     # 3. Validar que pertenezcan al mismo cliente (ID de la institución)
     if cliente_usuario_a_inactivar.client_uuid != cliente_del_usuario_administrador.client_uuid:
         # Esto es un intento de violación de seguridad (un admin tratando de editar otra escuela)
-        raise PermissionError("Acceso denegado: El usuario no pertenece a su institución.")
+        raise PermissionError(i18n._("error.access_denied_institution_mismatch"))
         
     user = User.query.filter_by(userId=user_id).first()
     if not user:
-        raise ValueError("Usuario no encontrado")
+        raise ValueError(i18n._("auth.user_not_found"))
     
     try:
         user.isActive = False

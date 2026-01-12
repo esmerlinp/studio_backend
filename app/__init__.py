@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import g, request
 from app.errors import register_error_handlers
-
+from app.utils import i18n
 
 INACTIVITY_MINUTES = 30  # tiempo de inactividad permitido
 
@@ -90,7 +90,7 @@ def track_activity(func):
             session = get_session_active_by_user_id(userId=user_id)
 
             if not session or not session.isActive:
-                return jsonify({"msg": "Sesión inválida o expirada"}), 440
+                return jsonify({"msg": i18n._("auth.session_invalid")}), 440
             
             # 2. VALIDACIÓN CRÍTICA: ¿El usuario sigue activo?
             # Esto detiene a los usuarios  que no pagaron
@@ -98,7 +98,7 @@ def track_activity(func):
             
             if not user.isActive:                 
                 return jsonify({
-                    "msg": f"Cuenta inhabilitada. Contacte al administrador de su institución."
+                    "msg": i18n._("auth.account_disabled")
                 }), 403
 
 
@@ -111,8 +111,7 @@ def track_activity(func):
 
             if expiration < now:
                 invalidar_sesiones_por_id_session(sessionId=session.sessionId)
-                return jsonify({"msg": "Sesión expirada por inactividad"}), 440
-
+                return jsonify({"msg": i18n._("auth.session_expired_inactivity")}), 440
             # Actualizar actividad
             actualizar_actividad_sesion(sessionId=session.sessionId, inactivity_minutes=INACTIVITY_MINUTES)
 
@@ -120,7 +119,7 @@ def track_activity(func):
 
         except Exception as e:
             print("track_activity error:", str(e))
-            return error(message=f"Error en seguimiento de sesión {str(e)}", status_code=500)
+            return error(message=f"{i18n._('auth.session_track_error')} {str(e)}", status_code=500)
 
 
     return wrapper
@@ -195,12 +194,12 @@ def require_role(role_codes:list[str]):
                 user_id = get_jwt_identity()
                 
                 if not user_id:
-                    return error("Usuario no autenticado", 401)
+                    return error(i18n._("auth.not_authenticated"), 401)
                 
                 # Validar que el usuario exista
                 user = User.query.get(user_id)
                 if not user:
-                    return error("Usuario no existe", 403)
+                    return error(i18n._("auth.user_not_found"), 403)
 
                 # Obtener los roles válidos desde la tabla Role
                 valid_roles = (
@@ -220,10 +219,9 @@ def require_role(role_codes:list[str]):
                 )
 
                 if not has_role:
-                    return error(
-                        f"Permisos insuficientes. Se requiere uno de: {', '.join(role_codes)}",
-                        403
-                    )
+                    roles_str = ', '.join(role_codes)
+                    msg = i18n._("auth.insufficient_permissions") % {'roles': roles_str}
+                    return error(msg, 403)
 
                 return fn(*args, **kwargs)
             return wrapper

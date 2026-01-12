@@ -3,7 +3,7 @@ from app import db, audit_log
 from app.utils.types import ResourceTypes, ActionType
 from typing import Optional, List
 from sqlalchemy.exc import IntegrityError
-
+from app.utils import i18n  # Importar el módulo de idiomas
 
 @audit_log(action=ActionType.READ, resource_type=ResourceTypes.ROLE)
 def get_all_roles() -> Optional[list[Role]]:
@@ -23,7 +23,7 @@ def delete_role(role_id) -> int:
         return role.id
     except Exception as e:
         db.session.rollback()
-        raise ValueError("No se pudo eliminar el rol debido a un error interno.", e)
+        raise ValueError(i18n._("error.role.delete_failed"), e)
 
             
         
@@ -39,17 +39,18 @@ def create_role(name, code, description) -> Role:
     except IntegrityError as e:
         db.session.rollback()
         # Verificamos si el error es por el código único
+        error_str = str(e.orig).lower()
         if 'scodigo' in str(e.orig).lower():
-            raise ValueError(f"El código de rol '{code}' ya existe.")
+            raise ValueError(i18n._("error.role.code_exists") % code)
         if 'srol' in str(e.orig).lower():
-            raise ValueError(f"El nombre de rol '{name}' ya existe.")
+            raise ValueError(i18n._("error.role.name_exists") % name)
         
-        raise ValueError("Error de integridad: Datos duplicados o inválidos.")
+        raise ValueError(i18n._("error.role.integrity_error"))
 
     except Exception as e:
         db.session.rollback()
         # Para errores inesperados, mejor loguear el error real y lanzar algo genérico
-        raise ValueError("No se pudo crear el rol debido a un error interno.")
+        raise ValueError(i18n._("error.role.internal_error"))
     
  
 

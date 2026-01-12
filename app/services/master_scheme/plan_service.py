@@ -1,7 +1,7 @@
 from typing import List, Optional
 from app import db
 from app.models.master_scheme.plans_model import Plan
-
+from app.utils import i18n
 
 def create_plan(
     *,
@@ -16,7 +16,7 @@ def create_plan(
 
     # Validar código único
     if Plan.query.filter_by(code=code).first():
-        raise ValueError("Plan code already exists")
+        raise ValueError(i18n._("error.plan_code_already_exists"))
 
     plan = Plan(
         code=code,

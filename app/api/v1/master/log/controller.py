@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required
 from app import track_activity, require_role
 from app.utils.responses import error, success
 from app.utils.types import Roles as r
+from app.utils import i18n  # Importar el módulo de idiomas
 
 LOG_FILE_PATH = 'errors.log'
 ADMIN_ROLES = [r.SUPER_ADMIN, r.ROOT]
@@ -16,7 +17,7 @@ def get_logs():
     lines = request.args.get('lines', default=50, type=int)
     
     if not os.path.exists(LOG_FILE_PATH):
-        return jsonify({"msg": "El archivo de log no existe aún."}), 404
+        return error(message=i18n._("error.log.not_found"), status_code=404)
 
     try:
         # Leemos el archivo de atrás hacia adelante (las más recientes primero)

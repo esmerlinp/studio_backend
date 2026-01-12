@@ -9,6 +9,7 @@ from sqlalchemy import text
 import datetime
 from google.cloud import storage
 from app import db
+from app.utils import i18n
 
 def schema_exists(schema_name):
     query = text("""
@@ -82,7 +83,7 @@ def send_confirmation_account_email(user_id, user_name, email):
     token = generate_reset_token(user_id)
     confirmation_url = f"{request.host_url}/confirmation-account?token={token}"
     
-    send_email_template(subject="Confirmation Account", 
+    send_email_template(subject=i18n._("email.subject.confirmation"),
                         to=[email],
                         path_template="emails/es/confirmation_email.html",
                         confirmation_url=confirmation_url, app_name=os.getenv("APP_NAME"), name=user_name
@@ -93,7 +94,7 @@ def send_reset_email(email: str, token: str, userName = ""):
     reset_url = f"{request.host_url}/reset-password?token={token}"
 
     msg = Message(
-        subject="Cambio de contraseña",
+        subject=i18n._("email.subject.reset_password"),
         recipients=[email]
     )
 
@@ -148,7 +149,11 @@ def validate_custom_attributes(entity_type, attributes_dict):
     # 2. Comparar con lo que viene del frontend
     for key in attributes_dict.keys():
         if key not in allowed_fields:
-            raise Exception(f"El campo '{key}' no está definido para {entity_type}. Por favor, regístralo primero.")
+            error_msg = i18n._("error.dynamic_field_undefined") % {
+                'key': key, 
+                'entity': entity_type
+            }
+            raise Exception(error_msg)
 
 # En tu create_student llamarías a esta función:
 # validate_custom_attributes('STUDENT', data.get('custom_attributes', {}))

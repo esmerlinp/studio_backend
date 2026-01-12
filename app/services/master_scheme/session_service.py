@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import  timedelta
 from ...extensions import db 
 from datetime import datetime, timezone
-
+from app.utils import i18n
 
 # @audit_log(action=ActionType.CREATE,
 #            resource_type=ResourceTypes.USER_SESSION,
@@ -151,7 +151,7 @@ def close_all_session(user_id: int, commit = True) -> dict:
         
         return {
             "status": "success", 
-            "message": f"Se cerraron {updated_count} sesiones.",
+            "message": i18n._("auth.sessions_closed_count") % updated_count,
             "user_id": user_id
         }
     except Exception as e:

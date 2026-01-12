@@ -8,6 +8,7 @@ from app.exceptions import AuditedError
 from app.utils.types import ResourceTypes, ActionType
 from app.models.client_scheme.storage_model import Storage
 from app import db
+from app.utils import i18n  # Importar el módulo de idiomas
 
 def save_file_metadata(cliente_id, entidad, record_id, gcs_data, file_info, file_size_mb):
     """
@@ -74,7 +75,8 @@ def upload_to_gcs(user_id, file,  entity_name:str="general", entity_record:int =
         # B. Validar disponibilidad de espacio en el plan
         if not client_service.has_available_storage(cliente.clientId, file_size_mb):
             #raise "Has alcanzado el límite de almacenamiento de tu plan. Mejora tu plan para subir más archivos."
-            raise AuditedError(message="Has alcanzado el límite de almacenamiento de tu plan. Mejora tu plan para subir más archivos.",
+            error_msg = i18n._("error.storage.limit_reached")
+            raise AuditedError(message=error_msg,
                                resource_type=ResourceTypes.STORAGE, action_type=ActionType.UPLOAD, user_id=user_id)
         
        

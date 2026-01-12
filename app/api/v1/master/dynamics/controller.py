@@ -5,6 +5,8 @@ from app import track_activity, require_role
 from app.utils.responses import success, error
 from app.utils import i18n
 from app.utils.types import Roles as r
+
+
 @jwt_required()
 @track_activity
 def get_entity_fields(entityType: str):
@@ -23,6 +25,6 @@ def create_field():
     data = request.get_json()
     try:
         field = dynamic_field_service.create_dynamic_field(data)
-        return success(data=field.to_dict(), msg="Campo definido correctamente", code=201)
+        return success(data=field.to_dict(), msg=i18n._("success.dynamic_field.created"), code=201)
     except Exception as e:
         return error(str(e), 400)

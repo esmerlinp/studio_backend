@@ -11,6 +11,7 @@ from app.models.master_scheme.client_model import Client
 from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.models.master_scheme.user_model import User
 from app.utils.responses import error, success
+from app.utils.types import Roles as r
 from dotenv import load_dotenv
 import os, stripe
 from werkzeug.security import check_password_hash
@@ -19,6 +20,7 @@ from app.services.master_scheme.payment_service import (handle_checkout_session_
                                                         handle_invoice_payment_failed,handle_subscription_deleted,handle_subscription_updated, handle_subscription_trial_will_end)
 
 
+from app.utils import i18n  # Importar el módulo de idiomas
 
 def verificar_password(hash_stored: str, password: str) -> bool:
     """Verifica la contraseña comparando con el hash almacenado."""
@@ -81,6 +83,7 @@ def payment_success():
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
     app_name = os.getenv("APP_NAME")
     session_id = request.args.get('session_id')
+    lang = i18n.get_locale()
   
     # if not session_id:
     #     return redirect(url_for('home')) # O a tu página de precios
@@ -91,7 +94,8 @@ def payment_success():
     # Si la transacción existe pero aún está "PENDING", es que el webhook no ha llegado.
     # En lugar de fallar, mostramos la vista de "Procesando" que haga un refresh automático.
     if not transaction or transaction.status == "PENDING":
-        return render_template("es/processing_payment.html", 
+        
+        return render_template(f"{lang}/processing_payment.html", 
                                app_name=app_name, 
                                session_id=session_id)
 
@@ -116,7 +120,7 @@ def payment_success():
 
         # Usamos la nueva vista estética que diseñamos
         return render_template(
-            "es/receipt_view.html", # Tu nueva plantilla estilo Stripe
+            f"{lang}/receipt_view.html", # Tu nueva plantilla estilo Stripe
             transaction=transaction,
             invoice=invoice,
             app_name=app_name,
@@ -125,7 +129,7 @@ def payment_success():
             user_email=user.user.email # Pasamos el email para mostrarlo en el texto
         )
         
-    return render_template("es/error_payment.html", app_name=app_name)
+    return render_template(f"{lang}/error_payment.html", app_name=app_name)
 
 def payment_cancel():
     order_id = request.args.get('order_id')
@@ -167,8 +171,8 @@ def restore_canceled_subscription():
         #client = Client.query.get(client_id)
 
         if not client.stripe_customer_id:
-            return jsonify({"success": False, "msg": "El cliente no tiene un perfil de Stripe asociado"}), 400
-        
+            return jsonify({"success": False, "msg": i18n._("error.payment.no_stripe_profile")}), 400
+            
         
         
         if new_pm_id:
@@ -244,7 +248,7 @@ def restore_canceled_subscription():
                     "status": "requires_action",
                     "client_secret": payment_intent.client_secret,
                     "subscription_id": new_subscription.id,
-                    "msg": "Se requiere autenticación bancaria"
+                    "msg": i18n._("error.payment.auth_required")
                 }), 200
             
             
@@ -257,7 +261,7 @@ def restore_canceled_subscription():
                 return jsonify({
                     "success": True, 
                     "status": "active",
-                    "msg": "Suscripción restaurada con éxito",
+                    "msg": i18n._("success.payment.restored"),
                     "subscription_id": new_subscription.id
                 })
                 
@@ -268,7 +272,7 @@ def restore_canceled_subscription():
                 return jsonify({
                     "success": False,
                     "status": "payment_failed", # <--- Agrega este status para que tu JS lo capture
-                    "msg": "El pago inicial falló. Por favor intenta con otra tarjeta.",
+                    "msg": i18n._("error.payment.failed_retry"),
                     "url_actualizacion": payment_url
                 }), 402
             
@@ -278,10 +282,10 @@ def restore_canceled_subscription():
                 client.stripe_subscription_id = new_subscription.id
                 client.isActive = True
                 db.session.commit()
-                return jsonify({"success": True, "status": "active", "msg": "Suscripción activa"})
+                return jsonify({"success": True, "status": "active", "msg": i18n._("success.payment.active")})
 
             # Si llega aquí, es un estado desconocido
-            return jsonify({"success": False, "msg": "Estado de pago pendiente o desconocido"}), 400
+            return jsonify({"success": False, "msg": i18n._("error.payment.unknown_status")}), 400
 
         # 2. CASO ESPECÍFICO TEST CLOCK / FACTURA ABIERTA
         # Si la factura está abierta y no hubo intento fallido, consideramos que el proceso inició bien
@@ -294,14 +298,14 @@ def restore_canceled_subscription():
             return jsonify({
                 "success": True,
                 "status": "pending_test_clock",
-                "msg": "Suscripción creada (Pendiente de proceso por Test Clock)"
+                "msg": i18n._("success.payment.pending_test_clock")
             })
 
         # 3. Si la factura falló
         if new_subscription.status == 'incomplete':
              return jsonify({
                 "success": False,
-                "msg": "El pago inicial falló. Revisa tu configuración en Stripe.",
+                "msg": i18n._("error.payment.initial_failed"),
                 "url_actualizacion": latest_invoice.hosted_invoice_url
             }), 402
              
@@ -312,7 +316,7 @@ def restore_canceled_subscription():
     except Exception as e:
         db.session.rollback()
         print(e)
-        return jsonify({"success": False, "msg": f"Error procesando la solicitud {e}"}), 500
+        return jsonify({"success": False, "msg": i18n._("error.payment.generic_process")}), 500
     
       
 
@@ -364,7 +368,7 @@ def cancel_subscription():
         
 
     if not subscription_id or not password:
-            return jsonify({"success": False, "msg": "Datos incompletos"}), 400
+        return jsonify({"success": False, "msg": i18n._("error.auth.incomplete_data")}), 400
     
     
     try:
@@ -372,15 +376,15 @@ def cancel_subscription():
         client = Client.query.filter_by(stripe_subscription_id=subscription_id).first()
 
         if not client:
-            return error(message="Invalid suscription")  
+            return error(message=i18n._("error.payment.invalid_subscription"))  
             
         user = User.query.get(user_id)
         if not user:
-            return error(message="not user found")    
+            return error(message=i18n._("error.auth.invalid_credentials"), status_code=401)    
             
 
         if not verificar_password(user.password, password):
-            return error(message="Credenciales inválidas", status_code=401)
+            return error(message=i18n._("error.auth.invalid_credentials"), status_code=401)    
         
         
         relacion = UsuarioCliente.query.filter_by(client_uuid=client.uuid).first()
@@ -395,8 +399,8 @@ def cancel_subscription():
             return error(message="Este usuario no está relacionado a la suscripción")
         
         
-        if not user.rol or  user.rol not in ("ADMIN", "OWNER"):
-                    return jsonify({"success": False, "msg": "Nivel de privilegios insuficiente"}), 403
+        if not user.rol or  user.rol not in (r.ADMIN, r.OWNER):
+            return jsonify({"success": False, "msg": i18n._("error.auth.insufficient_permissions")}), 403
             
             
         
@@ -415,7 +419,7 @@ def cancel_subscription():
         return jsonify({
             "success": True, 
             "status": deleted_subscription.status,
-            "msg": "Suscripción cancelada exitosamente"
+            "msg": i18n._("success.payment.cancelled")
         }), 200
 
     except stripe.error.StripeError as e:

@@ -13,6 +13,8 @@ from app.utils.responses import success, error
 from app import limiter
 from datetime import date
 from app.utils.types import Roles as r
+from app.utils import i18n
+
 #Consumir rutas protegidas con el JWT
 #El cliente debe enviar el token en el header: Authorization: Bearer <token>
 ADMIN_ROLES = [r.OWNER, r.ADMIN, r.SUPER_ADMIN, r.SYS_ADMIN]
@@ -24,7 +26,7 @@ def get_my_institution():
     user_id = get_jwt_identity()  
     data = get_client_by_user(user_id=user_id)
     if not data:
-        error(message="not found")
+        error(message=i18n._("error.client.not_found"))
     return success(data=data.to_dict())
 
 
@@ -98,7 +100,7 @@ def get_my_subscription():
 def get_client_preferences():
     preferences = get_client_preferences()
     if not preferences:
-        return success(data={}, message="Client preferences not found", status_code=200)
+        return success(data={}, message=i18n._("error.client.preferences_not_found"), status_code=200)
     return success(data=preferences)
 
 
@@ -216,9 +218,7 @@ def onboard_client():
         return error(str(e), 400)
 
     except Exception as e:
-        # ❗ Error inesperado
-        
-        return error(f"Error interno del servidor {e}", 500)
+        return error(f"{i18n._('error.internal_server')} {str(e)}", 500)
     
 
 
@@ -233,7 +233,7 @@ def handle_export_data():
     schema = getattr(g, "scheme", None)
 
     if not schema:
-        return error(message="No se pudo determinar el esquema")
+        return error(message=i18n._("error.client.schema_not_determined"))
 
     try:
         download_url = export_client_data(schema)
@@ -249,7 +249,7 @@ def handle_export_data():
         return success(data={
             "success": True,
             "download_url": download_url,
-            "expires_in": "1 hour"
+            "expires_in": i18n._("msg.client.one_hour")
         })
 
     except Exception as e:

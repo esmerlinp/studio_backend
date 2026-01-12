@@ -8,6 +8,8 @@ from dateutil.relativedelta import relativedelta
 from app import audit_log
 from app.utils.types import ActionType, ResourceTypes, states
 from flask import g
+from app.utils import i18n # Importar el módulo de idiomas
+
 
 
 def assign_plan_to_client_onboard(
@@ -23,15 +25,15 @@ def assign_plan_to_client_onboard(
     # Validar plan
     plan = Plan.query.get(plan_id)
     if not plan or not plan.is_active:
-        raise ValueError("Invalid or inactive plan")
+        raise ValueError(i18n._("error.plan.invalid_or_inactive"))
 
     # Validar lista de precios
     price_list = PriceList.query.get(price_list_id)
     if not price_list or not price_list.is_active:
-        raise ValueError("Invalid or inactive price list")
+        raise ValueError(i18n._("error.price_list.invalid_or_inactive"))
 
     if price_list.plan_id != plan_id:
-        raise ValueError("Price list does not belong to the selected plan")
+        raise ValueError(i18n._("error.price_list.mismatch"))
 
 
     if plan.code == "TRIAL":
@@ -49,7 +51,7 @@ def assign_plan_to_client_onboard(
     ).first()
 
     if active_plan:
-        raise ValueError("Client already has an active plan for this period")
+        raise ValueError(i18n._("error.client_plan.already_active"))
 
     client_plan = ClientPlan(
         client_id=client_id,
@@ -226,7 +228,7 @@ def update_client_plan(
 
     if status is not None:
         if status not in (states.ACTIVE, states.SUSPENDED, states.CANCELLED):
-            raise ValueError("Invalid status")
+            raise ValueError(i18n._("error.client_plan.invalid_status"))
         client_plan.status = status
 
     try:
@@ -253,7 +255,7 @@ def change_client_plan(
 
     current_plan = get_active_client_plan(client_id)
     if not current_plan:
-        raise ValueError("Client has no active plan")
+        raise ValueError(i18n._("error.client_plan.no_active_found"))
 
     g.audit_resource_id = current_plan.id
     g.audit_old_values = current_plan.to_dict()
