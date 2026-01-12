@@ -275,7 +275,7 @@ def insert_user_onboard(
         
         send_email_template(subject=i18n._("email.subject.confirmation"), 
                             to=[email],
-                            path_template="emails/es/confirmation_email.html",
+                            path_template=f"emails/{i18n.get_locale()}/confirmation_email.html",
                             confirmation_url=confirmation_url, app_name=os.getenv("APP_NAME"), name=user.firstName
                             )
     
@@ -368,7 +368,7 @@ def insert_user(
             
             send_email_template(subject="Confirmation Account", 
                                 to=[email],
-                                path_template="emails/es/confirmation_email.html",
+                                path_template=f"emails/{i18n.get_locale()}/confirmation_email.html",
                                 confirmation_url=confirmation_url, app_name=os.getenv("APP_NAME"), name=user.firstName
                                 )
         

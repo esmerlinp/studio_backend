@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmation</title>
+    <style type="text/css">
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f1f3f4;
+            font-family: 'Google Sans', Roboto, Segoe UI, Arial, sans-serif;
+        }
+
+        .container-table {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #dadce0;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3);
+        }
+
+        .content-td {
+            padding: 40px;
+            color: #3c4043;
+            line-height: 1.6;
+        }
+
+        h2 {
+            color: #202124;
+            font-size: 24px;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .invoice-card {
+            background-color: #f8f9fa;
+            border: 1px solid #e8eaed;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        .invoice-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #70757a;
+            font-weight: 700;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #e8eaed;
+            padding-bottom: 8px;
+        }
+
+        .detail-row {
+            margin-bottom: 8px;
+            font-size: 15px;
+            clear: both;
+            overflow: hidden;
+        }
+
+        .label {
+            color: #70757a;
+        }
+
+        .value {
+            color: #202124;
+            font-weight: 500;
+            float: right;
+        }
+
+        .badge {
+            background-color: #e6f4ea;
+            color: #188038;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .button {
+            background-color: #1a73e8;
+            color: #ffffff !important;
+            padding: 12px 32px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #70757a;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e8eaed;
+        }
+    </style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
+    <tr>
+        <td align="center" style="padding: 20px;">
+            <table class="container-table" border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
+                <tr>
+                    <td class="content-td">
+                        <div style="font-size: 20px; color: #5f6368; margin-bottom: 30px; font-weight: 500;">
+                            {{ app_name }}
+                        </div>
+
+                        <h2>Thanks for your purchase, {{ name }}!</h2>
+                        <p>Your payment has been successfully processed. Your subscription is now active, and you can start enjoying all the benefits of your plan.</p>
+
+                        <div class="invoice-card">
+                            <div class="invoice-title">Subscription Summary</div>
+                            
+                            <div class="detail-row">
+                                <span class="label">Plan:</span>
+                                <span class="value">{{ plan_name }} <span class="badge">ACTIVE</span></span>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span class="label">Invoice No:</span>
+                                <span class="value" style="color: #1a73e8;">{{ invoice_num }}</span>
+                            </div>
+
+                            <div class="detail-row">
+                                <span class="label">Total Amount:</span>
+                                <span class="value">{{ amount }} {{ currency }}</span>
+                            </div>
+                        </div>
+
+                        <div class="btn-container">
+                            <a href="{{ invoice_url }}" class="button" target="_blank">
+                                Download Invoice / Receipt
+                            </a>
+                        </div>
+
+                        <p>You can now access your dashboard from our platform to begin setting up your environment.</p>
+
+                        <div class="footer-text">
+                            Best regards,<br>
+                            The <strong>{{ app_name }}</strong> Team
+                            <br><br>
+                            <span style="font-size: 11px;">© 2026 {{ app_name }}. You are receiving this email because a successful payment was made.</span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

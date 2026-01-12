@@ -2,77 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirm Your Account</title>
     <style type="text/css">
+        /* Email client rendering adjustments */
         body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
         table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
         img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
-        a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
-        .button {
-            display: inline-block;
-            padding: 12px 20px;
-            background-color: #4f46e5; /* Modern Indigo */
-            color: #ffffff !important;
-            text-decoration: none;
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f1f3f4; /* Google Gray */
+            font-family: 'Google Sans', Roboto, Segoe UI, Arial, sans-serif;
+        }
+
+        .container-table {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
             border-radius: 8px;
-            font-weight: 600;
-            font-size: 16px;
-            letter-spacing: 0.5px;
-            mso-padding-alt: 0; /* Outlook fix */
+            border: 1px solid #dadce0;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3);
+        }
+
+        .button {
+            background-color: #1a73e8;
+            color: #ffffff !important;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-block;
+            letter-spacing: 0.25px;
+        }
+
+        .link-text {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .content-td {
+            padding: 40px;
+            color: #3c4043;
+            line-height: 1.6;
+        }
+
+        h2 {
+            color: #202124;
+            font-size: 24px;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #70757a;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e8eaed;
         }
     </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f7f7f7; font-family: Arial, Helvetica, sans-serif;">
+<body>
 
-<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="min-width: 100%; background-color: #f7f7f7;">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
     <tr>
-        <td align="center" style="padding: 40px 10px;">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" role="presentation">
+        <td align="center" style="padding: 20px;">
+            <table class="container-table" border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
                 <tr>
-                    <td style="padding: 30px 40px 30px 40px; color: #333333; font-size: 16px; line-height: 1.5;">
-
-                        <h2 style="font-size: 24px; color: #1f2937; margin-top: 0; margin-bottom: 20px; text-align: center;">
-                            🚀 Welcome to {{ app_name }}!
-                        </h2>
-
-                        <p style="margin-top: 0; margin-bottom: 15px;">
-                            Hi {{ name }},
-                        </p>
-
-                        <p style="margin-bottom: 25px;">
-                            We are excited to have you on board! To get started and activate your account, please confirm your email address by clicking the button below:
-                        </p>
-
-                        <div style="text-align: center; margin-bottom: 30px;">
-                            <table border="0" cellspacing="0" cellpadding="0" role="presentation" style="margin: 0 auto;">
-                                <tr>
-                                    <td align="center" style="border-radius: 8px; background-color: #4f46e5; padding: 0;" >
-                                        <a href="{{ confirmation_url }}" target="_blank" class="button">
-                                            <span style="color: #ffffff; text-decoration: none; line-height: 1.5; padding: 12px 20px; display: block;">
-                                                Confirm My Account
-                                            </span>
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
+                    <td class="content-td">
+                        <div style="font-size: 20px; color: #5f6368; margin-bottom: 30px; font-weight: 500;">
+                            {{ app_name }}
                         </div>
 
-                        <p style="font-size: 14px; text-align: center; color: #6b7280; margin-bottom: 30px;">
-                            If the button above doesn't work, copy and paste this link into your browser:<br>
-                            <a href="{{ confirmation_url }}" style="color: #4f46e5; word-break: break-all;">{{ confirmation_url }}</a>
+                        <h2>Welcome to {{ app_name }}!</h2>
+
+                        <p>Hello {{ name }},</p>
+
+                        <p>We're excited to have you on board. To start exploring all your account features, please confirm your email address:</p>
+
+                        <table border="0" cellspacing="0" cellpadding="0" role="presentation" style="margin: 30px 0;">
+                            <tr>
+                                <td align="center">
+                                    <a href="{{ confirmation_url }}" target="_blank" class="button">
+                                        Confirm my account
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="font-size: 13px; color: #5f6368;">
+                            If you're having trouble with the button, you can also 
+                            <a href="{{ confirmation_url }}" class="link-text">confirm your address here</a>.
                         </p>
 
-                        <p style="font-size: 14px; color: #6b7280; margin-top: 0; padding-top: 15px; border-top: 1px solid #eeeeee;">
-                            If you did not create an account with {{ app_name }}, you can safely ignore this email. Someone may have entered your address by mistake.
-                        </p>
-
+                        <div class="footer-text">
+                            If you didn't create an account with {{ app_name }}, you can safely ignore this message.
+                            <br><br>
+                            © 2026 {{ app_name }}
+                        </div>
                     </td>
                 </tr>
             </table>
         </td>
     </tr>
 </table>
+
 </body>
 </html>

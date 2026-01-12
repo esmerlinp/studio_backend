@@ -6,6 +6,7 @@
     <title>Account Verification | {{ app_name }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body { background-color: #f7f7f7; font-family: 'Inter', sans-serif; }
         .card { max-width: 450px; width: 90%; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
     </style>
@@ -27,9 +28,9 @@
             </div>
             <h1 class="text-2xl font-bold text-gray-800 mb-2">Account Verified!</h1>
             <p class="text-gray-600 mb-8">
-                Great news! Your email has been successfully verified. You can now access all the features of your account.
+                Great news! Your email address has been successfully verified. You can now access all your account features.
             </p>
-            <a href="{{ login_url }}" class="inline-block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+            <a href="{{ login_url }}" class="inline-block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md">
                 Go to Dashboard
             </a>
         </div>
@@ -42,15 +43,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">Verification Failed</h1>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Verification Error</h1>
             <p class="text-gray-600 mb-8">
                 The link is invalid or has expired. For security reasons, verification links are only active for a limited time.
             </p>
-            <a href="{{ resend_url }}" class="inline-block w-full bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                Resend Verification Email
+            <a href="{{ resend_url }}" class="inline-block w-full bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md">
+                Resend confirmation email
             </a>
             <p class="mt-4 text-sm text-gray-500">
-                Need help? <a href="mailto:support@example.com" class="text-indigo-600 underline">Contact support</a>
+                Need help? <a href="mailto:support@yourcompany.com" class="text-indigo-600 hover:underline">Contact support</a>
             </p>
         </div>
         {% endif %}

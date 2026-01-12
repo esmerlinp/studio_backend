@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate your account</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f1f3f4;
+            font-family: 'Google Sans', Roboto, 'Segoe UI', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrapper {
+            width: 100%;
+            background-color: #f1f3f4;
+            padding: 40px 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #dadce0;
+            overflow: hidden;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        .header {
+            padding: 32px 40px 0 40px;
+        }
+        .app-logo {
+            font-size: 22px;
+            font-weight: 500;
+            color: #5f6368;
+            letter-spacing: -0.5px;
+        }
+        .content {
+            padding: 24px 40px 40px 40px;
+            color: #3c4043;
+            line-height: 1.6;
+        }
+        h2 {
+            color: #202124;
+            font-size: 24px;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .highlight {
+            color: #202124;
+            font-weight: 500;
+        }
+        .button-wrapper {
+            text-align: left;
+            margin: 35px 0;
+        }
+        .button {
+            background-color: #1a73e8;
+            color: #ffffff !important;
+            padding: 12px 28px;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 0.25px;
+        }
+        .link-text {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link-text:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            padding: 0 40px 40px 40px;
+            font-size: 12px;
+            color: #70757a;
+        }
+        .divider {
+            border-top: 1px solid #e8eaed;
+            margin: 30px 0 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="app-logo">{{ app_name }}</div>
+            </div>
+            
+            <div class="content">
+                <h2>Hi {{ name }}! We're almost there.</h2>
+                <p>Thanks for signing up for <span class="highlight">{{ app_name }}</span>. Your account has been successfully created.</p>
+                
+                <p>There is just one last step to activate your <span class="highlight">{{ plan_name }}</span> plan. Click the button below to complete your subscription securely through <strong>Stripe</strong>.</p>
+                
+                <div class="button-wrapper">
+                    <a href="{{ checkout_url }}" class="button">Complete subscription now</a>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <p style="font-size: 13px; color: #5f6368;">
+                    If you're having trouble with the button, you can also 
+                    <a href="{{ checkout_url }}" class="link-text">complete your registration by clicking here</a>.
+                </p>
+            </div>
+
+            <div class="footer">
+                Best regards,<br>
+                The <span class="highlight">{{ app_name }}</span> Team
+                <p style="margin-top: 20px; font-size: 11px; color: #9aa0a6;">
+                    © 2026 {{ app_name }}. If you don't recognize this activity, you can safely ignore this message.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

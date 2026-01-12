@@ -135,7 +135,7 @@ def login():
     
     send_email_template(subject=i18n._("email.subject.login_notification"), 
                         to=[user.email], 
-                        path_template="emails/es/notification_login.html",
+                        path_template=f"emails/{i18n.get_locale()}/notification_login.html",
                         app_name=app_name,
                         nombre_usuario=user.firstName,
                         ip_address=session_create.ipAddress,

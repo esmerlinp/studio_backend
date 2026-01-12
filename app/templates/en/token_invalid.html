@@ -26,7 +26,7 @@
                 </svg>
             </div>
 
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">Invalid or Expired Link</h1>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Invalid link</h1>
             
             <p class="text-gray-600 mb-8">
                 We're sorry, the confirmation link you used is invalid, has expired, or has already been processed.
@@ -34,7 +34,21 @@
 
             <div class="space-y-3">
                 <a href="{{ resend_url }}" class="inline-block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-sm">
-                    Request a new link
+                    Request new link
                 </a>
                 
-                <a href="{{ login_url }}" class="inline-block w-full
+                <a href="{{ login_url }}" class="inline-block w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">
+                    Go to login
+                </a>
+            </div>
+
+            <p class="mt-8 text-sm text-gray-500">
+                Do you think this is an error? <br>
+                <a href="mailto:support@yourcompany.com" class="text-indigo-600 hover:underline font-medium">Contact our team</a>
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>

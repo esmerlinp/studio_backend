@@ -8,6 +8,7 @@ from app.services.master_scheme.user_service import get_user_preferences, get_us
 from dotenv import load_dotenv
 import os
 from flask import request
+from app.utils import i18n
 
 def create_notification(
     user_id: int,
@@ -91,7 +92,7 @@ def create_notification(
             user = get_user_by_id(user_id=user_id)
             
             full_url = f"{request.host_url}{target_url}"
-            send_email_template(subject=title, to=[user.email], path_template="emails/es/notification_email.html",
+            send_email_template(subject=title, to=[user.email], path_template=f"emails/{i18n.get_locale()}/notification_email.html",
                                 title=title, message=message, target_url=full_url, app_name=os.getenv("APP_NAME"))
             
 

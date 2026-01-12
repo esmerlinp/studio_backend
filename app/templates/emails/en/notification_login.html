@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Notification - {{app_name}}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f7; color: #333333;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <tr>
+                        <td style="padding: 40px 40px 20px 40px; text-align: left;">
+                            <h1 style="margin: 0; color: #1a1a1a; font-size: 24px; font-weight: 700;">Hello, {{nombre_usuario}}:</h1>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td style="padding: 0 40px 20px 40px; line-height: 1.6; font-size: 16px;">
+                            <p style="margin: 0;">Your Akdmia account (<strong>{{email_usuario}}</strong>) was recently used to log in to our platform.</p>
+                            
+                            <div style="background-color: #f9fafb; border-radius: 6px; padding: 20px; margin-top: 25px;">
+                                <p style="margin: 0 0 10px 0;"><strong>Date and time:</strong> {{fecha_hora}}</p>
+                                <p style="margin: 0 0 10px 0;"><strong>Device:</strong> {{dispositivo}}</p>
+                                <p style="margin: 0;"><strong>IP Address:</strong> {{ip_address}}</p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; line-height: 1.6; font-size: 15px;">
+                            <p style="margin-bottom: 20px;">If this information looks familiar, you can safely ignore this message.</p>
+                            
+                            <p style="margin-bottom: 25px;"><strong>Wasn't you?</strong> If you believe someone else may have accessed your account, please change your password immediately by clicking the button below:</p>
+                            
+                            <table border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                                <tr>
+                                    <td align="center" bgcolor="#0052cc" style="border-radius: 5px;">
+                                        <a href="https://akdmia.com/password/reset" target="_blank" style="padding: 12px 25px; color: #ffffff; text-decoration: none; font-weight: bold; display: inline-block;">Secure my account</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 0 40px 40px 40px; border-top: 1px solid #eeeeee; padding-top: 30px;">
+                            <p style="margin: 0; font-size: 14px; color: #777777;">
+                                Best regards,<br>
+                                <strong>Technical Support</strong>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+
+                <table border="0" cellpadding="0" cellspacing="0" width="600">
+                    <tr>
+                        <td style="padding: 30px 10px; text-align: center; font-size: 12px; color: #999999; line-height: 1.5;">
+                            <p style="margin: 0 0 10px 0;">
+                                <a href="#" style="color: #999999; text-decoration: underline;">Account</a> | 
+                                <a href="#" style="color: #999999; text-decoration: underline;">Support</a> | 
+                                <a href="#" style="color: #999999; text-decoration: underline;">Privacy Policy</a>
+                            </p>
+                            <p style="margin: 0;">Copyright © 2026 {{app_name}}. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

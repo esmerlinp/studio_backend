@@ -169,7 +169,7 @@ def send_goodbye_email(client_email, contact_name, business_name):
         send_email_template(
             subject=i18n._("email.subject.subscription_ended"),
             to=[client_email],
-            path_template="emails/es/subscription_ended.html",
+            path_template=f"emails/{i18n.get_locale()}/subscription_ended.html",
             name=contact_name,
             business_name=business_name,
             reactivate_url=f"{base_url}/login"
@@ -254,7 +254,7 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
             send_email_template(
                 subject = i18n._("email.subject.trial_welcome") % {'plan': plan_name, 'app': app_name},
                 to=[email_to],
-                path_template="emails/es/trial_welcome.html", # Template específico
+                path_template=f"emails/{i18n.get_locale()}/trial_welcome.html", # Template específico
                 name=name_to,
                 plan_name=plan_name,
                 trial_end_date=d_fin.strftime('%d/%m/%Y'),
@@ -271,7 +271,7 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
             send_email_template(
                 subject = i18n._("email.subject.invoice_ready") % {'num': num_factura, 'app': app_name},
                 to=[email_to],
-                path_template="emails/es/invoice_ready.html",
+                path_template=f"emails/{i18n.get_locale()}/invoice_ready.html",
                 name=name_to,
                 invoice_num=num_factura,
                 amount=float(transaction.amount),
@@ -317,7 +317,7 @@ def handle_invoice_payment_failed(invoice, app_name):
         send_email_template(
             subject=i18n._("email.subject.payment_failed"),
             to=[client.billingEmail],
-            path_template="emails/es/payment_failed.html",
+            path_template=f"emails/{i18n.get_locale()}/payment_failed.html",
             name=client.contactName,
             app_name=app_name,
             plan_name=plan.plan.name if plan else "Suscripción Akdmia",
@@ -540,7 +540,7 @@ def handle_subscription_trial_will_end(subscription, app_name):
         send_email_template(
             subject=i18n._("email.subject.trial_ending") % {'app': app_name},
             to=[client.billingEmail],
-            path_template="emails/es/trial_ending.html",
+            path_template=f"emails/{i18n.get_locale()}/trial_ending.html",
             name=client.contactName,
             business_name=client.businessName,
             trial_end_date=trial_end_date.strftime('%d/%m/%Y'),

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .container { font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1f36; }
+        .card { background: #ffffff; border: 1px solid #f0f0f0; border-radius: 16px; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .icon { background: #fff1f2; color: #e11d48; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 32px; }
+        h1 { font-size: 24px; font-weight: 800; text-align: center; color: #0a2540; margin-bottom: 16px; }
+        p { font-size: 16px; line-height: 1.6; color: #424770; text-align: center; }
+        .details { background: #f6f9fc; border-radius: 12px; padding: 20px; margin: 24px 0; }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .detail-label { color: #697386; }
+        .detail-value { font-weight: bold; color: #1a1f36; }
+        .button { display: block; background: #6366f1; color: #ffffff !important; text-align: center; padding: 16px; border-radius: 12px; text-decoration: none; font-weight: bold; margin-top: 32px; }
+        .footer { text-align: center; font-size: 12px; color: #8898aa; margin-top: 32px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">⚠️</div>
+            <h1>Payment Issue</h1>
+            <p>Hello <strong>{{ name }}</strong>, we were unable to process the recurring payment for your subscription at <strong>{{ app_name }}</strong>.</p>
+            
+            <div class="details">
+                <div class="detail-row">
+                    <span class="detail-label">Plan:</span>
+                    <span class="detail-value">{{ plan_name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Amount:</span>
+                    <span class="detail-value">{{ amount }} {{ currency }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Reason:</span>
+                    <span class="detail-value" style="color: #e11d48;">{{ failure_reason }}</span>
+                </div>
+            </div>
+
+            <p style="font-size: 14px;">This may be due to insufficient funds or an expired card. To avoid any service interruptions for your institution, please update your payment information.</p>
+            
+            <a href="{{ update_payment_url }}" class="button">Update payment method</a>
+        </div>
+        <div class="footer">
+            © 2026 Akdmia Software. If you have any questions, simply reply to this email.
+        </div>
+    </div>
+</body>
+</html>

@@ -145,7 +145,7 @@ def onboard_client_service(client_data, admin_user_data, plan_data):
             send_email_template(
                 subject=i18n._("email.subject.complete_registration") % app_name,
                 to=[email],
-                path_template="emails/es/complete_subscription.html",
+                path_template=f"emails/{i18n.get_locale()}/complete_subscription.html",
                 name=admin_user_data["first_name"],
                 plan_name=client_plan.plan.code,
                 checkout_url=checkout_url,

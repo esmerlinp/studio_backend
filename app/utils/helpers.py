@@ -85,7 +85,7 @@ def send_confirmation_account_email(user_id, user_name, email):
     
     send_email_template(subject=i18n._("email.subject.confirmation"),
                         to=[email],
-                        path_template="emails/es/confirmation_email.html",
+                        path_template=f"emails/{i18n.get_locale()}/confirmation_email.html",
                         confirmation_url=confirmation_url, app_name=os.getenv("APP_NAME"), name=user_name
                         )
             
@@ -99,7 +99,7 @@ def send_reset_email(email: str, token: str, userName = ""):
     )
 
     msg.html = render_template(
-        "emails/es/reset_password_notify.html",
+        f"emails/{i18n.get_locale()}/reset_password_notify.html",
         reset_url=reset_url, name=userName, expiration_minutes="30"
     )
 

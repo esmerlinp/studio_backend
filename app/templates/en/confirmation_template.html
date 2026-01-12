@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Activate your access to Akdmia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-color: #0a2540;
+            --text-muted: #424770;
+            --background-color: #f6f9fc;
+            --card-background: white;
+            --border-color: #e6ebf1;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-background);
+            padding: 48px 32px;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .welcome-badge {
+            display: inline-block;
+            background: #eef2ff;
+            color: var(--primary-color);
+            padding: 6px 16px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            background: #d1fae5;
+            color: var(--success-color);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 32px;
+            transform: rotate(-5deg);
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            color: var(--text-color);
+            margin-bottom: 12px;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 32px;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            margin-left: 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            background: #fcfdff;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            margin-top: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        #message {
+            margin-top: 24px;
+        }
+        
+        .error {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            padding: 12px;
+            background-color: #fff1f2;
+            border-radius: 10px;
+            border: 1px solid #fecdd3;
+            font-weight: 500;
+        }
+
+        .hidden { display: none; }
+
+        .footer-text {
+            margin-top: 32px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="setup-view">
+        <div class="welcome-badge">Subscription Active!</div>
+        <div class="success-icon">✦</div>
+        <h2>Finish your setup</h2>
+        <p class="subtitle">Welcome to Akdmia! To start managing your institution, please set your access password.</p>
+
+        <form id="confirmForm">
+            <div class="input-group">
+                <label>New Password</label>
+                <input type="password" id="password" placeholder="Minimum 8 characters" required />
+            </div>
+
+            <div class="input-group">
+                <label>Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Repeat your password" required />
+            </div>
+
+            <button type="submit" id="submitBtn">Activate my account & enter</button>
+        </form>
+    </div>
+
+    <div id="message"></div>
+    
+    <p class="footer-text">Akdmia © 2026 · Intelligent Education Management</p>
+</div>
+
+<script>
+    const form = document.getElementById("confirmForm");
+    const message = document.getElementById("message");
+    const setupView = document.getElementById("setup-view");
+    const submitBtn = document.getElementById("submitBtn");
+
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (!token) {
+        message.innerHTML = "<p class='error'>The activation link is no longer valid or has already been used.</p>";
+        setupView.classList.add("hidden");
+    }
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        if (password.length < 8) {
+            message.innerHTML = "<p class='error'>Password must be stronger (at least 8 characters).</p>";
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            message.innerHTML = "<p class='error'>Passwords do not match. Please try again.</p>";
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Activating access...";
+        message.innerHTML = "";
+
+        try {
+            const response = await fetch("/auth/reset-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    token: token,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "We couldn't activate the account at this time.");
+            }
+
+            // SUCCESS STATE
+            setupView.innerHTML = `
+                <div class="success-icon" style="background: #ecfdf5; transform: rotate(0deg)">✓</div>
+                <h2 style="color: #059669">Access Activated!</h2>
+                <p class="subtitle">Your administrative profile is ready. You can now access your school's dashboard.</p>
+                <button onclick="window.location.href='/login'">Go to Dashboard</button>
+            `;
+
+        } catch (error) {
+            message.innerHTML = `<p class='error'>${error.message}</p>`;
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Activate my account & enter";
+        }
+    });
+</script>
+
+</body>
+</html>

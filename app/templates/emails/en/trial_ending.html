@@ -1,0 +1,16 @@
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+    <h2 style="color: #6366f1;">Your free trial is ending soon!</h2>
+    <p>Hello <strong>{{ name }}</strong>,</p>
+    <p>We hope you are enjoying all the tools <strong>Akdmia</strong> offers for managing <strong>{{ business_name }}</strong>.</p>
+    
+    <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <p style="margin: 0;">📅 Your trial period ends on: <strong>{{ trial_end_date }}</strong></p>
+        <p style="margin: 5px 0 0 0;">Starting on that date, the first automatic charge will be applied to your registered card.</p>
+    </div>
+
+    <p>If you wish to continue using the service without interruptions, please ensure your payment method is valid. If you would like to make any changes, you can access our billing portal:</p>
+    
+    <a href="{{ update_payment_url }}" style="display: inline-block; background-color: #6366f1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Manage my account</a>
+    
+    <p style="font-size: 12px; color: #666; margin-top: 30px;">If you have any questions, simply reply to this email and our support team will assist you immediately.</p>
+</div>

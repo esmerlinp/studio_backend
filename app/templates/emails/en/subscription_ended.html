@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container { font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1f36; }
+        .card { background: #ffffff; border: 1px solid #f0f0f0; border-radius: 16px; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .icon { background: #f3f4f6; color: #374151; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 32px; }
+        h1 { font-size: 24px; font-weight: 800; text-align: center; color: #0a2540; margin-bottom: 16px; }
+        p { font-size: 16px; line-height: 1.6; color: #424770; text-align: center; }
+        .info-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 24px 0; font-size: 14px; color: #92400e; text-align: left; }
+        .button { display: block; background: #6366f1; color: #ffffff !important; text-align: center; padding: 16px; border-radius: 12px; text-decoration: none; font-weight: bold; margin-top: 32px; }
+        .footer { text-align: center; font-size: 12px; color: #8898aa; margin-top: 32px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">👋</div>
+            <h1>Your plan has ended</h1>
+            <p>Hello <strong>{{ name }}</strong>, we are writing to inform you that the <strong>{{ business_name }}</strong> subscription at Akdmia has officially ended today.</p>
+            
+            <div class="info-box">
+                <strong>What does this mean?</strong><br>
+                Your data remains safe with us, but access to management, grades, and billing modules has been temporarily restricted.
+            </div>
+
+            <p>We hope Akdmia has been a great asset to your institution. If this cancellation was a mistake or you wish to regain control of your educational center, you can reactivate your plan at any time.</p>
+            
+            <a href="{{ reactivate_url }}" class="button">Reactivate my subscription</a>
+        </div>
+        <div class="footer">
+            Need help coming back? Email us at support@akdmia.com<br>
+            © 2026 Akdmia Software.
+        </div>
+    </div>
+</body>
+</html>
