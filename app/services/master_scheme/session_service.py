@@ -89,19 +89,6 @@ from typing import List, Optional
 def get_open_sessions(user_id: int) -> List[Optional[Session]]:
     #rows = db.fetch_data("SELECT * FROM usuariossesiones where bactivo = TRUE AND idusuario = %s", (int(user_id), ))
     sessions = Session.query.filter_by(userId=int(user_id), isActive=True).all()
-
-    # sessions = []
-    # for s in rows:
-    #     sessions.append(
-    #         {
-    #             "sessionId": s.get("idusuariosesion", 0),
-    #             "lastAccess": s.get("dultimoacceso", None),
-    #             "expired": s.get("dfechaexpiracion", None),
-    #             "device": f"Random device {s.get("idusuariosesion", 0)}",
-    #             "deviceIp": request.remote_addr #TODO: sustituir por campo real cuando se implemente
-    #         }
-    #     )
-
     return sessions
 
 # @audit_log(action=ActionType.UPDATE,
