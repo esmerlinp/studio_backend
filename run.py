@@ -54,7 +54,7 @@ app.register_blueprint(roles_bp)
 # Configuración de idioma
 # ------------------------------
 culture = "es-DO"
-i18n.setup_gettext("es")
+i18n.setup_gettext("en")
 
 
 #endpoints que consultas en esquema master que no requieren validacion de jwt
