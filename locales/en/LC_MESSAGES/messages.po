@@ -364,3 +364,37 @@ msgstr "Password must contain at least one number"
 
 msgid "error.password.require_special"
 msgstr "Password must contain at least one special character"
+
+msgid "msg.export.process_started"
+msgstr "The export process has started successfully."
+
+msgid "msg.export.delivery_notice"
+msgstr "Once completed, an email will be sent to you with the download link for the document."
+
+msgid "email.subject.data_export_ready"
+msgstr "Your %s data export is ready"
+
+msgid "email.body.export_ready"
+msgstr ""
+"Hello %(client_name)s,\n\n"
+"We are pleased to inform you that your data export process has been completed successfully.\n\n"
+"You can download your file by clicking the following link:\n"
+"%(download_url)s\n\n"
+"This link will be valid for 1 hour. For security reasons, do not share this link with anyone.\n\n"
+"Best regards,\n"
+"The %(app_name)s Team"
+
+msgid "email.export.greeting"
+msgstr "Hello"
+
+msgid "email.export.message"
+msgstr "We are pleased to inform you that your data export process has been completed successfully. Your backup is now ready for download."
+
+msgid "email.export.button"
+msgstr "Download Data (SQL)"
+
+msgid "email.export.warning"
+msgstr "This link is private and will expire in 1 hour for security reasons."
+
+msgid "email.export.footer"
+msgstr "Best regards, the team at"

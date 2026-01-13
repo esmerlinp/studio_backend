@@ -1,11 +1,10 @@
 
-import os, re, uuid, subprocess, stripe
+import os, re, uuid, stripe
 
 from flask import g
 from typing import Optional, List
 from sqlalchemy import text
 from dotenv import load_dotenv
-from google.cloud import storage
 from sqlalchemy.exc import IntegrityError
 
 from app import audit_log, db
@@ -21,7 +20,7 @@ from app.services.master_scheme.client_plan_service import assign_plan_to_client
 from app.services.master_scheme.user_service import  insert_user_onboard
 from app.services.master_scheme.user_client_service import  assign_user_to_client_onboard
 from app.services.master_scheme.payment_service import request_suscription
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from app.utils.helpers import send_email_template, paginate_query
 from app.utils.types import ActionType, ResourceTypes, states
 from app.utils import i18n  # Importar el módulo de idiomas
@@ -462,10 +461,10 @@ def storage_info(client_id) -> ClientStorage:
     
 
 
-@audit_log(action=ActionType.UPDATE, 
-           resource_type=ResourceTypes.STORAGE, 
-           resource_id_arg="client_id", 
-           description="Actualiza el contador de almacenamiento consumido por un cliente")
+# @audit_log(action=ActionType.UPDATE, 
+#            resource_type=ResourceTypes.STORAGE, 
+#            resource_id_arg="client_id", 
+#            description="Actualiza el contador de almacenamiento consumido por un cliente")
 def update_client_storage_usage(client_id: int, size_mb: float, operation: str = "add"):
     """
     Actualiza el contador de almacenamiento consumido por un cliente.
@@ -514,55 +513,3 @@ def update_client_storage_usage(client_id: int, size_mb: float, operation: str =
 
 
 
-
-
-    
-def export_client_data(schema_name):
-    """
-    Genera un archivo .sql del esquema del cliente y lo sube a GCS.
-    """
-    file_name = f"backup_{schema_name}_{uuid.uuid4().hex}.sql"
-    local_path = f"/tmp/{file_name}"
-    
-    # Configuración de la base de datos (puedes sacarlo de tu config)
-    db_uri = os.getenv("DATABASE_URL") 
-    
-    try:
-        # 1. Ejecutar pg_dump solo para el esquema del cliente
-        # El comando: pg_dump -n nombre_esquema > archivo.sql
-        command = [
-            "pg_dump",
-            f"--schema={schema_name}",
-            "--no-owner", # Para que el cliente pueda restaurarlo en otra DB
-            f"--file={local_path}",
-            db_uri
-        ]
-        
-        subprocess.run(command, check=True)
-
-        # 2. Subir a GCS en una carpeta de 'exports'
-        client = storage.Client()
-        bucket = client.bucket(os.getenv("GCS_BUCKET_NAME"))
-        blob = bucket.blob(f"exports/{schema_name}/{file_name}")
-        
-        blob.upload_from_filename(local_path)
-
-        # 3. Generar URL firmada válida por 1 hora
-        url = blob.generate_signed_url(
-            version="v4",
-            # La URL expirará en 15 minutos
-            expiration=timedelta(minutes=60),
-            # Método permitido
-            method="GET",
-        )
-
-        # Limpiar archivo local
-        if os.path.exists(local_path):
-            os.remove(local_path)
-
-        return url
-
-    except Exception as e:
-        if os.path.exists(local_path):
-            os.remove(local_path)
-        raise Exception(i18n._("error.client.export_failed") % str(e))

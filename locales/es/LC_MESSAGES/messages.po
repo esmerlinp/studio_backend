@@ -364,3 +364,39 @@ msgstr "La contraseña debe contener al menos un número"
 
 msgid "error.password.require_special"
 msgstr "La contraseña debe contener al menos un carácter especial"
+
+msgid "msg.export.process_started"
+msgstr "El proceso de exportación ha comenzado correctamente."
+
+msgid "msg.export.delivery_notice"
+msgstr "Una vez finalizado, se le enviará un correo electrónico con el enlace de descarga del documento."
+
+
+msgid "email.subject.data_export_ready"
+msgstr "Su exportación de datos de %s está lista"
+
+msgid "email.body.export_ready"
+msgstr ""
+"Hola %(client_name)s,\n\n"
+"Le informamos que el proceso de exportación de sus datos ha finalizado con éxito.\n\n"
+"Puede descargar su archivo haciendo clic en el siguiente enlace:\n"
+"%(download_url)s\n\n"
+"Este enlace será válido por 1 hora. Por motivos de seguridad, no comparta este enlace con nadie.\n\n"
+"Atentamente,\n"
+"El equipo de %(app_name)s"
+
+
+msgid "email.export.greeting"
+msgstr "Hola"
+
+msgid "email.export.message"
+msgstr "Le informamos que el proceso de exportación de sus datos ha finalizado con éxito. Ya puede descargar su respaldo."
+
+msgid "email.export.button"
+msgstr "Descargar Datos (SQL)"
+
+msgid "email.export.warning"
+msgstr "Este enlace es privado y expirará en 1 hora por seguridad."
+
+msgid "email.export.footer"
+msgstr "Atentamente, el equipo de"

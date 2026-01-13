@@ -22,8 +22,8 @@ COPY . .
 # RUN find locales -name "*.po" -exec msgfmt {} -o {} \; && \
 #     sed -i 's/\.po/\.mo/g' locales/**/LC_MESSAGES/*.po || true
 
-RUN msgfmt locales/es/LC_MESSAGES/messages.po -o locales/es/LC_MESSAGES/messages.mo && \
-    msgfmt locales/en/LC_MESSAGES/messages.po -o locales/en/LC_MESSAGES/messages.mo
+# RUN msgfmt locales/es/LC_MESSAGES/messages.po -o locales/es/LC_MESSAGES/messages.mo && \
+#     msgfmt locales/en/LC_MESSAGES/messages.po -o locales/en/LC_MESSAGES/messages.mo
 # Nota: Si usas Flask-Babel, es mucho más simple: 
 # RUN pybabel compile -d locales
 

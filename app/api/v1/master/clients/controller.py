@@ -1,14 +1,16 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import track_activity, require_role
+from app.services.master_scheme.documents_service import export_client_data
 from app.services.master_scheme.client_service import (get_client_preferences, get_client_logs, get_logs_by_entity,
                                                        onboard_client_service, storage_info, 
-                                                       create_client, get_clients, export_client_data,
+                                                       create_client, get_clients,
                                                        get_client_by_id, get_client_payment_orders)
 
 from app.services.master_scheme.user_client_service import get_client_by_user   
 from app.services.master_scheme.client_plan_service import get_active_client_plan, assign_plan_to_client, change_client_plan, get_client_plan_history
+from app.services.master_scheme.user_service import get_user_by_id
 from app.utils.responses import success
-from flask import request, g
+from flask import request, g, current_app
 from app.utils.responses import success, error
 from app import limiter
 from datetime import date
@@ -222,21 +224,28 @@ def onboard_client():
     
 
 
-
+import threading
 
 @jwt_required()
 @track_activity
 @require_role(ADMIN_ROLES)
 def handle_export_data():
     user_id = get_jwt_identity()
+    
     # Asumimos que g.scheme contiene el esquema actual del cliente
+    app = current_app._get_current_object()
     schema = getattr(g, "scheme", None)
 
     if not schema:
         return error(message=i18n._("error.client.schema_not_determined"))
 
     try:
-        download_url = export_client_data(schema)
+        
+        user = get_user_by_id(user_id)
+        #download_url = export_client_data(schema)
+        hilo = threading.Thread(target=export_client_data, args=(app, schema, user.email))
+        hilo.daemon = True 
+        hilo.start()
         
         # # Opcional: Registrar en auditoría
         # log_action(
@@ -246,11 +255,13 @@ def handle_export_data():
         #     status="DML"
         # )
 
-        return success(data={
-            "success": True,
-            "download_url": download_url,
-            "expires_in": i18n._("msg.client.one_hour")
-        })
+        return success(
+            message=i18n._("msg.export.process_started"),
+            data={
+                "status": "processing",
+                "info": i18n._("msg.export.delivery_notice")
+            }
+        )
 
     except Exception as e:
         return error(message=str(e), status_code=500)

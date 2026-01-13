@@ -8,9 +8,16 @@ from app.exceptions import AuditedError
 from app.utils.types import ResourceTypes, ActionType
 from app.models.client_scheme.storage_model import Storage
 from app import db
-from app.utils import i18n  # Importar el módulo de idiomas
+from app.utils import i18n, helpers  # Importar el módulo de idiomas
+import os, uuid, subprocess
+from datetime import timedelta
+from google.cloud import storage
+from app.models.master_scheme.client_model import Client
 
-def save_file_metadata(cliente_id, entidad, record_id, gcs_data, file_info, file_size_mb):
+
+
+
+def save_file_metadata(cliente_id, entidad, record_id, gcs_data, file_name, content_type, file_size_mb):
     """
     Registra los metadatos de un archivo subido a Google Cloud Storage en la base de datos.
 
@@ -43,10 +50,10 @@ def save_file_metadata(cliente_id, entidad, record_id, gcs_data, file_info, file
         client_id=cliente_id,
         entity=entidad,
         record_id=str(record_id),
-        file_name=file_info.filename,
+        file_name=file_name,
         path_gcs=gcs_data['path'],
         generation_id=str(gcs_data['version']),
-        content_type=file_info.content_type,
+        content_type=content_type,
         peso_mb=file_size_mb
     )
     db.session.add(nuevo_archivo)
@@ -62,7 +69,7 @@ def upload_to_gcs(user_id, file,  entity_name:str="general", entity_record:int =
     :param foldlocation_folderer: Carpeta de destino dentro del bucket
     :return: URL del archivo subido
     """
-    from google.cloud import storage
+
     load_dotenv()
     try:
         
@@ -116,8 +123,8 @@ def upload_to_gcs(user_id, file,  entity_name:str="general", entity_record:int =
             "path": unique_filename,
             "version": generation_id
         }
-        
-        storage = save_file_metadata(cliente_id=cliente.clientId, entidad=entity_name, record_id=entity_record, gcs_data=gcs_data, file_info=file, file_size_mb=file_size_mb)
+
+        storage = save_file_metadata(cliente_id=cliente.clientId, entidad=entity_name, record_id=entity_record, gcs_data=gcs_data, file_name=file.filename, content_type=file.content_type, file_size_mb=file_size_mb)
         # 5. Retornar la URL (Si el bucket es público)
         # Si es privado, deberías usar blob.generate_signed_url
         
@@ -135,3 +142,100 @@ def upload_to_gcs(user_id, file,  entity_name:str="general", entity_record:int =
     except Exception as e:
         print(f"Error en GCS Upload: {str(e)}")
         raise e
+    
+
+
+
+
+def export_client_data(app, schema_name, email):
+    """
+    Genera un archivo .sql del esquema del cliente y lo sube a GCS.
+    """
+
+    with app.app_context():
+        load_dotenv()
+        file_name = f"backup_{schema_name}_{uuid.uuid4().hex}.sql"
+        local_path = f"/tmp/{file_name}"
+        cliente = Client.query.filter_by(schemaName=schema_name).first()
+        # Configuración de la base de datos (puedes sacarlo de tu config)
+        db_uri = os.getenv("DATABASE_URL") 
+        
+        try:
+            # 1. Ejecutar pg_dump solo para el esquema del cliente
+            # El comando: pg_dump -n nombre_esquema > archivo.sql
+            command = [
+                "pg_dump",
+                f"--schema={schema_name}",
+                "--no-owner", # Para que el cliente pueda restaurarlo en otra DB
+                f"--file={local_path}",
+                db_uri
+            ]
+            
+            subprocess.run(command, check=True)
+
+            # 2. Subir a GCS en una carpeta de 'exports'
+            client = storage.Client()
+            bucket = client.bucket(os.getenv("GCS_BUCKET_NAME"))
+            unique_filename = f"tenant_{cliente.uuid}/backup/{file_name}"
+            blob = bucket.blob(unique_filename)
+            
+            blob.upload_from_filename(local_path)
+            
+            # 1. Refrescar los metadatos para asegurar que el atributo size esté disponible
+            blob.reload()
+            
+            size_in_bytes = blob.size
+            # 3. Convertir a MB (1 MB = 1024 * 1024 bytes)
+            size_in_mb = size_in_bytes / (1024 * 1024)
+            
+            
+            
+            generation_id = blob.generation
+        
+            gcs_data = {
+                "path": unique_filename,
+                "version": generation_id
+            }
+            from sqlalchemy import text
+            db.session.execute(text(f"SET search_path TO {schema_name}"))
+            save_file_metadata(cliente_id=cliente.clientId, entidad="backup", record_id=0, gcs_data=gcs_data, file_name=blob.name, content_type=blob.content_type, file_size_mb=size_in_mb)
+
+            # IMPORTANTE: Actualizar el contador de uso
+            client_service.update_client_storage_usage(cliente.clientId, size_in_mb)
+          
+
+            # 3. Generar URL firmada válida por 1 hora
+            url = blob.generate_signed_url(
+                version="v4",
+                # La URL expirará en 15 minutos
+                expiration=timedelta(minutes=60),
+                # Método permitido
+                method="GET",
+            )
+            
+            # Preparamos el contenido traducido
+            helpers.send_email_template(
+                subject=i18n._("email.subject.data_export_ready") % os.getenv("APP_NAME"),
+                to=[email],
+                path_template=f"emails/{i18n.get_locale()}/email_export.html",
+                greeting=i18n._("email.export.greeting"),
+                client_name=email,
+                message_body=i18n._("email.export.message"),
+                download_url=url,
+                button_text=i18n._("email.export.button"),
+                warning_text=i18n._("email.export.warning"),
+                footer_text=i18n._("email.export.footer"),
+                app_name=os.getenv("APP_NAME")
+            )
+
+
+            # Limpiar archivo local
+            if os.path.exists(local_path):
+                os.remove(local_path)
+
+    
+
+        except Exception as e:
+            if os.path.exists(local_path):
+                os.remove(local_path)
+            raise Exception(i18n._("error.client.export_failed") % str(e))
