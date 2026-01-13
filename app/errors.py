@@ -24,10 +24,11 @@ def register_error_handlers(app):
                 "msg": i18n._("error.too_many_requests"),
                 "description": str(e.description)
                 }, status_code=429)  
+        
     
     @app.errorhandler(AuditedError)
     def handle_audited_error(e):
-
+        logging.warning(f"AuditedError: {e} | User: {g.get('user_id')}")
         # 1. Registrar en la tabla de auditoría (DB)
         # Usamos los datos que vienen dentro de la excepción
         if getattr(g, "scheme", None):
@@ -39,10 +40,8 @@ def register_error_handlers(app):
                 user_id=e.user_id,
                 status="ERROR" # Puedes agregar un campo status a tu tabla de auditoría
             )
-        else:
-            # 2. También lo guardamos en el archivo .log para el equipo técnico
-           
-            logging.warning(f"AuditedError: {e} | User: {g.get('user_id')}")
+
+            
 
         # 3. Respondemos al Frontend
         return error(message={
