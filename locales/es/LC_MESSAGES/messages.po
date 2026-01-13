@@ -400,3 +400,7 @@ msgstr "Este enlace es privado y expirará en 1 hora por seguridad."
 
 msgid "email.export.footer"
 msgstr "Atentamente, el equipo de"
+
+
+msgid "error.client_plan.user_limit_reached"
+msgstr "Se ha alcanzado el límite de usuarios permitidos en su plan actual. Por favor, mejore su suscripción para añadir más miembros."

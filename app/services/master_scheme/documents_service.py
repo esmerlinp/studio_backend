@@ -163,9 +163,11 @@ def export_client_data(app, schema_name, email):
         try:
             # 1. Ejecutar pg_dump solo para el esquema del cliente
             # El comando: pg_dump -n nombre_esquema > archivo.sql
+            #TODO: Evitar se envien las funciones y procedimientos almacenados si no son necesarios
             command = [
                 "pg_dump",
                 f"--schema={schema_name}",
+                # "--data-only", #Si el cliente ya tiene las tablas y solo quiere los registros
                 "--no-owner", # Para que el cliente pueda restaurarlo en otra DB
                 f"--file={local_path}",
                 db_uri

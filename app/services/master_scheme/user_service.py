@@ -9,7 +9,7 @@ from app.models.client_scheme.password_policy_model import PasswordPolicy
 from app.models.master_scheme.client_model import Client
 from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.services.master_scheme.password_service import validate_password_policy
-from app.services.master_scheme.user_client_service import assign_user_to_client
+from app.services.master_scheme.user_client_service import assign_user_to_client    
 from datetime import datetime, timezone
 from app.utils.responses import success, error
 from app.utils.helpers import send_email_template, generate_reset_token, send_confirmation_account_email
@@ -20,7 +20,7 @@ from uuid import uuid4
 from app.utils.types import Roles
 from app.utils import i18n
 from sqlalchemy.orm.attributes import flag_modified
-
+from app.services.master_scheme.client_plan_service import get_active_client_plan
 
 
 
@@ -303,6 +303,21 @@ def insert_user(
     
     #Valida politicas de la contrasena
     load_dotenv()
+    
+    client = Client.query.filter_by(uuid=client_uuid).first()
+    if not client:
+        raise ValueError(i18n._("error.client.not_found"))
+    
+    plan = get_active_client_plan(client_id=client.clientId)
+    
+    if not plan:
+        raise ValueError(i18n._("error.client_plan.no_active_found"))
+    
+    max_users = plan.plan.max_users
+    current_user_count = UsuarioCliente.query.filter_by(client_uuid=client.uuid).count()
+    if current_user_count >= max_users:
+        raise ValueError(i18n._("error.client_plan.user_limit_reached"))
+    
     uuid = str(uuid4())
     
     if not default_password:

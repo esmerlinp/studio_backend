@@ -398,3 +398,6 @@ msgstr "This link is private and will expire in 1 hour for security reasons."
 
 msgid "email.export.footer"
 msgstr "Best regards, the team at"
+
+msgid "error.client_plan.user_limit_reached"
+msgstr "The user limit for your current plan has been reached. Please upgrade your subscription to add more members."
