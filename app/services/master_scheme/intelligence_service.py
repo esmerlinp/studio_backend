@@ -1,6 +1,7 @@
 from google import genai
 import os
 from google.api_core import exceptions
+from app.utils import i18n
 
 # Configura tu llave de API
 client = genai.Client(api_key="AIzaSyALDyvLZU7FUfj1H3u1J8pvXVqiFkPK9VQ")
@@ -12,7 +13,7 @@ def generar_reporte_estudiante(datos_estudiante):
     try:
         # El 'Prompt' es la instrucción que le damos a la IA
         prompt = f"""
-        Actúa como un psicopedagogo experto. Analiza los siguientes datos del estudiante en Akdmia:
+        Actúa como un psicopedagogo experto. Analiza los siguientes datos del estudiante en Akdmia, la respuesta debe ser en el idioma ({i18n.get_locale()}) en JSON estructurado:
         
         DATOS:
         - Calificaciones: {datos_estudiante['notas']}
@@ -24,6 +25,14 @@ def generar_reporte_estudiante(datos_estudiante):
         2. Relación entre alimentación y rendimiento (si aplica).
         3. Tres puntos específicos a mejorar basados en sus tareas y notas.
         4. Un mensaje motivacional corto para el estudiante.
+
+        PROPORCIONA UN PLAN DE ACCIÓN ESTRUCTURADO (si aplica):
+
+        1. IDENTIFICACIÓN DE DEBILIDADES: Analiza qué temas específicos no domina.
+        2. PARA EL MAESTRO: Sugiere 2 ejercicios técnicos o dinámicas de clase para nivelar al alumno.
+        3. PARA LOS PADRES: Sugiere 2 actividades cotidianas o ejercicios prácticos para reforzar en casa.
+        4. RECURSO ESPECÍFICO: Inventa un ejercicio corto de "entrenamiento mental" basado en sus puntos débiles.
+
         """
 
         response = client.models.generate_content(

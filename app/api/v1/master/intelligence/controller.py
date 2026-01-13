@@ -3,7 +3,7 @@ from app.utils.responses import success, error
 from app.services.master_scheme.intelligence_service import generar_reporte_estudiante
 from app import limiter
 from flask_jwt_extended import jwt_required
-
+import json
 
 # @limiter.limit("100 per minute")
 @jwt_required()
@@ -18,5 +18,6 @@ def get_report(student_id):
 
     # Ejecución
     reporte = generar_reporte_estudiante(estudiante_ejemplo)
+    data_json = json.loads(reporte.replace("```json", "").replace("```", ""))
 
-    return success(data=reporte)
+    return success(data=data_json)
