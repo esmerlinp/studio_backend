@@ -166,7 +166,7 @@
 
     <script>
         let plansData = [];
-        let currentBillingCycle = 'MONTHLY';
+        let currentBillingCycle = 'ANNUAL';
 
         async function init() {
             try {
@@ -206,7 +206,7 @@
         }
 
         function toggleBilling() {
-            currentBillingCycle = currentBillingCycle === 'ANNUAL' ? 'MONTHLY' : 'ANNUAL';
+            currentBillingCycle = currentBillingCycle === 'ANNUAL' ? 'ANNUAL' : 'MONTHLY';
             const circle = document.getElementById('toggle-circle');
             const monthlyLabel = document.getElementById('monthly-label');
             const annualLabel = document.getElementById('annual-label');
