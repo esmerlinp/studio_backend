@@ -1,6 +1,7 @@
 
 from ...extensions import db
 import datetime
+from app.utils.helpers import format_datetime_user
 class Session(db.Model):
     __tablename__ = "usuariossesiones"
     __table_args__ = {"schema": "master"}
@@ -23,11 +24,17 @@ class Session(db.Model):
     closeAt = db.Column('dfechafin', db.DateTime(timezone=True), nullable=True)
     
     def to_dict(self, include_sensitive=False):
+        expirationDate = format_datetime_user(self.expirationDate) if self.expirationDate else None
+        lastAccessDate = format_datetime_user(self.lastAccessDate) if self.lastAccessDate else None
+        
         data = {
+            "deviceInfo": self.deviceInfo,
+            "ipAddress": self.ipAddress,
+            "userAgent": self.userAgent,
             "sessionId": self.sessionId,
             "userId": self.userId,
-            "expirationDate": self.expirationDate.isoformat() if self.expirationDate else None,
-            "lastAccessDate": self.lastAccessDate.isoformat() if self.lastAccessDate else None,
+            "expirationDate": expirationDate,
+            "lastAccessDate": lastAccessDate,
             "isActive": self.isActive
         }
         if include_sensitive:

@@ -24,7 +24,7 @@ from sqlalchemy import text
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request, JWTManager, get_jwt
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-
+import pytz
 
 load_dotenv()
 app = create_app()
@@ -90,33 +90,43 @@ def health():
     get_remote_address()
     return f'OK - {get_remote_address()}', 200
            
+
+
+@app.before_request
+def load_user_preferences():
+    # Simulamos obtener las preferencias del usuario (pueden venir de session o JWT)
+    # En un caso real: prefs = get_jwt_identity().get('preferences')
+    
+    verify_jwt_in_request(optional=True)
+    claims = get_jwt()
+    
+    # 2. Si el token existe y tiene el claim 'lang'
+    if claims: 
+
+        # Guardamos en 'g' para acceso global en este request
+        g.date_format = claims.get('dateFormat').replace('DD', '%d').replace('MM', '%m').replace('YYYY', '%Y')
+        g.hour_format = "%H:%M" if claims.get('hourFormat') == "24" else "%I:%M %p"
+        g.tz = pytz.timezone(claims.get('timeZone', 'UTC'))
+        g.lang = claims.get('language', 'es')
+        
+        i18n.setup_gettext(g.lang)
+    else:
+        # Valores por defecto
+        g.date_format = "%d-%m-%Y"
+        g.hour_format = "%H:%M"
+        g.tz = pytz.timezone('UTC')
+        g.lang = 'es'
+        i18n.setup_gettext(g.lang)
+        
+    print(f"Idioma establecido a: {g.lang}")
+    
 @app.before_request
 def before_request():
     # 1. Forzar HTTPS
     if not request.is_secure and os.getenv('FLASK_ENV') != 'development':
         return redirect(request.url.replace('http://', 'https://', 1), code=301)
     
-    
-    try:
-        # 1. Verifica si hay un token válido en la petición sin bloquearla
-        verify_jwt_in_request(optional=True)
-        claims = get_jwt()
-        
-        # 2. Si el token existe y tiene el claim 'lang'
-        if claims and "language" in claims:
-            lang = claims["language"]
-        else:
-            # Idioma por defecto si no hay token o no tiene el claim
-            lang = "es"
-            
-        # 3. Iniciar i18n con el lenguaje obtenido
-        i18n.setup_gettext(lang)
-
-        
-    except Exception:
-        # En caso de error (token malformado, etc.), fallback al inglés
-        i18n.setup_gettext("es")
-        
+    load_user_preferences()
     
     endpoint = request.endpoint
     if endpoint is None:

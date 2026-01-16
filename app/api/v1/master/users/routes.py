@@ -8,6 +8,9 @@ from app.api.v1.master.clients.controller import (get_my_institution, get_my_sub
                                                   get_my_payments, get_my_storage_usage, 
                                                   get_my_personal_logs, get_my_personal_logs_by_entity)
 
+from app.api.v1.master.auth.controller import sessions
+from app.api.v1.master.clients.controller import get_my_plan
+
 users_bp = Blueprint('users', __name__, url_prefix='/api/v1/users')
 
 # GET
@@ -20,11 +23,14 @@ users_bp.get("/current")(me)
 users_bp.get("/current/organization")(get_my_institution)# Información de la institución (El "Client" de la tabla master.clientes)
 users_bp.get("/current/subscription")(get_my_subscription)# Facturación y Suscripción
 users_bp.get("/current/payments")(get_my_payments)
+users_bp.get("/current/sessions")(sessions)
 
 users_bp.get("/current/storage")(get_my_storage_usage)# Recursos y Seguridad
 users_bp.get("/current/audit")(get_my_personal_logs)
 users_bp.get("/current/audit/<string:entityName>")(get_my_personal_logs_by_entity)
 users_bp.get("/current/notifications")(get_notifications)
+
+users_bp.get("/current/plan")(get_my_plan) #planes activos
 
 
 # POSTS

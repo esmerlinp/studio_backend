@@ -1,5 +1,6 @@
 from ...extensions import db
 from datetime import datetime
+from app.utils.helpers import format_datetime_user
 
 class Notification(db.Model):
     __tablename__ = "notificaciones"
@@ -20,6 +21,7 @@ class Notification(db.Model):
     created_at = db.Column("dfechacreacion", db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
+        created_at = format_datetime_user(self.created_at)
         return {
             "id": self.id,
             "title": self.title,
@@ -29,5 +31,5 @@ class Notification(db.Model):
             "resource_id": self.resource_id,
             "action": self.action,
             "target_url": self.target_url,
-            "created_at": self.created_at.isoformat()
+            "created_at": created_at
         }

@@ -19,7 +19,7 @@ from app.utils import i18n
 
 #Consumir rutas protegidas con el JWT
 #El cliente debe enviar el token en el header: Authorization: Bearer <token>
-ADMIN_ROLES = [r.OWNER, r.ADMIN, r.SUPER_ADMIN, r.SYS_ADMIN]
+ADMIN_ROLES = [r.OWNER, r.ADMIN, r.SUPER_ADMIN, r.SYS_ADMIN, r.ROOT]
 
 @jwt_required()
 @track_activity
@@ -142,6 +142,21 @@ def get_plan(clientId):
         from datetime import date
         today = date.today()
         plan = assign_plan_to_client(client_id=clientId, plan_id=2, price_list_id=2, start_date=today, commit=True)
+        
+    return success(data=plan.to_dict())
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES.extend([r.AUDITOR]))
+def get_my_plan():
+    user_id = get_jwt_identity()
+    client = get_client_by_user(user_id=user_id)
+    plan = get_active_client_plan(client_id=client.clientId)
+    
+    if not plan:
+        from datetime import date
+        today = date.today()
+        plan = assign_plan_to_client(client_id=client.clientId, plan_id=2, price_list_id=2, start_date=today, commit=True)
         
     return success(data=plan.to_dict())
 

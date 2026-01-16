@@ -293,7 +293,7 @@ def get_client_preferences():
 
       "timezone": "America/Santo_Domingo",
       "language": "es",
-      "date_format": "DD/MM/YYYY",
+      "date_format": "DD-MM-YYYY",
       "company_logo_url": "https://example.com/logo_cliente10.png",
 
       "modules_enabled": {
@@ -394,7 +394,7 @@ def get_client_by_uuid(uuid)-> Client:
            resource_id_arg="client_id", 
            description="Consultar Ordenes de pago de cliente")
 def get_client_payment_orders(client_id)-> List[PaymentTransaction]:    
-    orders = PaymentTransaction.query.filter_by(clientId =client_id).all()
+    orders = PaymentTransaction.query.filter_by(clientId=client_id).all()
     return orders
 
 # @audit_log(action=ActionType.READ, 

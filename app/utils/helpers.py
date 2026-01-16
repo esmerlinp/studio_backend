@@ -11,6 +11,27 @@ from google.cloud import storage
 from app import db
 from app.utils import i18n
 
+
+# app/utils/formatters.py
+from flask import g
+from datetime import datetime
+
+def format_datetime_user(dt_object):
+    """
+    Convierte un objeto datetime de la DB a la zona horaria 
+    y formato del usuario actual.
+    """
+    if dt_object is None:
+        return None
+    
+    # 1. Ajustar a la zona horaria del usuario
+    localized_dt = dt_object.astimezone(g.tz)
+    
+    # 2. Aplicar formato de fecha y hora guardados en g
+    full_format = f"{g.date_format} {g.hour_format}"
+    return localized_dt.strftime(full_format)
+
+
 def schema_exists(schema_name):
     query = text("""
         SELECT EXISTS (

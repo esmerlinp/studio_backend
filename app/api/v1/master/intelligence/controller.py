@@ -1,6 +1,6 @@
 
 from app.utils.responses import success, error
-from app.services.master_scheme.intelligence_service import generar_reporte_estudiante, ai_generic_generator
+from app.services.master_scheme.intelligence_service import  ai_generic_generator
 from app import limiter, track_activity
 from flask_jwt_extended import jwt_required
 import json

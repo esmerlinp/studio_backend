@@ -1,6 +1,6 @@
 
 from ...extensions import db
-
+from app.utils.helpers import format_datetime_user
 
 class User(db.Model):
     __tablename__ = "usuarios"
@@ -39,6 +39,11 @@ class User(db.Model):
         return self.is_active and not self.is_disabled_by_client
     
     def to_dict(self, include_sensitive=False):
+        blockedDate = format_datetime_user(self.blockedDate) if self.blockedDate else None
+        lastLoginDate = format_datetime_user(self.lastLoginDate) if self.lastLoginDate else None
+        tokenExpirationDate = format_datetime_user(self.tokenExpirationDate) if self.tokenExpirationDate else None
+        lastPasswordChangeDate = format_datetime_user(self.lastPasswordChangeDate) if self.lastPasswordChangeDate else None
+        
         data = {
             "userId": self.userId,
             "username": self.username,
@@ -52,10 +57,10 @@ class User(db.Model):
             "loginAttempts": self.loginAttempts,
             "isBlocked": self.isBlocked,
             "rol": self.rol,
-            "blockedDate": self.blockedDate.isoformat() if self.blockedDate else None,
-            "lastLoginDate": self.lastLoginDate.isoformat() if self.lastLoginDate else None,
-            "tokenExpirationDate": self.tokenExpirationDate.isoformat() if self.tokenExpirationDate else None,
-            "lastPasswordChangeDate": self.lastPasswordChangeDate.isoformat() if self.lastPasswordChangeDate else None
+            "blockedDate": blockedDate,
+            "lastLoginDate": lastLoginDate,
+            "tokenExpirationDate": tokenExpirationDate,
+            "lastPasswordChangeDate": lastPasswordChangeDate
         }
         if include_sensitive:
             data["recoveryToken"] = self.recoveryToken

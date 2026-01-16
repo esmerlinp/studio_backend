@@ -79,11 +79,11 @@ class ClientPlan(db.Model):
             "client_id": self.client_id,
             "plan_id": self.plan_id,
             "plan_code": self.plan.code if self.plan else None,
-            "price_list_id": self.price_list_id,
+            #"price_list_id": self.price_list_id,
             "billing_cycle": self.price_list.billing_cycle if self.price_list else None,
             "price": float(self.price_list.price) if self.price_list else None,
             "currency": self.price_list.currency if self.price_list else None,
             "start_date": self.start_date.isoformat(),
-            "end_date": self.end_date.isoformat() if self.end_date else None,
+            #"end_date": self.end_date.isoformat() if self.end_date else None,
             "status": self.status,
         }

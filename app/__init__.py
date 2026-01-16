@@ -88,14 +88,14 @@ def track_activity(func):
             user_id = get_jwt_identity()
 
             session = get_session_active_by_user_id(userId=user_id)
-
+            print("track_activity session:", session)
             if not session or not session.isActive:
                 return jsonify({"msg": i18n._("auth.session_invalid")}), 440
             
             # 2. VALIDACIÓN CRÍTICA: ¿El usuario sigue activo?
             # Esto detiene a los usuarios  que no pagaron
             user = User.query.get(user_id)
-            
+            print("track_activity user:", user)
             if not user.isActive:                 
                 return jsonify({
                     "msg": i18n._("auth.account_disabled")
@@ -103,7 +103,7 @@ def track_activity(func):
 
 
             expiration = session.expirationDate
-
+            print("track_activity expiration:", expiration)
             if expiration.tzinfo is None:
                 expiration = expiration.replace(tzinfo=timezone.utc)
 
@@ -113,8 +113,10 @@ def track_activity(func):
                 invalidar_sesiones_por_id_session(sessionId=session.sessionId)
                 return jsonify({"msg": i18n._("auth.session_expired_inactivity")}), 440
             # Actualizar actividad
+            
+            print("track_activity updating activity...")
             actualizar_actividad_sesion(sessionId=session.sessionId, inactivity_minutes=INACTIVITY_MINUTES)
-
+            print("track_activity activity updated.")
             return func(*args, **kwargs)
 
         except Exception as e:
@@ -201,6 +203,9 @@ def require_role(role_codes:list[str]):
                 if not user:
                     return error(i18n._("auth.user_not_found"), 403)
 
+                if role_codes is None or len(role_codes) == 0:
+                    return fn(*args, **kwargs)
+                
                 # Obtener los roles válidos desde la tabla Role
                 valid_roles = (
                     db.session.query(Role.id)

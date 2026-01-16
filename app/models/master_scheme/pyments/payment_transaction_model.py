@@ -2,7 +2,7 @@
 from ....extensions import db
 from sqlalchemy.dialects.postgresql import JSONB
 from datetime import datetime, timezone
-
+from app.utils.helpers import format_datetime_user
 
 class PaymentTransaction(db.Model):
     __tablename__ = 'transacciones_pagos'
@@ -29,6 +29,7 @@ class PaymentTransaction(db.Model):
     createdAt = db.Column("dfecha_registro", db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     def to_dict(self):
+        paymentDate = format_datetime_user(self.paymentDate)
         return {
             "id": self.id,
             "clientPlanId": self.clientPlanId,
@@ -38,5 +39,5 @@ class PaymentTransaction(db.Model):
             "amount": float(self.amount),
             "currency": self.currency,
             "status": self.status,
-            "paymentDate": self.paymentDate.isoformat() if self.paymentDate else None
+            "paymentDate": paymentDate if self.paymentDate else None
         }

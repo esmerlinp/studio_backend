@@ -1,6 +1,6 @@
 import datetime
 from app import db
-
+from app.utils.helpers import format_datetime_user
 
 class ClienteConfiguracion(db.Model):
     __tablename__ = "cliente_configuracion"
@@ -31,7 +31,7 @@ class ClienteConfiguracion(db.Model):
     # ======================
     timezone = db.Column(db.String(100), default="America/Santo_Domingo")
     language = db.Column(db.String(10), default="es")
-    date_format = db.Column(db.String(20), default="DD/MM/YYYY")
+    date_format = db.Column(db.String(20), default="DD-MM-YYYY")
 
     # ======================
     # Personalización
@@ -88,6 +88,8 @@ class ClienteConfiguracion(db.Model):
     # Helpers
     # ======================
     def to_dict(self, include_sensitive=False):
+        created_at = format_datetime_user(self.created_at)
+        updated_at = format_datetime_user(self.updated_at)
         data = {
             "id": self.id,
             "idcliente": self.idcliente,
@@ -121,8 +123,8 @@ class ClienteConfiguracion(db.Model):
             "api_keys": self.api_keys,
             "webhooks": self.webhooks,
 
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
+            "created_at": created_at if self.created_at else None,
+            "updated_at": updated_at if self.updated_at else None,
         }
         if include_sensitive:
             data['smtp_password'] = self.smtp_password

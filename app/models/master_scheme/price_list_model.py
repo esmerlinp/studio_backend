@@ -1,6 +1,6 @@
 from datetime import datetime
 from ...extensions import db
-
+from app.utils.helpers import format_datetime_user
 from sqlalchemy.dialects.postgresql import JSONB
 
 class PriceList(db.Model):
@@ -105,6 +105,8 @@ class PriceList(db.Model):
         )
 
     def to_dict(self):
+        created_at = format_datetime_user(self.created_at) if self.created_at else None
+        
         return {
             "id": self.id,
             "plan_id": self.plan_id,
@@ -119,6 +121,6 @@ class PriceList(db.Model):
             "valid_from": self.valid_from.isoformat(),
             "valid_to": self.valid_to.isoformat() if self.valid_to else None,
             "is_active": self.is_active,
-            "created_at": self.created_at.isoformat(),
+            "created_at": created_at if self.created_at else None,
             "features_config":self.features_config
         }

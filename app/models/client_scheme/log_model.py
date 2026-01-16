@@ -1,6 +1,6 @@
 from datetime import datetime
 from ...extensions import db
-
+from app.utils.helpers import format_datetime_user
 
 class AuditLog(db.Model):
     __tablename__ = "auditoria"
@@ -105,6 +105,7 @@ class AuditLog(db.Model):
     # Utilidad
     # -------------------------
     def to_dict(self):
+        created_at = format_datetime_user(self.created_at)
         return {
             "id": self.id,
             "user_id": self.user_id,
@@ -117,7 +118,7 @@ class AuditLog(db.Model):
             "user_agent": self.user_agent,
             "old_values": self.old_values,
             "new_values": self.new_values,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "created_at": created_at if self.created_at else None,
         }
 
     def __repr__(self):

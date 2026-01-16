@@ -38,7 +38,7 @@ def get_user_preferences(user_id) -> Optional[UserPreference]:
     prefs = UserPreference.query.filter_by(userId=user_id).first()
     return prefs
 
-def add_default_user_preferences_onboard(user_id:int,language="es", theme="light", timezone="America/Santo_Domingo", date_format="DD/MM/YYYY", 
+def add_default_user_preferences_onboard(user_id:int,language="es", theme="light", timezone="America/Santo_Domingo", date_format="DD-MM-YYYY", 
                         receive_not_email = True, 
                         push_notifications = False, 
                         hour_format = "24"):
@@ -64,7 +64,7 @@ def add_default_user_preferences_onboard(user_id:int,language="es", theme="light
 
     return prefs
 
-def add_default_user_preferences(user_id:int,language="es", theme="light", timezone="America/Santo_Domingo", date_format="DD/MM/YYYY", 
+def add_default_user_preferences(user_id:int,language="es", theme="light", timezone="America/Santo_Domingo", date_format="DD-MM-YYYY", 
                         receive_not_email = True, 
                         push_notifications = False, 
                         hour_format = "24"):

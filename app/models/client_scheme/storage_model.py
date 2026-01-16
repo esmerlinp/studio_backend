@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+from app.utils.helpers import format_datetime_user
 
 class Storage(db.Model):
     __tablename__ = 'almacenamiento'
@@ -26,6 +27,9 @@ class Storage(db.Model):
 
     def to_dict(self, show_confidencial=False):
             """Convierte el objeto a un diccionario para respuestas JSON"""
+            created_at = format_datetime_user(self.created_at)
+            updated_at = format_datetime_user(self.updated_at)
+            deleted_at = format_datetime_user(self.deleted_at) if self.deleted_at else None
             data = {
                 "id": self.id,
                 "client_id": self.client_id,
@@ -34,9 +38,9 @@ class Storage(db.Model):
                 "file_name": self.file_name,
                 "content_type": self.content_type,
                 "peso_mb": float(self.peso_mb) if self.peso_mb else 0.0,
-                "created_at": self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
-                "updated_at": self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
-                "is_deleted": self.deleted_at is not None
+                "created_at": created_at if self.created_at else None,
+                "updated_at": updated_at if self.updated_at else None,
+                "is_deleted": deleted_at
             }
             
             if show_confidencial:
