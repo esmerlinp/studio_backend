@@ -4,7 +4,8 @@ from app.services.master_scheme.documents_service import export_client_data
 from app.services.master_scheme.client_service import (get_client_preferences, get_client_logs, get_logs_by_entity,
                                                        onboard_client_service, storage_info, 
                                                        create_client, get_clients,
-                                                       get_client_by_id, get_client_payment_orders)
+                                                       get_client_by_id, get_client_payment_orders,
+                                                       request_scheme_deletion, cancel_scheme_deletion, process_scheduled_deletions)
 
 from app.services.master_scheme.user_client_service import get_client_by_user   
 from app.services.master_scheme.client_plan_service import get_active_client_plan, assign_plan_to_client, change_client_plan, get_client_plan_history
@@ -286,3 +287,46 @@ def handle_export_data():
 
     except Exception as e:
         return error(message=str(e), status_code=500)
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES)
+def request_deletion():
+    user_id = get_jwt_identity()
+    client = get_client_by_user(user_id=user_id)
+    if not client:
+        return error(message=i18n._("error.client.not_found"), status_code=404)
+        
+    try:
+        updated_client = request_scheme_deletion(client_id=client.clientId)
+        return success(data=updated_client.to_dict(), message=i18n._("msg.client.deletion_requested"))
+    except ValueError as e:
+        return error(str(e), 400)
+    except Exception as e:
+        return error(str(e), 500)
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES)
+def cancel_deletion():
+    user_id = get_jwt_identity()
+    client = get_client_by_user(user_id=user_id)
+    if not client:
+        return error(message=i18n._("error.client.not_found"), status_code=404)
+        
+    try:
+        updated_client = cancel_scheme_deletion(client_id=client.clientId)
+        return success(data=updated_client.to_dict(), message=i18n._("msg.client.deletion_cancelled"))
+    except ValueError as e:
+        return error(str(e), 400)
+    except Exception as e:
+        return error(str(e), 500)
+
+@jwt_required()
+@require_role([r.ROOT])
+def trigger_cleanup():
+    try:
+        results = process_scheduled_deletions()
+        return success(data=results, message="Cleanup process executed")
+    except Exception as e:
+        return error(str(e), 500)

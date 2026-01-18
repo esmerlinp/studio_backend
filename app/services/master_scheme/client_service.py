@@ -20,7 +20,7 @@ from app.services.master_scheme.client_plan_service import assign_plan_to_client
 from app.services.master_scheme.user_service import  insert_user_onboard
 from app.services.master_scheme.user_client_service import  assign_user_to_client_onboard
 from app.services.master_scheme.payment_service import request_suscription
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from app.utils.helpers import send_email_template, paginate_query
 from app.utils.types import ActionType, ResourceTypes, states
 from app.utils import i18n  # Importar el módulo de idiomas
@@ -513,3 +513,71 @@ def update_client_storage_usage(client_id: int, size_mb: float, operation: str =
 
 
 
+@audit_log(action=ActionType.UPDATE, 
+           resource_type=ResourceTypes.CLIENT, 
+           resource_id_arg="client_id", 
+           description="Solicitar baja de esquema")
+def request_scheme_deletion(client_id: int):
+    client = Client.query.get(client_id)
+    if not client:
+        raise ValueError(i18n._("error.client.not_found"))
+        
+    client.deletionRequestedAt = datetime.now()
+    db.session.commit()
+    return client
+
+@audit_log(action=ActionType.UPDATE, 
+           resource_type=ResourceTypes.CLIENT, 
+           resource_id_arg="client_id", 
+           description="Cancelar solicitud de baja de esquema")
+def cancel_scheme_deletion(client_id: int):
+    client = Client.query.get(client_id)
+    if not client:
+        raise ValueError(i18n._("error.client.not_found"))
+        
+    client.deletionRequestedAt = None
+    db.session.commit()
+    return client
+
+def process_scheduled_deletions():
+    """
+    Busca clientes con solicitud de baja mayor a 15 días y elimina sus esquemas.
+    """
+    cutoff_date = datetime.now() - timedelta(days=15)
+    
+    clients_to_delete = Client.query.filter(
+        Client.deletionRequestedAt.isnot(None),
+        Client.deletionRequestedAt <= cutoff_date
+    ).all()
+    
+    results = {
+        "deleted": [],
+        "errors": []
+    }
+    
+    for client in clients_to_delete:
+        try:
+            if client.schemaName == "cliente":
+                results["errors"].append({"client_id": client.clientId, "error": "Ignored: Cannot delete model schema 'cliente'"})
+                print(f"Skipping deletion for model schema 'cliente' (Client ID: {client.clientId})")
+                continue
+
+            # 1. Drop Schema Cascade
+            print(f"Deleting schema {client.schemaName} for client {client.clientId}")
+            db.session.execute(text(f"DROP SCHEMA IF EXISTS {client.schemaName} CASCADE"))
+             
+            # 2. Mark client as inactive and clear schema request
+            client.isActive = False
+            client.comment = f"{client.comment or ''} | Schema {client.schemaName} deleted on {datetime.now()}"
+            client.deletionRequestedAt = None 
+            
+            db.session.commit()
+            
+            results["deleted"].append(client.clientId)
+            
+        except Exception as e:
+            db.session.rollback()
+            results["errors"].append({"client_id": client.clientId, "error": str(e)})
+            print(f"Error executing deletion for client {client.clientId}: {e}")
+            
+    return results

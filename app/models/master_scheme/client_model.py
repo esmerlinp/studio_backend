@@ -124,6 +124,7 @@ class Client(db.Model):
     )
     stripe_customer_id = db.Column("sidclientestripe", db.String(50), unique=True, nullable=True)
     stripe_subscription_id = db.Column("sidcontratostripe", db.String(50), unique=True, nullable=True)
+    deletionRequestedAt = db.Column("dfechasolicitudbaja", db.DateTime, nullable=True)
     
     # --------------------------------------------------
     # Representación (útil para logs / debug)
@@ -156,6 +157,7 @@ class Client(db.Model):
             "uuid": str(self.uuid),
             "schema": self.schemaName,
             "stripe_customer_id": self.stripe_customer_id,
-            "stripe_subscription_id": self.stripe_subscription_id
+            "stripe_subscription_id": self.stripe_subscription_id,
+            "deletion_requested_at": self.deletionRequestedAt.isoformat() if self.deletionRequestedAt else None
             
         }
