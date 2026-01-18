@@ -10,19 +10,13 @@ client_bp = Blueprint('clients', __name__, url_prefix='/api/v1/clients')
 
 client_bp.get("/")(get_all_clients)
 client_bp.get("/<int:clientId>")(get_client)
-
-
 client_bp.get("/<int:clientId>/plan")(get_plan) #planes activos
 client_bp.get("/<int:clientId>/plan/all")(get_client_plans) #todos los planes 
-
 client_bp.get("/<int:clientId>/payments/orders")(get_client_payments)
-
-
-client_bp.patch("/plan/change")(change_plan)
-
-
 client_bp.get("/settings")(get_client_preferences)
 client_bp.get("/logs")(get_logs)
+
+client_bp.patch("/plan/change")(change_plan)
 
 client_bp.post("/")(new_cliente)
 client_bp.post("/onboard")(onboard_client)

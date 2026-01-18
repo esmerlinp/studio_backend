@@ -18,7 +18,7 @@ def create_dynamic_field(data: Dict[str, Any]) -> DynamicField:
         entityType=data.get('entityType').upper(),
         label=data.get('label'),
         name=data.get('name'), # ej: 'talla_camisa'
-        fieldType=data.get('fieldType'), # TEXT, SELECT, DATE
+        fieldType=data.get('fieldType'), # TEXT, SELECT, DATE, NUMBER, etc.
         isRequired=data.get('isRequired', False),
         options=data.get('options') # Lista de opciones si es SELECT
     )
