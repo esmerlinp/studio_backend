@@ -111,6 +111,18 @@
                 </select>
             </div>
 
+            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <div style="flex: 1; display: flex; align-items: center; gap: 8px; padding-top: 24px;">
+                    <input type="checkbox" id="createIsTrial" onchange="toggleTrialDays('create')">
+                    <label for="createIsTrial" style="font-size: 0.85rem;">Es prueba gratis</label>
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Días de Prueba</label>
+                    <input type="number" id="createTrialDays" value="0" disabled
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+            </div>
+
             <div style="margin-bottom: 12px;">
                 <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Válido Desde</label>
                 <input type="date" id="createValidFrom" required
@@ -163,6 +175,18 @@
                 </select>
             </div>
 
+            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <div style="flex: 1; display: flex; align-items: center; gap: 8px; padding-top: 24px;">
+                    <input type="checkbox" id="editIsTrialInput" onchange="toggleTrialDays('edit')">
+                    <label for="editIsTrialInput" style="font-size: 0.85rem;">Es prueba gratis</label>
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Días de Prueba</label>
+                    <input type="number" id="editTrialDays" value="0" disabled
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+            </div>
+
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
                 <input type="checkbox" id="editIsActive">
                 <label for="editIsActive" style="font-size: 0.85rem;">Activo</label>
@@ -209,6 +233,8 @@
             valid_from: document.getElementById('createValidFrom').value,
             price_per_user: document.getElementById('createPricePerUser').checked,
             min_users: parseInt(document.getElementById('createMinUsers').value) || 1,
+            is_trial: document.getElementById('createIsTrial').checked,
+            trial_days: parseInt(document.getElementById('createTrialDays').value) || 0,
             features_config: {}
         };
 
@@ -239,6 +265,9 @@
         document.getElementById('editBillingCycle').value = item.billing_cycle;
         document.getElementById('editIsActive').checked = item.is_active;
         document.getElementById('editPricePerUser').checked = item.price_per_user;
+        document.getElementById('editIsTrialInput').checked = item.is_trial || false;
+        document.getElementById('editTrialDays').value = item.trial_days || 0;
+        toggleTrialDays('edit');
 
         document.getElementById('editPriceModal').style.display = 'flex';
     }
@@ -254,7 +283,9 @@
             price: parseFloat(document.getElementById('editPriceValue').value),
             billing_cycle: document.getElementById('editBillingCycle').value,
             is_active: document.getElementById('editIsActive').checked,
-            price_per_user: document.getElementById('editPricePerUser').checked
+            price_per_user: document.getElementById('editPricePerUser').checked,
+            is_trial: document.getElementById('editIsTrialInput').checked,
+            trial_days: parseInt(document.getElementById('editTrialDays').value) || 0
         };
 
         if (!confirm('¿Confirmar cambios en la lista de precios?')) return;
@@ -303,6 +334,19 @@
         } catch (err) {
             console.error(err);
             select.innerHTML = '<option value="">Error cargando planes</option>';
+        }
+    }
+
+    function toggleTrialDays(mode) {
+        const checkbox = mode === 'create' ? document.getElementById('createIsTrial') : document.getElementById('editIsTrialInput');
+        const input = mode === 'create' ? document.getElementById('createTrialDays') : document.getElementById('editTrialDays');
+
+        if (checkbox.checked) {
+            input.disabled = false;
+            if (input.value == 0) input.value = 14;
+        } else {
+            input.disabled = true;
+            input.value = 0;
         }
     }
 </script>

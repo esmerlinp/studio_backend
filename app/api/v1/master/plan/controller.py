@@ -58,13 +58,16 @@ def add_price_list():
     valid_from = request.json.get("valid_from", None)
     valid_to = request.json.get("valid_to", None)
     features_config = request.json.get("features_config", None)
+    is_trial = request.json.get("is_trial", False)
+    trial_days = request.json.get("trial_days", 0)
     
     data = price_list_service.create_price_list(plan_id=plan_id,
                                          billing_cycle=billing_cycle,
                                          price=price,
                                          currency=currency,
                                          price_per_user=price_per_user,
-                                         min_users=min_users, valid_from=valid_from, valid_to=valid_to, features_config=features_config)
+                                         min_users=min_users, valid_from=valid_from, valid_to=valid_to, features_config=features_config,
+                                         is_trial=is_trial, trial_days=trial_days)
     
 
     return success(data=data.to_dict())

@@ -18,6 +18,8 @@ def create_price_list(
     valid_from: str,
     valid_to: Optional[str] = None,
     features_config: dict = {},
+    is_trial: bool = False,
+    trial_days: int = 0
 ) -> PriceList:
     # 1. Validar que no exista cruce de fechas para el mismo plan y ciclo (opcional pero recomendado)
     price_list = PriceList(
@@ -29,7 +31,9 @@ def create_price_list(
         min_users=min_users,
         valid_from=valid_from,
         valid_to=valid_to,
-        features_config=features_config
+        features_config=features_config,
+        is_trial=is_trial,
+        trial_days=trial_days
     )
 
     try:
@@ -57,6 +61,8 @@ def update_price_list_service(price_id: int, data: dict) -> PriceList:
     if 'is_active' in data: price_list.is_active = data['is_active']
     if 'price_per_user' in data: price_list.price_per_user = data['price_per_user']
     if 'valid_to' in data: price_list.valid_to = data['valid_to']
+    if 'is_trial' in data: price_list.is_trial = data['is_trial']
+    if 'trial_days' in data: price_list.trial_days = data['trial_days']
     
     db.session.commit()
     return price_list
