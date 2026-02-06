@@ -13,7 +13,7 @@ from app.api.v1.base.storage.routes import documents_bp
 from app.api.v1.master.intelligence.routes import intelligence_bp
 from app.api.v1.base.roles.routes import roles_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
-from app import create_app
+from app import create_app, require_role
 from app.utils import i18n
 from app.utils.helpers import verify_reset_token
 from app.utils.responses import error
@@ -21,7 +21,7 @@ import os
 from dotenv import load_dotenv
 from app.extensions import db
 from sqlalchemy import text
-from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request, JWTManager, get_jwt
+from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request, JWTManager, get_jwt, jwt_required
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import pytz
@@ -69,7 +69,6 @@ MASTER_PUBLIC_ENDPOINTS = {
     "login",
     "plans_page",
     "plans.get_plans",
-    "dashboard",
     "users.forgot_password",
     "confirmation_account",
     "reset_password",
@@ -118,7 +117,6 @@ def load_user_preferences():
         g.lang = 'es'
         i18n.setup_gettext(g.lang)
         
-    print(f"Idioma establecido a: {g.lang}")
     
 @app.before_request
 def before_request():
@@ -146,7 +144,9 @@ def before_request():
         g.user_id = user_id
         
     except Exception:
-        return error(i18n._("auth.not_authenticated"), 401)
+        if request.path.startswith('/api/'):
+            return error(i18n._("auth.not_authenticated"), 401)
+        return redirect('/login')
 
     # 4. Obtener datos del usuario (Intenta optimizar esta función para que traiga el esquema de una vez)
     user = get_user_by_id(user_id=user_id)
@@ -235,8 +235,59 @@ def login():
     return render_template("es/login.html", app_name=app_name)
 
 @app.route("/dashboard")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard():
-    return render_template("es/dashboard.html")
+    from app.services.master_scheme.dashboard_service import get_admin_dashboard_data
+    data = get_admin_dashboard_data()
+    return render_template("es/dashboard.html", 
+                         stats=data.get('stats'), 
+                         recent_clients=data.get('recent_clients'), 
+                         recent_payments=data.get('recent_payments'))
+
+@app.route("/dashboard/clients")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_clients():
+    from app.services.master_scheme.client_service import get_clients
+    clients = get_clients()
+    return render_template("es/dashboard/clients.html", clients=[c.to_dict() for c in clients])
+
+@app.route("/dashboard/plans")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_plans():
+    from app.models.master_scheme.plans_model import Plan
+    from app.models.master_scheme.price_list_model import PriceList  # Required for relationship mapping
+    
+    plans = Plan.query.order_by(Plan.created_at.desc()).all()
+    return render_template("es/dashboard/plans.html", plans=[p.to_dict() for p in plans])
+
+@app.route("/dashboard/price-lists")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_price_lists():
+    from app.models.master_scheme.price_list_model import PriceList
+    price_lists = PriceList.query.order_by(PriceList.id.desc()).all()
+    return render_template("es/dashboard/price_lists.html", price_lists=[pl.to_dict() for pl in price_lists])
+
+@app.route("/dashboard/payments")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_payments():
+    from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
+    payments = PaymentTransaction.query.order_by(PaymentTransaction.createdAt.desc()).all()
+    return render_template("es/dashboard/payments.html", payments=[p.to_dict() for p in payments])
+
+@app.route("/dashboard/invoices")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_invoices():
+    # Asumiendo que las facturas se manejan de alguna forma, por ahora lista vacía o fetch si existe el modelo
+    # Si no hay modelo de facturas aún, podrías usar PaymentTransaction como base
+    from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
+    invoices = PaymentTransaction.query.filter(PaymentTransaction.status.in_(['SUCCESS', 'APPROVED'])).order_by(PaymentTransaction.createdAt.desc()).all()
+    return render_template("es/dashboard/invoices.html", invoices=[i.to_dict() for i in invoices])
 
 @app.route("/reset-password")
 def reset_password_page():

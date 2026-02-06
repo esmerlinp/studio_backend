@@ -32,7 +32,7 @@ def get_user_scheme(user_id:int)-> Optional[str]:
         if cliente:
             return cliente.schemaName
         
-    return None
+    return "master"
     
 def get_user_preferences(user_id) -> Optional[UserPreference]:
     prefs = UserPreference.query.filter_by(userId=user_id).first()

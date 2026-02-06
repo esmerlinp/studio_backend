@@ -1,0 +1,307 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'planes' %}
+
+{% block title %}Planes | Akdmia{% endblock %}
+
+{% block page_title %}Planes de Suscripción{% endblock %}
+{% block page_subtitle %}Configura las opciones de suscripción para los clientes.{% endblock %}
+
+
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Planes Disponibles</h3>
+        <button onclick="openCreateModal()"
+            style="padding: 8px 16px; border:none; border-radius: 6px; cursor:pointer; background-color: #4f46e5; color: white; font-weight: 600; font-family: 'Inter', sans-serif;">
+            + Crear Plan
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Precio Base</th>
+                    <th>Almacenamiento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plan in plans %}
+                <tr>
+                    <td style="font-family: monospace; font-weight: 600;">{{ plan.code }}</td>
+                    <td>{{ plan.name }}</td>
+                    <td class="price-text">
+                        {% if plan.price_info %}
+                        {% for price in plan.price_info %}
+                        <div style="font-size: 0.8rem; margin-bottom: 2px;">
+                            ${{ "{:,.2f}".format(price.price) }} {{ price.currency }}/{{ 'año' if price.billing_cycle ==
+                            'ANNUAL' else 'mes' }}
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <span style="color: var(--text-muted); font-size: 0.8rem;">--</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ plan.max_storage_gb }} GB</td>
+                    <td>
+                        {% if plan.is_active %}
+                        <span class="badge badge-success">Activo</span>
+                        {% else %}
+                        <span class="badge badge-pending">Desactivado</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="badge" onclick='openEditModal({{ plan | tojson | safe }})'
+                                style="border: 1px solid var(--border); background: white; cursor: pointer;">Editar</button>
+
+                            {% if plan.is_active %}
+                            <button class="badge" onclick="toggleStatus({{ plan.id }}, false)"
+                                style="border: 1px solid var(--border); background: white; cursor: pointer; color: var(--error);">Desactivar</button>
+                            {% else %}
+                            <button class="badge" onclick="toggleStatus({{ plan.id }}, true)"
+                                style="border: 1px solid var(--border); background: white; cursor: pointer; color: var(--success);">Activar</button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        No hay planes configurados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Crear Plan -->
+<div id="createModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div
+        style="background-color: white; padding: 24px; border-radius: 12px; width: 500px; max-width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h3 style="margin-top: 0; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+            Nuevo Plan</h3>
+        <form id="createForm" onsubmit="createPlan(event)">
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Código (Único)</label>
+                <input type="text" id="createCode" required placeholder="Ej: BASIC_PLAN"
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-transform: uppercase;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Nombre del Plan</label>
+                <input type="text" id="createName" required placeholder="Ej: Plan Básico"
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Descripción</label>
+                <textarea id="createDescription" rows="2"
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;"></textarea>
+            </div>
+            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Max Usuarios</label>
+                    <input type="number" id="createMaxUsers" placeholder="0 = Ilimitado"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Almacenamiento (GB)</label>
+                    <input type="number" id="createStorage" required value="1"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Nivel Soporte</label>
+                    <select id="createSupport"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                        <option value="BASIC">Básico</option>
+                        <option value="PRIORITY">Prioritario</option>
+                        <option value="DEDICATED">Dedicado</option>
+                    </select>
+                </div>
+                <!-- Environment Type can be hidden or default -->
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" onclick="closeCreateModal()"
+                    style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                <button type="submit"
+                    style="padding: 8px 16px; border: none; background: #4f46e5; color: white; border-radius: 6px; cursor: pointer;">Crear
+                    Plan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Plan -->
+<div id="editModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div
+        style="background-color: white; padding: 24px; border-radius: 12px; width: 500px; max-width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h3 style="margin-top: 0; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+            Editar Plan</h3>
+        <form id="editForm" onsubmit="savePlan(event)">
+            <input type="hidden" id="editPlanId">
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Código</label>
+                <input type="text" id="editCode" disabled
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: #f5f5f5; color: #666;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Nombre del Plan</label>
+                <input type="text" id="editName" required
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Descripción</label>
+                <textarea id="editDescription" rows="2"
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;"></textarea>
+            </div>
+            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Max Usuarios</label>
+                    <input type="number" id="editMaxUsers"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Almacenamiento (GB)</label>
+                    <input type="number" id="editStorage" required
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Nivel Soporte</label>
+                    <select id="editSupport"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                        <option value="BASIC">Básico</option>
+                        <option value="PRIORITY">Prioritario</option>
+                        <option value="DEDICATED">Dedicado</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" onclick="closeEditModal()"
+                    style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                <button type="submit"
+                    style="padding: 8px 16px; border: none; background: #4f46e5; color: white; border-radius: 6px; cursor: pointer;">Guardar
+                    Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Create Modal
+    function openCreateModal() {
+        document.getElementById('createForm').reset();
+        document.getElementById('createModal').style.display = 'flex';
+    }
+    function closeCreateModal() {
+        document.getElementById('createModal').style.display = 'none';
+    }
+
+    // Edit Modal
+    function openEditModal(plan) {
+        document.getElementById('editPlanId').value = plan.id;
+        document.getElementById('editCode').value = plan.code;
+        document.getElementById('editName').value = plan.name;
+        document.getElementById('editDescription').value = plan.description || '';
+        document.getElementById('editMaxUsers').value = plan.max_users || '';
+        document.getElementById('editStorage').value = plan.max_storage_gb;
+        document.getElementById('editSupport').value = plan.support_level || 'BASIC';
+
+        document.getElementById('editModal').style.display = 'flex';
+    }
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    // API Calls
+    async function createPlan(e) {
+        e.preventDefault();
+        const payload = {
+            code: document.getElementById('createCode').value.toUpperCase(),
+            name: document.getElementById('createName').value,
+            description: document.getElementById('createDescription').value,
+            max_users: document.getElementById('createMaxUsers').value ? parseInt(document.getElementById('createMaxUsers').value) : null,
+            max_storage_gb: parseInt(document.getElementById('createStorage').value),
+            suppor_level: document.getElementById('createSupport').value,
+            environment_type: "PRODUCTION" // Default
+        };
+
+        try {
+            const res = await fetch('/api/v1/master/plans/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'No se pudo crear el plan'));
+            }
+        } catch (err) {
+            alert('Error de conexión');
+        }
+    }
+
+    async function savePlan(e) {
+        e.preventDefault();
+        const planId = document.getElementById('editPlanId').value;
+        const payload = {
+            name: document.getElementById('editName').value,
+            description: document.getElementById('editDescription').value,
+            max_users: document.getElementById('editMaxUsers').value ? parseInt(document.getElementById('editMaxUsers').value) : null,
+            max_storage_gb: parseInt(document.getElementById('editStorage').value),
+            support_level: document.getElementById('editSupport').value
+        };
+
+        try {
+            const res = await fetch(`/api/v1/master/plans/${planId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'No se pudo actualizar el plan'));
+            }
+        } catch (err) {
+            alert('Error de conexión');
+        }
+    }
+
+    async function toggleStatus(planId, isActive) {
+        if (!confirm(`¿Seguro que deseas ${isActive ? 'activar' : 'desactivar'} este plan?`)) return;
+
+        try {
+            const res = await fetch(`/api/v1/master/plans/${planId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_active: isActive })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'No se pudo cambiar el estado'));
+            }
+        } catch (err) {
+            alert('Error de conexión');
+        }
+    }
+</script>
+{% endblock %}

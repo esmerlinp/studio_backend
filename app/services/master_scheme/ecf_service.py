@@ -1,8 +1,8 @@
 from app import db
 from app.models.master_scheme.ncf_model import NCFLog
-from ..utils.ecf.xml_builder import ECFBuilder
-from ..utils.ecf.signer import ECFSigner
-from ..utils.ecf.dgii_client import DGIIClient
+from app.utils.ecf.xml_builder import ECFBuilder
+from app.utils.ecf.signer import ECFSigner
+from app.utils.ecf.dgii_client import DGIIClient
 import os
 
 class ECFService:

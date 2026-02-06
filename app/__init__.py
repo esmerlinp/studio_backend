@@ -14,7 +14,8 @@ from app.models.master_scheme.user_roles_model import UserRole
 from app.models.master_scheme.roles_model import Role
 from datetime import datetime, timezone
 from werkzeug.middleware.proxy_fix import ProxyFix
-from flask import g, request
+from flask import g, request, redirect
+from sqlalchemy import select, text
 from app.errors import register_error_handlers
 from app.utils import i18n
 
@@ -40,7 +41,12 @@ def create_app():
     
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
     
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")  # cámbiala por una segura
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+    app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies"]
+    app.config["JWT_COOKIE_SECURE"] = os.getenv("FLASK_ENV") != "development"
+    app.config["JWT_ACCESS_COOKIE_PATH"] = "/"
+    app.config["JWT_REFRESH_COOKIE_PATH"] = "/"
+    app.config["JWT_COOKIE_CSRF_PROTECT"] = False # Simplified for now, consider enabling later
     
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -206,27 +212,31 @@ def require_role(role_codes:list[str]):
                 if role_codes is None or len(role_codes) == 0:
                     return fn(*args, **kwargs)
                 
-                # Obtener los roles válidos desde la tabla Role
-                valid_roles = (
-                    db.session.query(Role.id)
-                    .filter(Role.code.in_(role_codes), Role.is_active == True)
-                    .subquery()
-                )
-
-                # Verificar si el usuario tiene al menos uno de esos roles
-                has_role = (
-                    db.session.query(UserRole)
-                    .filter(
-                        UserRole.user_id == user_id,
-                        UserRole.role_id.in_(valid_roles)
+                try:
+                    # Obtener los roles válidos desde la tabla Role
+                    valid_roles_stmt = select(Role.id).where(Role.code.in_(role_codes), Role.is_active == True).scalar_subquery()
+                    
+                    # Verificar si el usuario tiene al menos uno de esos roles
+                    has_role = (
+                        db.session.query(UserRole)
+                        .filter(
+                            UserRole.user_id == user_id,
+                            UserRole.role_id.in_(valid_roles_stmt)
+                        )
+                        .first()
                     )
-                    .first()
-                )
 
-                if not has_role:
-                    roles_str = ', '.join(role_codes)
-                    msg = i18n._("auth.insufficient_permissions") % {'roles': roles_str}
-                    return error(msg, 403)
+                    if not has_role:
+                        roles_str = ', '.join(role_codes)
+                        msg = i18n._("auth.insufficient_permissions") % {'roles': roles_str}
+                        if request.path.startswith('/api/'):
+                            return error(msg, 403)
+                        return redirect('/') # Or a specific forbidden page
+
+                except Exception as e:
+                    db.session.rollback()
+                    app.logger.error(f"Error en require_role: {str(e)}")
+                    return error(i18n._("system.error_processing_permissions"), 500)
 
                 return fn(*args, **kwargs)
             return wrapper

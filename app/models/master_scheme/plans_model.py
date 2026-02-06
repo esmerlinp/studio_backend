@@ -27,6 +27,13 @@ class Plan(db.Model):
     is_active = db.Column("bactivo", db.Boolean, default=True, nullable=False)
     created_at = db.Column("dcreacion", db.DateTime, default=datetime.utcnow, nullable=False)
 
+    # 🔗 Relación con Lista de Precios
+    price_lists = db.relationship(
+        "PriceList",
+        back_populates="plan",
+        lazy=True
+    )
+
     def __repr__(self):
         return f"<Plan {self.code}>"
 

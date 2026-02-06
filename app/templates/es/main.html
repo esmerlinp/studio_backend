@@ -6,215 +6,456 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Akdmia | Gestión Educativa de Nueva Generación</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z'/></svg>">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+        :root {
+            --stripe-blue: #635bff;
+            --stripe-dark: #0a2540;
+            --stripe-slate: #424770;
+            --stripe-light: #adbdcc;
         }
 
-        @keyframes gradient-move {
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--stripe-slate);
+            overflow-x: hidden;
+            background-color: #ffffff;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Stripe Canvas Background Section */
+        .hero-section {
+            position: relative;
+            background-color: #fff;
+            padding-top: 160px;
+            padding-bottom: 180px;
+            overflow: hidden;
+        }
+
+        .hero-canvas {
+            position: absolute;
+            top: -50%;
+            left: 0;
+            width: 100%;
+            height: 150%;
+            background: linear-gradient(150deg, #53f 15%, #05d5ff 70%, #a6ffcb 94%);
+            transform: skewY(-12deg);
+            transform-origin: 0;
+            z-index: 1;
+        }
+
+        .hero-canvas span {
+            position: absolute;
+            height: 190px;
+        }
+
+        .hero-canvas span:nth-child(1) {
+            width: 33.33333%;
+            left: -16.66666%;
+            background: #53f;
+            bottom: auto;
+            top: 0;
+        }
+
+        .hero-canvas span:nth-child(2) {
+            width: 33.33333%;
+            left: 16.66666%;
+            background: #4553ff;
+            bottom: 0;
+            top: auto;
+        }
+
+        .hero-canvas span:nth-child(3) {
+            width: 33.33333%;
+            left: 49.99999%;
+            background: #4f40ff;
+            bottom: auto;
+            top: 0;
+        }
+
+        .hero-canvas span:nth-child(4) {
+            width: 33.33333%;
+            left: 83.33332%;
+            background: #25ddf5;
+            bottom: auto;
+            top: 0;
+        }
+
+        @keyframes mesh-animation {
             0% {
-                background-position: 0% 50%;
+                transform: translate(0, 0) scale(1);
             }
 
-            50% {
-                background-position: 100% 50%;
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
             }
 
             100% {
-                background-position: 0% 50%;
+                transform: translate(0, 0) scale(1);
             }
         }
 
-        .animated-mesh {
-            background: linear-gradient(-45deg, #6366f1, #a855f7, #ec4899, #3b82f6);
-            background-size: 400% 400%;
-            animation: gradient-move 15s ease infinite;
+        .mesh-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+            z-index: 0;
+            opacity: 0.1;
         }
 
         .glass-nav {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
-        .btn-stripe {
-            transition: all 0.2s ease;
+        .btn-modern {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 24px;
+            font-weight: 600;
+            border-radius: 9999px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background-color: var(--stripe-blue);
+            color: white;
             box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
-        .btn-stripe:hover {
+        .btn-primary:hover {
             transform: translateY(-2px);
+            background-color: #7b73ff;
             box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-secondary {
+            background-color: var(--stripe-dark);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            background-color: #1a3a5a;
+        }
+
+        .stripe-card {
+            background: white;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgba(50, 50, 93, .1), 0 5px 15px rgba(0, 0, 0, .07);
+        }
+
+        .stripe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 18px 35px rgba(50, 50, 93, .1), 0 8px 15px rgba(0, 0, 0, .1);
+        }
+
+        .skew-section {
+            transform: skewY(-6deg);
+            margin-top: -100px;
+            padding-top: 100px;
+        }
+
+        .unskew-content {
+            transform: skewY(6deg);
+        }
+
+        .animation-delay-200 {
+            animation-delay: 0.2s;
+        }
+
+        .animation-delay-400 {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
 </head>
 
-<body class="bg-white text-[#424770]">
+<body class="bg-white">
 
-    <header class="fixed w-full z-[100] glass-nav border-b border-slate-100">
-        <nav class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="#6366f1" class="transform -rotate-12">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z" />
-                </svg>
-                <span class="text-xl font-bold tracking-tight text-[#0a2540]">Akdmia</span>
+    <header class="fixed w-full z-[100] glass-nav">
+        <nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3 group cursor-pointer">
+                <div class="bg-indigo-600 p-1.5 rounded-lg transform transition-transform group-hover:rotate-12">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z" />
+                    </svg>
+                </div>
+                <span class="text-2xl font-bold tracking-tight text-[#0a2540]">Akdmia</span>
             </div>
-            <div class="hidden md:flex space-x-8 font-semibold text-sm">
-                <a href="#precios" class="hover:text-[#0a2540] transition">Planes</a>
-                <a href="#contacto" class="hover:text-[#0a2540] transition">Contacto</a>
+
+            <div class="hidden md:flex space-x-10 font-medium text-[15px]">
+                <a href="#precios" class="text-var(--stripe-slate) hover:text-indigo-600 transition-colors">Planes</a>
+                <a href="#contacto"
+                    class="text-var(--stripe-slate) hover:text-indigo-600 transition-colors">Contacto</a>
+                <a href="/login" class="text-var(--stripe-slate) hover:text-indigo-600 transition-colors">Iniciar
+                    Sesión</a>
             </div>
-            <div class="flex items-center gap-4">
-                <a href="#contacto" class="btn-stripe bg-[#6366f1] text-white px-5 py-2 rounded-full text-sm font-bold">
-                    Registrarse
+
+            <div class="flex items-center">
+                <a href="#contacto" class="btn-modern btn-primary text-sm">
+                    Empezar ahora
                 </a>
             </div>
         </nav>
     </header>
 
-    <section class="relative pt-48 pb-32 overflow-hidden">
-        <div class="absolute inset-0 animated-mesh opacity-10 blur-3xl"></div>
-        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 relative z-10 text-center lg:text-left">
-            <div>
-                <h1 class="text-5xl md:text-7xl font-extrabold text-[#0a2540] leading-tight tracking-tight mb-8">
-                    El sistema operativo de tu <span class="text-[#6366f1]">colegio</span>
+    <section class="hero-section">
+        <div class="hero-canvas">
+            <span></span><span></span><span></span><span></span>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="max-w-3xl animate-fade-up">
+                <h1 class="text-6xl md:text-8xl font-bold text-white leading-[1.1] tracking-tight mb-8">
+                    Infraestructura financiera para el <span class="text-cyan-300">sector educativo</span>
                 </h1>
-                <p class="text-xl text-[#424770] leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0">
-                    Akdmia unifica la gestión académica, administrativa y financiera en una sola plataforma.
+                <p class="text-xl md:text-2xl text-white/90 leading-relaxed mb-12 max-w-xl font-light">
+                    Akdmia unifica la gestión académica, administrativa y financiera en una sola plataforma diseñada
+                    para colegios de alto rendimiento.
                 </p>
-                <div class="flex flex-wrap justify-center lg:justify-start gap-4">
-                    <a href="#contacto"
-                        class="btn-stripe bg-[#0a2540] text-white px-8 py-3.5 rounded-full font-bold text-lg">
-                        Empezar ahora →
+                <div class="flex flex-wrap gap-5">
+                    <a href="#contacto" class="btn-modern btn-secondary text-lg px-8 py-4">
+                        Empezar ahora <span class="ml-2">→</span>
+                    </a>
+                    <a href="#precios"
+                        class="btn-modern bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm text-lg px-8 py-4 transition-all">
+                        Ver planes
                     </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="precios" class="py-32 bg-[#f6f9fc]">
-        <div class="max-w-7xl mx-auto px-6 text-center mb-16">
-            <h2 class="text-[#6366f1] font-bold mb-4 uppercase tracking-wider text-sm">Planes</h2>
-            <h3 class="text-4xl font-extrabold text-[#0a2540] mb-8">Escalabilidad sin límites.</h3>
+    <div class="bg-[#f6f9fc] skew-section pb-32">
+        <div class="unskew-content max-w-7xl mx-auto px-6">
+            <section id="precios" class="py-20">
+                <div class="text-center mb-20 animate-fade-up">
+                    <h2 class="text-indigo-600 font-bold mb-4 uppercase tracking-[0.2em] text-xs">Precios y Planes</h2>
+                    <h3 class="text-4xl md:text-5xl font-bold text-[#0a2540] mb-8">Escalabilidad que acompaña tu
+                        crecimiento.</h3>
 
-            <div class="flex justify-center items-center gap-4">
-                <span id="monthly-label" class="text-sm font-medium transition-colors">Mensual</span>
-                <button onclick="toggleBilling()"
-                    class="w-14 h-7 bg-[#6366f1] rounded-full p-1 relative transition-all duration-300">
-                    <div id="toggle-circle"
-                        class="bg-white w-5 h-5 rounded-full shadow-md transition-transform duration-300 transform translate-x-7">
+                    <div
+                        class="flex justify-center items-center gap-6 bg-slate-100/50 p-1 rounded-full w-fit mx-auto mt-10">
+                        <button id="btn-monthly" onclick="setBilling('MONTHLY')"
+                            class="px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300">
+                            Mensual
+                        </button>
+                        <button id="btn-annual" onclick="setBilling('ANNUAL')"
+                            class="px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300 relative">
+                            Anual
+                            <span
+                                class="absolute -top-4 -right-2 bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full">-15%</span>
+                        </button>
                     </div>
-                </button>
-                <span id="annual-label" class="text-sm font-bold text-[#0a2540] transition-colors">Anual <span
-                        class="text-emerald-500 font-bold ml-1">(-15%)</span></span>
-            </div>
+                </div>
+
+                <div id="plans-container"
+                    class="grid grid-cols-1 md:grid-cols-3 gap-10 mt-16 animate-fade-up animation-delay-200">
+                    <!-- Los planes se cargan dinámicamente -->
+                </div>
+            </section>
         </div>
+    </div>
 
-        <div id="plans-container" class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-        </div>
-    </section>
+    <section id="contacto" class="py-32 bg-[#0a2540] relative overflow-hidden">
+        <div class="mesh-gradient absolute inset-0"></div>
 
-    <section id="contacto" class="py-32 bg-[#0a2540] text-white">
-        <div class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
-            <div>
-                <h2 class="text-5xl font-extrabold mb-8 leading-tight">Comienza a digitalizar hoy.</h2>
-                <p class="text-slate-400 text-xl mb-12">Configura tu cuenta y obtén acceso inmediato a las herramientas
-                    de gestión académica.</p>
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-24 items-center relative z-10">
+            <div class="animate-fade-up">
+                <h2 class="text-5xl md:text-6xl font-bold text-white mb-8 leading-tight">Empieza a digitalizar tu
+                    institución hoy mismo.</h2>
+                <p class="text-slate-400 text-xl font-light mb-12">Únete a cientos de instituciones que ya confían en
+                    Akdmia para potenciar su excelencia educativa y operativa.</p>
+
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 text-white/80">
+                        <div
+                            class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                            ✓</div>
+                        <span>Configuración en menos de 24 horas</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-white/80">
+                        <div
+                            class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                            ✓</div>
+                        <span>Soporte técnico prioritario 24/7</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-white/80">
+                        <div
+                            class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                            ✓</div>
+                        <span>Migración de datos incluida</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-3xl text-[#0a2540]">
-                <form id="onboard-form" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+            <div class="bg-white p-10 md:p-14 rounded-2xl shadow-3xl animate-fade-up animation-delay-200">
+                <form id="onboard-form" class="space-y-8 text-[#0a2540]">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="md:col-span-2">
                             <label
-                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Institución
+                                class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Institución
                                 / Razón Social</label>
                             <input type="text" id="business_name" required
-                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition"
-                                placeholder="Nombre del Colegio">
+                                class="w-full border-b border-slate-200 pb-3 focus:border-indigo-600 outline-none transition-colors placeholder:text-slate-300 text-lg"
+                                placeholder="Nombre completo del colegio">
                         </div>
 
-                        <div class="col-span-1">
-                            <label
-                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Nombre
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Nombre
                                 Admin</label>
                             <input type="text" id="first_name" required
-                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition"
-                                placeholder="Nombre">
+                                class="w-full border-b border-slate-200 pb-3 focus:border-indigo-600 outline-none transition-colors placeholder:text-slate-300 text-lg"
+                                placeholder="Ej. Juan">
                         </div>
 
-                        <div class="col-span-1">
+                        <div>
                             <label
-                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Apellido
+                                class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Apellido
                                 Admin</label>
                             <input type="text" id="last_name" required
-                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition"
-                                placeholder="Apellido">
+                                class="w-full border-b border-slate-200 pb-3 focus:border-indigo-600 outline-none transition-colors placeholder:text-slate-300 text-lg"
+                                placeholder="Ej. Pérez">
                         </div>
 
-                        <div class="col-span-1">
+                        <div>
                             <label
-                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">WhatsApp</label>
+                                class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">WhatsApp</label>
                             <input type="tel" id="contact_phone" required
-                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition"
+                                class="w-full border-b border-slate-200 pb-3 focus:border-indigo-600 outline-none transition-colors placeholder:text-slate-300 text-lg"
                                 placeholder="809-000-0000">
                         </div>
 
-                        <div class="col-span-1">
-                            <label
-                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Email
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Email
                                 Corporativo</label>
                             <input type="email" id="email" required
-                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition"
+                                class="w-full border-b border-slate-200 pb-3 focus:border-indigo-600 outline-none transition-colors placeholder:text-slate-300 text-lg"
                                 placeholder="admin@colegio.com">
                         </div>
 
                         <div class="md:col-span-2">
-                            <label
-                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">País
-                                de Facturación</label>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">País de
+                                Facturación</label>
                             <select id="country_id_select" required
-                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none bg-transparent">
+                                class="w-full border-b border-slate-200 pb-3 focus:border-indigo-600 outline-none bg-transparent appearance-none text-lg">
                                 <option value="">Cargando países...</option>
                             </select>
-                            <p id="tax-notice" class="text-[9px] text-emerald-600 mt-1 hidden font-bold">✓ Se aplicará
-                                ITBIS (18%) por residencia en RD</p>
+                            <p id="tax-notice"
+                                class="text-[11px] text-emerald-600 mt-2 hidden font-bold flex items-center gap-1">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                </svg>
+                                Se aplicará ITBIS (18%) por residencia en RD
+                            </p>
                         </div>
 
                         <div class="md:col-span-2">
-                            <label
-                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Plan</label>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Plan
+                                Seleccionado</label>
                             <select id="plan_id_select" required
-                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none bg-transparent">
+                                class="w-full border-b border-slate-200 pb-3 focus:border-indigo-600 outline-none bg-transparent appearance-none text-lg">
                                 <option value="">Selecciona un plan arriba</option>
                             </select>
                         </div>
-
                     </div>
+
                     <button type="submit" id="submit-btn"
-                        class="w-full btn-stripe bg-[#6366f1] text-white py-4 rounded-2xl font-bold text-lg mt-4">
+                        class="w-full btn-modern btn-primary py-5 text-xl tracking-tight shadow-xl">
                         Empezar ahora
                     </button>
-                    <p class="text-center text-[10px] text-slate-400 tracking-widest uppercase mt-4">Tarjeta de crédito
-                        requerida para iniciar</p>
+
+                    <div class="text-center">
+                        <p class="text-[10px] text-slate-400 tracking-widest uppercase mb-4">Mantenemos tus datos
+                            seguros</p>
+                        <div class="flex justify-center gap-4 opacity-50 grayscale">
+                            <img src="https://img.icons8.com/color/48/000000/visa.png" class="h-6" alt="Visa">
+                            <img src="https://img.icons8.com/color/48/000000/mastercard.png" class="h-6"
+                                alt="Mastercard">
+                            <img src="https://img.icons8.com/color/48/000000/stripe.png" class="h-6" alt="Stripe">
+                        </div>
+                    </div>
                 </form>
 
                 <div id="success-msg" class="hidden text-center py-10">
                     <div
-                        class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
-                        ✓</div>
-                    <h3 class="text-2xl font-bold mb-3 text-[#0a2540]">¡Gracias por unirte a nosotros!</h3>
-                    <p class="text-slate-500">
-                        Estamos emocionados de ayudarte a transformar tu colegio. Revisa tu email para validar tu cuenta
-                        y dar el siguiente paso.
+                        class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-4 text-[#0a2540]">¡Paso completado!</h3>
+                    <p class="text-slate-500 text-lg leading-relaxed">
+                        Excelente elección. Revisa tu bandeja de entrada para verificar tu email y configurar tu
+                        institución.
                     </p>
                 </div>
             </div>
         </div>
     </section>
+
+    <footer class="bg-white py-20 border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
+            <div class="flex items-center gap-3">
+                <div class="bg-slate-100 p-1 rounded-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#0a2540">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z" />
+                    </svg>
+                </div>
+                <span class="text-xl font-bold tracking-tight text-[#0a2540]">Akdmia</span>
+                <span class="text-sm text-slate-400 ml-4">© 2024 Akdmia Inc.</span>
+            </div>
+
+            <div class="flex gap-8 text-sm font-medium text-slate-500">
+                <a href="#" class="hover:text-indigo-600 transition-colors">Privacidad</a>
+                <a href="#" class="hover:text-indigo-600 transition-colors">Términos</a>
+                <a href="#" class="hover:text-indigo-600 transition-colors">Estado</a>
+            </div>
+        </div>
+    </footer>
 
     <script>
         let plansData = [];
@@ -226,10 +467,9 @@
                 const json = await res.json();
                 if (json.success) {
                     plansData = json.data;
-                    renderPlans();
+                    setBilling('ANNUAL');
                 }
 
-                // NUEVO: Carga de Países
                 const resCountries = await fetch("/api/v1/master/countries");
                 const jsonCountries = await resCountries.json();
                 if (jsonCountries.success) {
@@ -238,12 +478,10 @@
 
                     jsonCountries.data.forEach(country => {
                         const opt = new Option(country.name, country.id);
-                        // Guardamos el ISO para la lógica de impuestos visual
                         opt.setAttribute('data-iso', country.iso_code);
                         countrySelect.add(opt);
                     });
 
-                    // Listener para mostrar aviso de ITBIS
                     countrySelect.addEventListener('change', (e) => {
                         const selectedIso = e.target.options[e.target.selectedIndex].getAttribute('data-iso');
                         const notice = document.getElementById('tax-notice');
@@ -257,22 +495,19 @@
             } catch (e) { console.error("Error cargando datos iniciales", e); }
         }
 
-        function toggleBilling() {
-            currentBillingCycle = currentBillingCycle === 'ANNUAL' ? 'ANNUAL' : 'MONTHLY';
-            const circle = document.getElementById('toggle-circle');
-            const monthlyLabel = document.getElementById('monthly-label');
-            const annualLabel = document.getElementById('annual-label');
+        function setBilling(cycle) {
+            currentBillingCycle = cycle;
+            const btnMonthly = document.getElementById('btn-monthly');
+            const btnAnnual = document.getElementById('btn-annual');
 
-            if (currentBillingCycle === 'ANNUAL') {
-                circle.classList.add('translate-x-7');
-                circle.classList.remove('translate-x-0');
-                annualLabel.classList.add('text-[#0a2540]', 'font-bold');
-                monthlyLabel.classList.remove('text-[#0a2540]', 'font-bold');
+            if (cycle === 'ANNUAL') {
+                btnAnnual.classList.add('bg-white', 'shadow-sm', 'text-indigo-600');
+                btnMonthly.classList.remove('bg-white', 'shadow-sm', 'text-indigo-600');
+                btnMonthly.classList.add('text-slate-500');
             } else {
-                circle.classList.add('translate-x-0');
-                circle.classList.remove('translate-x-7');
-                monthlyLabel.classList.add('text-[#0a2540]', 'font-bold');
-                annualLabel.classList.remove('text-[#0a2540]', 'font-bold');
+                btnMonthly.classList.add('bg-white', 'shadow-sm', 'text-indigo-600');
+                btnAnnual.classList.remove('bg-white', 'shadow-sm', 'text-indigo-600');
+                btnAnnual.classList.add('text-slate-500');
             }
             renderPlans();
         }
@@ -293,40 +528,59 @@
                 const isStandard = plan.code === 'STANDARD';
 
                 container.innerHTML += `
-                    <div class="group border-t-4 ${isStandard ? 'border-[#6366f1]' : 'border-slate-200'} bg-white p-8 rounded-b-2xl shadow-sm hover:shadow-2xl transition-all relative">
-                        ${isTrial ? `<div class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-sm">${trialDays} DÍAS GRATIS</div>` : ''}
+                    <div class="stripe-card p-10 flex flex-col h-full relative overflow-hidden">
+                        ${isTrial ? `<div class="absolute top-0 right-0 bg-indigo-100 text-indigo-600 text-[10px] font-bold px-4 py-1.5 rounded-bl-lg">${trialDays} DÍAS GRATIS</div>` : ''}
                         
-                        <h4 class="text-lg font-bold text-[#0a2540] mb-2">${plan.name}</h4>
-                        <div class="text-4xl font-extrabold text-[#0a2540] mb-4">
-                            $${priceObj.price}
-                            <span class="text-sm font-normal text-slate-400">/${currentBillingCycle === 'ANNUAL' ? 'año' : 'mes'}</span>
-                        </div>
-                        <p class="text-sm text-slate-500 mb-6 min-h-[40px]">${plan.description}</p>
-                        
-                        <div class="space-y-6 mb-8">
-                            <div>
-                                <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Capacidad</span>
-                                <ul class="mt-2 text-sm text-[#424770] space-y-1">
-                                    <li>• <strong>${config.limits.max_users}</strong> Usuarios Staff</li>
-                                    <li>• <strong>${config.limits.max_students}</strong> Alumnos</li>
-                                    <li>• <strong>${config.limits.max_storage_gb}GB</strong> Disco</li>
-                                </ul>
+                        <div class="flex-grow">
+                            <h4 class="text-indigo-600 font-bold text-xs uppercase tracking-widest mb-6">${plan.name}</h4>
+                            <div class="flex items-baseline gap-1 mb-6">
+                                <span class="text-5xl font-bold text-[#0a2540]">$${priceObj.price}</span>
+                                <span class="text-slate-400 font-medium">USD/${currentBillingCycle === 'ANNUAL' ? 'año' : 'mes'}</span>
                             </div>
-                            <div>
-                                <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Módulos Incluidos</span>
-                                <ul class="mt-2 text-sm text-[#424770] space-y-1">
-                                    ${config.modules.map(mod => `<li class="flex items-center gap-2">✓ ${mod.replace('_', ' ')}</li>`).join('')}
-                                </ul>
+                            <p class="text-slate-500 mb-10 leading-relaxed font-light">${plan.description}</p>
+                            
+                            <div class="space-y-6 pt-6 border-t border-slate-50">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Capacidad</span>
+                                    <ul class="mt-4 space-y-3">
+                                        <li class="flex items-center gap-3 text-sm">
+                                            <svg width="14" height="14" class="text-emerald-500" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            <strong>${config.limits.max_users}</strong> Usuarios Staff
+                                        </li>
+                                        <li class="flex items-center gap-3 text-sm">
+                                            <svg width="14" height="14" class="text-emerald-500" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            <strong>${config.limits.max_students}</strong> Alumnos
+                                        </li>
+                                        <li class="flex items-center gap-3 text-sm">
+                                            <svg width="14" height="14" class="text-emerald-500" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            <strong>${config.limits.max_storage_gb}GB</strong> Disco
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Incluye</span>
+                                    <ul class="mt-4 space-y-2">
+                                        ${config.modules.slice(0, 4).map(mod => `
+                                            <li class="flex items-center gap-3 text-sm text-slate-500">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                                                ${mod.replace('_', ' ')}
+                                            </li>
+                                        `).join('')}
+                                        ${config.modules.length > 4 ? `<li class="text-[11px] text-indigo-400 font-bold ml-4.5 mt-2">+ todos los módulos base</li>` : ''}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
 
-                        <button onclick="preselectPlan(${plan.id}, ${priceObj.id})" class="w-full bg-slate-100 text-[#0a2540] py-3 rounded-xl font-bold group-hover:bg-[#6366f1] group-hover:text-white transition-all">
+                        <button onclick="preselectPlan(${plan.id}, ${priceObj.id})" 
+                            class="w-full mt-10 py-3 rounded-full font-bold transition-all text-sm
+                            ${isStandard ? 'bg-indigo-600 text-white shadow-lg hover:bg-indigo-700' : 'bg-slate-50 text-indigo-600 hover:bg-indigo-50'}">
                             ${isTrial ? 'Empezar prueba gratis' : 'Elegir Plan'}
                         </button>
                     </div>
                 `;
 
-                const optLabel = `${plan.name} - $${priceObj.price} (${currentBillingCycle}) ${isTrial ? '[Trial ' + trialDays + 'd]' : ''}`;
+                const optLabel = `${plan.name} - $${priceObj.price} USD (${currentBillingCycle === 'ANNUAL' ? 'Anual' : 'Mensual'})`;
                 const opt = new Option(optLabel, plan.id);
                 opt.setAttribute('data-price-id', priceObj.id);
                 select.add(opt);
@@ -347,12 +601,12 @@
             const priceId = select.options[select.selectedIndex]?.getAttribute('data-price-id') || select.getAttribute('data-selected-price-id');
 
             if (!priceId) {
-                alert("Por favor selecciona un plan válido.");
+                alert("Por favor selecciona un plan.");
                 return;
             }
 
             btn.disabled = true;
-            btn.innerHTML = 'Procesando registro...';
+            btn.innerHTML = '<span class="flex items-center gap-3 justify-center"><svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Procesando...</span>';
 
             const payload = {
                 client_data: {
@@ -383,7 +637,7 @@
                     document.getElementById('onboard-form').classList.add('hidden');
                     document.getElementById('success-msg').classList.remove('hidden');
                     if (data.checkout_url) {
-                        setTimeout(() => window.location.href = data.checkout_url, 1200);
+                        setTimeout(() => window.location.href = data.checkout_url, 1500);
                     }
                 } else {
                     alert("Error: " + (data.msg || "Verifica los datos"));
@@ -391,7 +645,7 @@
                     btn.innerText = 'Empezar ahora';
                 }
             } catch (err) {
-                alert("Error de red");
+                alert("Error de conexión");
                 btn.disabled = false;
                 btn.innerText = 'Empezar ahora';
             }

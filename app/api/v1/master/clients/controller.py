@@ -5,7 +5,8 @@ from app.services.master_scheme.client_service import (get_client_preferences, g
                                                        onboard_client_service, storage_info, 
                                                        create_client, get_clients,
                                                        get_client_by_id, get_client_payment_orders,
-                                                       request_scheme_deletion, cancel_scheme_deletion, process_scheduled_deletions)
+                                                       request_scheme_deletion, cancel_scheme_deletion, process_scheduled_deletions,
+                                                       update_client_details, toggle_client_active_status)
 
 from app.services.master_scheme.user_client_service import get_client_by_user   
 from app.services.master_scheme.client_plan_service import get_active_client_plan, assign_plan_to_client, change_client_plan, get_client_plan_history
@@ -52,7 +53,7 @@ def get_my_payments():
 #     user_id = get_jwt_identity()  
 #     data = get_client_by_user(user_id=user_id)
 #     payments = get_client_payment_orders(data.clientId)
-    
+#     
 #     return success(data=[d.to_dict() for d in payments])
 
 @jwt_required()
@@ -328,5 +329,35 @@ def trigger_cleanup():
     try:
         results = process_scheduled_deletions()
         return success(data=results, message="Cleanup process executed")
+    except Exception as e:
+        return error(str(e), 500)
+
+@jwt_required()
+@track_activity
+@require_role([r.ROOT, r.SYS_ADMIN])
+def update_client(clientId):
+    try:
+        data = request.get_json()
+        client = update_client_details(client_id=clientId, data=data)
+        return success(data=client.to_dict(), message=i18n._("msg.client.updated"))
+    except ValueError as e:
+        return error(str(e), 400)
+    except Exception as e:
+        return error(str(e), 500)
+
+@jwt_required()
+@track_activity
+@require_role([r.ROOT, r.SYS_ADMIN])
+def toggle_client_status(clientId):
+    try:
+        data = request.get_json()
+        is_active = data.get('is_active')
+        if is_active is None:
+            return error("is_active is required", 400)
+            
+        client = toggle_client_active_status(client_id=clientId, is_active=is_active)
+        return success(data=client.to_dict(), message=i18n._("msg.client.status_updated"))
+    except ValueError as e:
+        return error(str(e), 400)
     except Exception as e:
         return error(str(e), 500)

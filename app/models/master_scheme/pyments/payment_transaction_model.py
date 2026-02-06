@@ -25,7 +25,7 @@ class PaymentTransaction(db.Model):
     paymentDate = db.Column("dfechapago", db.DateTime(timezone=True))
     
     # NUEVO: Referencia directa a la suscripción para evitar búsquedas en JSONB
-    subscriptionId = db.Column("ssubscripcion_id", db.String(255), index=True)
+    # subscriptionId = db.Column("ssubscripcion_id", db.String(255), index=True)
     
     rawResponse = db.Column("jrespuesta_pasarela", JSONB) 
     

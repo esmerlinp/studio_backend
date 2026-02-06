@@ -5,6 +5,7 @@ from datetime import datetime
 from app.exceptions import AuditedError
 from app import log_action
 from app.utils.responses import error
+from app.extensions import db
 from app.utils.types import ActionType
 from app.utils import i18n
 
@@ -28,6 +29,7 @@ def register_error_handlers(app):
     
     @app.errorhandler(AuditedError)
     def handle_audited_error(e):
+        db.session.rollback()
         logging.warning(f"AuditedError: {e} | User: {g.get('user_id')}")
         # 1. Registrar en la tabla de auditoría (DB)
         # Usamos los datos que vienen dentro de la excepción
@@ -54,6 +56,7 @@ def register_error_handlers(app):
     @app.errorhandler(Exception)
     def handle_exception(e):
         """Captura cualquier error no controlado (500)"""
+        db.session.rollback()
         # 1. Extraemos el traceback completo para el log
         error_details = traceback.format_exc()
         
@@ -62,8 +65,8 @@ def register_error_handlers(app):
                 action=ActionType.ERROR,
                 resource_type=request.method,
                 description=f"{i18n._('audit.operation_failed')}: {e}\n {i18n._('common.user')}: {getattr(g, 'user_id', 'Anónimo')}",
-                new_values={error_details},
-                status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
+                new_values={"traceback": error_details},
+                status="ERROR"
             )
         else:
             log_msg = (
@@ -95,8 +98,8 @@ def register_error_handlers(app):
                 action=ActionType.ERROR,
                 resource_type=request.method,
                 description=f"{i18n._('audit.operation_failed')}: {e}\n {i18n._('common.user')}: {getattr(g, 'user_id', 'Anónimo')}",
-                new_values={error_details},
-                status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
+                new_values={"traceback": error_details},
+                status="ERROR"
             )
         else:
             logging.warning(f"Validación fallida: {str(e)} en {request.url}")
@@ -120,8 +123,8 @@ def register_error_handlers(app):
                 action=ActionType.ERROR,
                 resource_type=request.method,
                 description=f"{log_desc}: {str(e)} en {request.url}\n {i18n._('common.user')}: {getattr(g, 'user_id', 'Anónimo')}",
-                new_values={error_details},
-                status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
+                new_values={"traceback": error_details},
+                status="ERROR"
             )
         else:
             logging.warning(f"{log_desc}: {str(e)} en {request.url}")
@@ -143,8 +146,8 @@ def register_error_handlers(app):
                 action=ActionType.ERROR,
                 resource_type=request.method,
                 description=f"RuntimeError: {str(e)} en {request.url}\n {i18n._('common.user')}: {getattr(g, 'user_id', 'Anónimo')}",
-                new_values={error_details},
-                status="FAILED" # Puedes agregar un campo status a tu tabla de auditoría
+                new_values={"traceback": error_details},
+                status="ERROR"
             )
         else:
             logging.warning(f"RuntimeError: {str(e)} - {request.url}")

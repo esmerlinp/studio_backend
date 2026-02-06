@@ -69,6 +69,50 @@ def add_price_list():
 
     return success(data=data.to_dict())
 
-    
+@jwt_required()
+@track_activity
+@require_role([types.Roles.ROOT, types.Roles.SUPER_ADMIN])
+def update_price(price_id):
+    try:
+        data = request.get_json()
+        updated_price = price_list_service.update_price_list_service(price_id, data)
+        return success(data=updated_price.to_dict(), message=i18n._("msg.price.updated"))
+    except ValueError as e:
+        return error(str(e), 400)
+    except Exception as e:
+        return error(str(e), 500)
 
 
+@jwt_required()
+@track_activity
+@require_role([types.Roles.ROOT, types.Roles.SUPER_ADMIN])
+def update_plan_details(plan_id):
+    try:
+        data = request.get_json()
+        updated_plan = plan_service.update_plan(plan_id, **data)
+        if not updated_plan:
+             return error(i18n._("error.plan.not_found"), 404)
+        return success(data=updated_plan.to_dict(), message=i18n._("msg.plan.updated"))
+    except ValueError as e:
+        return error(str(e), 400)
+    except Exception as e:
+        return error(str(e), 500)
+
+@jwt_required()
+@track_activity
+@require_role([types.Roles.ROOT, types.Roles.SUPER_ADMIN])
+def toggle_plan_status(plan_id):
+    try:
+        data = request.get_json()
+        is_active = data.get('is_active')
+        if is_active is None:
+            return error("is_active is required", 400)
+            
+        updated_plan = plan_service.update_plan(plan_id, is_active=is_active)
+        if not updated_plan:
+             return error(i18n._("error.plan.not_found"), 404)
+             
+        action = "activated" if is_active else "deactivated"
+        return success(data=updated_plan.to_dict(), message=f"Plan {action} successfully")
+    except Exception as e:
+        return error(str(e), 500)

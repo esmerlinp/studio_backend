@@ -38,7 +38,7 @@ def log_action(
             try:
                 # get_jwt_identity() falla si se llama fuera de un contexto JWT protegido
                 # sin el parámetro optional=True en decoradores, pero aquí lo manejamos:
-                final_user_id = get_jwt_identity()
+                final_user_id = get_jwt_identity() or 0
             except Exception:
                 final_user_id = 0
 

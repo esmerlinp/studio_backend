@@ -1,5 +1,5 @@
 from flask import  request, jsonify, render_template
-from app import db
+from app import db, require_role
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -442,3 +442,12 @@ def cancel_subscription():
 
     except stripe.error.StripeError as e:
         return jsonify({"success": False, "msg": str(e)}), 400
+
+@jwt_required()
+@require_role([r.ROOT, r.SYS_ADMIN, r.OWNER, r.AUDITOR])
+def get_payment_detail(payment_id):
+    transaction = PaymentTransaction.query.get(payment_id)
+    if not transaction:
+        return error(i18n._('error.payment.not_found'), 404)
+        
+    return success(data=transaction.to_dict())

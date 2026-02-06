@@ -94,7 +94,7 @@ class PriceList(db.Model):
     # 🔗 Relación con Plan
     plan = db.relationship(
         "Plan",
-        backref=db.backref("price_lists", lazy=True)
+        back_populates="price_lists"
     )
 
     def __repr__(self):

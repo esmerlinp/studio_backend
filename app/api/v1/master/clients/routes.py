@@ -4,7 +4,8 @@ from app.api.v1.master.clients.controller import (get_client_preferences, new_cl
                                            get_all_clients, get_client, get_plan, 
                                            change_plan, get_client_plans, 
                                            get_client_payments, handle_export_data,
-                                           request_deletion, cancel_deletion, trigger_cleanup)
+                                           request_deletion, cancel_deletion, trigger_cleanup,
+                                           update_client, toggle_client_status)
 
 
 client_bp = Blueprint('clients', __name__, url_prefix='/api/v1/master/clients')
@@ -26,4 +27,5 @@ client_bp.post("/request-deletion")(request_deletion)
 client_bp.post("/cancel-deletion")(cancel_deletion)
 client_bp.post("/cleanup")(trigger_cleanup)
 
-
+client_bp.patch("/<int:clientId>")(update_client)
+client_bp.patch("/<int:clientId>/status")(toggle_client_status)

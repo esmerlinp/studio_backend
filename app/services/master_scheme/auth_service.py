@@ -1,6 +1,6 @@
 from flask import  request, jsonify, g
 from werkzeug.security import check_password_hash
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token, set_access_cookies, set_refresh_cookies, unset_jwt_cookies
 from datetime import timedelta, datetime
 from app.services.master_scheme.user_service import get_user_by_user_name_with_passwd, get_user_by_id, get_user_preferences, add_default_user_preferences
 from app.services.master_scheme.session_service import close_session, create_session, get_session_active_by_refresh_token
@@ -137,22 +137,25 @@ def login():
                 redirect_url=f"/billing/restore?clientId={clientId}&token={access_token}", 
                 status_code=403)               
 
-    
-    send_email_template(subject=i18n._("email.subject.login_notification"), 
-                        to=[user.email], 
-                        path_template=f"emails/{lang}/notification_login.html",
-                        app_name=app_name,
-                        nombre_usuario=user.firstName,
-                        ip_address=session_create.ipAddress,
-                        dispositivo=session_create.userAgent,
-                        fecha_hora=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
-                        email_usuario=user.email
-                        )
+    #TODO: Comentado por pruebas
+    # send_email_template(subject=i18n._("email.subject.login_notification"), 
+    #                     to=[user.email], 
+    #                     path_template=f"emails/{lang}/notification_login.html",
+    #                     app_name=app_name,
+    #                     nombre_usuario=user.firstName,
+    #                     ip_address=session_create.ipAddress,
+    #                     dispositivo=session_create.userAgent,
+    #                     fecha_hora=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+    #                     email_usuario=user.email
+    #                     )
     
     log_action(action=ActionType.LOGIN, resource_type=ResourceTypes.USER_SESSION,
                 resource_id=user.userId, description="Login successful", user_id=user.userId)
     
-    return success(data=response_data, message=i18n._("success.auth.login"), status_code=200)
+    response, status_code = success(data=response_data, message=i18n._("success.auth.login"), status_code=200)
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+    return response, status_code
 
 
 
@@ -165,7 +168,9 @@ def logout(user_id:int, sessionId:int):
     if sessionId != result.get("sessionId", 0):
         return error(i18n._("error.auth.session_not_found"), status_code=404)
         
-    return success(data={"sessionId": sessionId}, message="Logout successful", status_code=200) 
+    response, status_code = success(data={"sessionId": sessionId}, message="Logout successful", status_code=200) 
+    unset_jwt_cookies(response)
+    return response, status_code
 
 
 

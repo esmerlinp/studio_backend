@@ -1,0 +1,61 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'facturas' %}
+
+{% block title %}Facturas | Akdmia{% endblock %}
+
+{% block page_title %}Gestión de Facturación{% endblock %}
+{% block page_subtitle %}Consulta y administra las facturas generadas por el servicio.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Facturas Emitidas</h3>
+        <button class="nav-link active"
+            style="padding: 8px 16px; border:none; cursor:pointer; background: var(--primary); color: white;">
+            Descargar Reporte
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nº Factura</th>
+                    <th>Fecha Vencimiento</th>
+                    <th>Monto</th>
+                    <th>Impuestos</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr>
+                    <td style="font-weight: 600;">INV-{{ invoice.id }}-{{ invoice.internalReference[:4] }}</td>
+                    <td>-</td>
+                    <td class="price-text">${{ "{:,.2f}".format(invoice.amount) }}</td>
+                    <td style="color: var(--text-muted);">$0.00</td>
+                    <td>
+                        <span class="badge badge-success">Pagada</span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="badge"
+                                style="border: 1px solid var(--border); background: white; cursor: pointer;">PDF</button>
+                            <button class="badge"
+                                style="border: 1px solid var(--border); background: white; cursor: pointer;">Enviar</button>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        No hay facturas disponibles.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

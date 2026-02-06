@@ -1,0 +1,162 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'listas_precio' %}
+
+{% block title %}Listas de Precio | Akdmia{% endblock %}
+
+{% block page_title %}Tarifarios y Precios{% endblock %}
+{% block page_subtitle %}Gestión de precios por región o tipo de cliente.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Listas de Precios Activas</h3>
+        <button class="nav-link active"
+            style="padding: 8px 16px; border:none; cursor:pointer; background: var(--primary); color: white;">
+            + Nueva Lista
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Plan Relacionado</th>
+                    <th>Ref. Ciclo</th>
+                    <th>Precio</th>
+                    <th>Moneda</th>
+                    <th>Usuario Adicional</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for list in price_lists %}
+                <tr>
+                    <td style="color: var(--text-muted); font-size: 0.8rem;">#{{ list.id }}</td>
+                    <td style="font-weight: 600;">{{ list.plan_code }}</td>
+                    <td>{{ list.billing_cycle }}</td>
+                    <td class="price-text">${{ "{:,.2f}".format(list.price) }}</td>
+                    <td>{{ list.currency }}</td>
+                    <td>
+                        {% if list.price_per_user %}
+                        <span class="badge badge-success">Sí</span>
+                        {% else %}
+                        <span class="badge" style="background:var(--bg-body); color:var(--text-muted);">No</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if list.is_active %}
+                        <span class="badge badge-success">Activo</span>
+                        {% else %}
+                        <span class="badge badge-pending">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="badge" onclick="openEditPriceModal({{ list | tojson }})"
+                            style="border: 1px solid var(--border); background: white; cursor: pointer;">Editar</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        No se encontraron listas de precios.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Editar Precio -->
+<div id="editPriceModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div
+        style="background-color: white; padding: 24px; border-radius: 12px; width: 450px; max-width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h3 style="margin-top: 0; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+            Editar Precio</h3>
+        <form id="editPriceForm" onsubmit="savePriceList(event)">
+            <input type="hidden" id="editPriceId">
+
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Precio</label>
+                <input type="number" step="0.01" id="editPriceValue" required
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Ciclo de Facturación</label>
+                <select id="editBillingCycle"
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                    <option value="MONTHLY">Mensual</option>
+                    <option value="ANNUAL">Anual</option>
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+                <input type="checkbox" id="editIsActive">
+                <label for="editIsActive" style="font-size: 0.85rem;">Activo</label>
+
+                <input type="checkbox" id="editPricePerUser" style="margin-left: 16px;">
+                <label for="editPricePerUser" style="font-size: 0.85rem;">Precio por Usuario</label>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" onclick="closeEditPriceModal()"
+                    style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                <button type="submit"
+                    style="padding: 8px 16px; border: none; background: var(--primary); color: white; border-radius: 6px; cursor: pointer;">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditPriceModal(item) {
+        document.getElementById('editPriceId').value = item.id;
+        document.getElementById('editPriceValue').value = item.price;
+        document.getElementById('editBillingCycle').value = item.billing_cycle;
+        document.getElementById('editIsActive').checked = item.is_active;
+        document.getElementById('editPricePerUser').checked = item.price_per_user;
+        
+        document.getElementById('editPriceModal').style.display = 'flex';
+    }
+
+    function closeEditPriceModal() {
+        document.getElementById('editPriceModal').style.display = 'none';
+    }
+
+    async function savePriceList(e) {
+        e.preventDefault();
+        const id = document.getElementById('editPriceId').value;
+        const payload = {
+            price: parseFloat(document.getElementById('editPriceValue').value),
+            billing_cycle: document.getElementById('editBillingCycle').value,
+            is_active: document.getElementById('editIsActive').checked,
+            price_per_user: document.getElementById('editPricePerUser').checked
+        };
+
+        if(!confirm('¿Confirmar cambios en la lista de precios?')) return;
+
+        try {
+            const res = await fetch(`/api/v1/master/plans/prices/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert('Precio actualizado correctamente');
+                window.location.reload();
+            } else {
+                const data = await res.json();
+                alert('Error: ' + (data.message || data.msg || 'Error desconocido'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error de conexión');
+        }
+    }
+</script>
+{% endblock %}

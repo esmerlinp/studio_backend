@@ -1,0 +1,1000 @@
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:16:41,788 INFO werkzeug Thread-20 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:16:41] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:16:50,219 INFO werkzeug Thread-21 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:16:50] "GET /dashboard/price-lists HTTP/1.1" 200 -
+2026-02-06 17:16:50,277 ERROR root Thread-23 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:16:50,277 INFO werkzeug Thread-23 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:16:50] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:17:33,319 INFO werkzeug Thread-24 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:17:33] "GET /dashboard/payments HTTP/1.1" 200 -
+2026-02-06 17:17:33,431 ERROR root Thread-27 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:17:33,431 INFO werkzeug Thread-27 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:17:33] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:17:39,384 INFO werkzeug Thread-28 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:17:39] "GET /api/v1/master/payments/90 HTTP/1.1" 200 -
+2026-02-06 17:17:51,555 INFO werkzeug Thread-30 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:17:51] "GET /dashboard/invoices HTTP/1.1" 200 -
+2026-02-06 17:17:51,612 ERROR root Thread-31 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:17:51,612 INFO werkzeug Thread-31 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:17:51] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:17:55,732 INFO werkzeug Thread-33 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:17:55] "GET /dashboard/payments HTTP/1.1" 200 -
+2026-02-06 17:17:55,786 ERROR root Thread-35 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:17:55,787 INFO werkzeug Thread-35 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:17:55] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:20:28,692 INFO werkzeug Thread-36 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:20:28] "GET /dashboard HTTP/1.1" 200 -
+2026-02-06 17:20:28,900 ERROR root Thread-39 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:20:28,901 INFO werkzeug Thread-39 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:20:28] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:20:37,101 INFO werkzeug Thread-40 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:20:37] "GET /dashboard/clients HTTP/1.1" 200 -
+2026-02-06 17:20:37,312 ERROR root Thread-42 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:20:37,312 INFO werkzeug Thread-42 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:20:37] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:21:35,465 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.0.0.86:8080
+2026-02-06 17:21:35,465 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-02-06 17:21:57,550 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:21:57] "GET /dashboard HTTP/1.1" 200 -
+2026-02-06 17:21:57,798 ERROR root Thread-3 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:21:57,799 INFO werkzeug Thread-3 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:21:57] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:22:14,307 INFO werkzeug Thread-5 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:22:14] "GET /dashboard/invoices HTTP/1.1" 200 -
+2026-02-06 17:22:14,467 ERROR root Thread-8 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:22:14,468 INFO werkzeug Thread-8 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:22:14] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:22:33,008 INFO werkzeug Thread-9 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:22:33] "GET /dashboard/payments HTTP/1.1" 200 -
+2026-02-06 17:22:33,078 ERROR root Thread-11 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:22:33,078 INFO werkzeug Thread-11 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:22:33] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:22:36,101 INFO werkzeug Thread-12 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:22:36] "GET /dashboard HTTP/1.1" 200 -
+2026-02-06 17:22:36,157 ERROR root Thread-14 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:22:36,157 INFO werkzeug Thread-14 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:22:36] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:25:13,763 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.0.0.86:8080
+2026-02-06 17:25:13,763 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-02-06 17:25:38,047 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:25:38] "GET / HTTP/1.1" 200 -
+2026-02-06 17:25:40,640 INFO werkzeug Thread-5 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:25:40] "GET /api/v1/master/plans/ HTTP/1.1" 200 -
+2026-02-06 17:25:40,919 INFO werkzeug Thread-7 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:25:40] "GET /api/v1/master/countries/ HTTP/1.1" 200 -
+2026-02-06 17:25:55,592 INFO werkzeug Thread-9 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:25:55] "GET /dashboard HTTP/1.1" 200 -
+2026-02-06 17:25:55,738 ERROR root Thread-11 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:25:55,738 INFO werkzeug Thread-11 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:25:55] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:26:16,311 INFO werkzeug Thread-12 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:16] "GET /dashboard/clients HTTP/1.1" 200 -
+2026-02-06 17:26:16,379 ERROR root Thread-14 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:26:16,379 INFO werkzeug Thread-14 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:16] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:26:18,478 INFO werkzeug Thread-15 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:18] "GET /dashboard/payments HTTP/1.1" 200 -
+2026-02-06 17:26:18,527 ERROR root Thread-18 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:26:18,527 INFO werkzeug Thread-18 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:18] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:26:30,027 INFO werkzeug Thread-19 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:30] "GET /dashboard/invoices HTTP/1.1" 200 -
+2026-02-06 17:26:30,086 ERROR root Thread-21 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:26:30,087 INFO werkzeug Thread-21 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:30] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:26:33,177 INFO werkzeug Thread-22 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:33] "GET /dashboard/price-lists HTTP/1.1" 200 -
+2026-02-06 17:26:33,232 ERROR root Thread-24 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:26:33,232 INFO werkzeug Thread-24 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:33] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:26:35,160 INFO werkzeug Thread-25 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:35] "GET /dashboard/payments HTTP/1.1" 200 -
+2026-02-06 17:26:35,199 ERROR root Thread-27 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:26:35,200 INFO werkzeug Thread-27 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:35] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:26:38,316 INFO werkzeug Thread-28 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:38] "GET /dashboard/plans HTTP/1.1" 200 -
+2026-02-06 17:26:38,371 ERROR root Thread-30 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:26:38,371 INFO werkzeug Thread-30 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:38] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:26:44,084 INFO werkzeug Thread-31 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:44] "GET /dashboard/clients HTTP/1.1" 200 -
+2026-02-06 17:26:46,417 INFO werkzeug Thread-34 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:46] "GET /dashboard/clients HTTP/1.1" 200 -
+2026-02-06 17:26:46,484 ERROR root Thread-36 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:26:46,484 INFO werkzeug Thread-36 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:26:46] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:31:15,816 INFO werkzeug Thread-37 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:31:15] "GET /dashboard/clients HTTP/1.1" 200 -
+2026-02-06 17:31:15,948 ERROR root Thread-40 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:31:15,948 INFO werkzeug Thread-40 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:31:15] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:31:20,660 INFO werkzeug Thread-41 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:31:20] "GET /dashboard/clients HTTP/1.1" 200 -
+2026-02-06 17:31:20,707 ERROR root Thread-44 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:31:20,708 INFO werkzeug Thread-44 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:31:20] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:31:44,715 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.0.0.86:8080
+2026-02-06 17:31:44,715 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-02-06 17:32:23,620 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:32:23] "GET / HTTP/1.1" 200 -
+2026-02-06 17:32:25,376 INFO werkzeug Thread-6 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:32:25] "GET /login HTTP/1.1" 200 -
+2026-02-06 17:32:25,433 ERROR root Thread-8 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:32:25,433 INFO werkzeug Thread-8 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:32:25] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:32:25,599 INFO werkzeug Thread-4 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:32:25] "GET /api/v1/master/plans/ HTTP/1.1" 200 -
+2026-02-06 17:32:35,566 INFO werkzeug Thread-9 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:32:35] "POST /api/v1/master/auth/login HTTP/1.1" 200 -
+2026-02-06 17:32:37,217 INFO werkzeug Thread-11 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:32:37] "GET /dashboard HTTP/1.1" 200 -
+2026-02-06 17:32:37,365 ERROR root Thread-13 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:32:37,365 INFO werkzeug Thread-13 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:32:37] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:32:45,505 INFO werkzeug Thread-14 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:32:45] "GET /dashboard/clients HTTP/1.1" 200 -
+2026-02-06 17:32:45,590 ERROR root Thread-17 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:32:45,591 INFO werkzeug Thread-17 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:32:45] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:33:28,077 INFO werkzeug Thread-18 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:33:28] "GET /dashboard/plans HTTP/1.1" 200 -
+2026-02-06 17:33:28,232 ERROR root Thread-20 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:33:28,232 INFO werkzeug Thread-20 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:33:28] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:37:13,201 INFO werkzeug Thread-21 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:37:13] "GET / HTTP/1.1" 200 -
+2026-02-06 17:37:14,253 INFO werkzeug Thread-22 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:37:14] "GET /api/v1/master/plans/ HTTP/1.1" 200 -
+2026-02-06 17:37:14,526 INFO werkzeug Thread-25 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:37:14] "GET /api/v1/master/countries/ HTTP/1.1" 200 -
+2026-02-06 17:37:19,078 INFO werkzeug Thread-27 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:37:19] "GET /login HTTP/1.1" 200 -
+2026-02-06 17:37:19,137 ERROR root Thread-29 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:37:19,137 INFO werkzeug Thread-29 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:37:19] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:37:27,992 INFO werkzeug Thread-30 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:37:27] "POST /api/v1/master/auth/login HTTP/1.1" 200 -
+2026-02-06 17:37:29,469 INFO werkzeug Thread-32 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:37:29] "GET /dashboard HTTP/1.1" 200 -
+2026-02-06 17:37:29,597 ERROR root Thread-35 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:37:29,597 INFO werkzeug Thread-35 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:37:29] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:37:41,058 INFO werkzeug Thread-36 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:37:41] "GET /dashboard/clients HTTP/1.1" 200 -
+2026-02-06 17:37:41,229 ERROR root Thread-38 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:37:41,229 INFO werkzeug Thread-38 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:37:41] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:38:12,858 INFO werkzeug Thread-39 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:12] "PATCH /api/v1/master/clients/64/status HTTP/1.1" 200 -
+2026-02-06 17:38:17,468 INFO werkzeug Thread-41 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:17] "GET /dashboard/clients HTTP/1.1" 200 -
+2026-02-06 17:38:17,581 ERROR root Thread-42 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:38:17,581 INFO werkzeug Thread-42 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:17] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:38:21,118 INFO werkzeug Thread-44 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:21] "GET /dashboard/plans HTTP/1.1" 200 -
+2026-02-06 17:38:21,182 ERROR root Thread-46 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:38:21,182 INFO werkzeug Thread-46 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:21] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:38:35,994 INFO werkzeug Thread-47 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:35] "GET /dashboard/price-lists HTTP/1.1" 200 -
+2026-02-06 17:38:36,056 ERROR root Thread-49 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:38:36,056 INFO werkzeug Thread-49 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:36] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:38:39,946 INFO werkzeug Thread-50 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:39] "GET /dashboard/plans HTTP/1.1" 200 -
+2026-02-06 17:38:40,003 ERROR root Thread-53 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:38:40,004 INFO werkzeug Thread-53 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:40] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:38:43,022 INFO werkzeug Thread-54 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:43] "GET /dashboard/plans HTTP/1.1" 200 -
+2026-02-06 17:38:43,068 ERROR root Thread-56 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:38:43,068 INFO werkzeug Thread-56 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:38:43] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:39:57,767 INFO werkzeug Thread-57 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:39:57] "GET /dashboard/plans HTTP/1.1" 200 -
+2026-02-06 17:39:57,949 ERROR root Thread-59 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:39:57,949 INFO werkzeug Thread-59 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:39:57] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:40:16,000 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.0.0.86:8080
+2026-02-06 17:40:16,000 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-02-06 17:40:23,097 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:23] "GET / HTTP/1.1" 200 -
+2026-02-06 17:40:26,132 INFO werkzeug Thread-6 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:26] "GET /login HTTP/1.1" 200 -
+2026-02-06 17:40:26,237 ERROR root Thread-8 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:40:26,237 INFO werkzeug Thread-8 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:26] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:40:26,324 INFO werkzeug Thread-4 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:26] "GET /api/v1/master/plans/ HTTP/1.1" 200 -
+2026-02-06 17:40:34,470 INFO werkzeug Thread-9 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:34] "POST /api/v1/master/auth/login HTTP/1.1" 200 -
+2026-02-06 17:40:35,634 INFO werkzeug Thread-11 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:35] "GET /dashboard HTTP/1.1" 200 -
+2026-02-06 17:40:35,713 ERROR root Thread-12 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:40:35,714 INFO werkzeug Thread-12 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:35] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:40:39,874 INFO werkzeug Thread-14 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:39] "GET /dashboard/clients HTTP/1.1" 200 -
+2026-02-06 17:40:39,920 ERROR root Thread-17 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:40:39,921 INFO werkzeug Thread-17 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:39] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:40:42,339 INFO werkzeug Thread-18 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:42] "[35m[1mGET /dashboard/plans HTTP/1.1[0m" 500 -
+2026-02-06 17:40:42,391 ERROR root Thread-20 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:40:42,392 INFO werkzeug Thread-20 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:40:42] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:45:42,192 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.0.0.86:8080
+2026-02-06 17:45:42,192 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-02-06 17:46:16,242 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:16] "[35m[1mGET /dashboard/plans HTTP/1.1[0m" 500 -
+2026-02-06 17:46:16,381 ERROR root Thread-5 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:46:16,381 INFO werkzeug Thread-5 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:16] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:46:26,656 INFO werkzeug MainThread : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.0.0.86:8080
+2026-02-06 17:46:26,656 INFO werkzeug MainThread : [33mPress CTRL+C to quit[0m
+2026-02-06 17:46:30,984 INFO werkzeug Thread-2 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:30] "GET / HTTP/1.1" 200 -
+2026-02-06 17:46:33,045 INFO werkzeug Thread-6 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:33] "GET /login HTTP/1.1" 200 -
+2026-02-06 17:46:33,075 INFO werkzeug Thread-4 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:33] "GET /api/v1/master/plans/ HTTP/1.1" 200 -
+2026-02-06 17:46:33,107 ERROR root Thread-8 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:46:33,107 INFO werkzeug Thread-8 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:33] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:46:40,645 INFO werkzeug Thread-9 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:40] "POST /api/v1/master/auth/login HTTP/1.1" 200 -
+2026-02-06 17:46:41,775 INFO werkzeug Thread-11 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:41] "GET /dashboard HTTP/1.1" 200 -
+2026-02-06 17:46:41,815 ERROR root Thread-13 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:46:41,816 INFO werkzeug Thread-13 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:41] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2026-02-06 17:46:52,809 INFO werkzeug Thread-14 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:52] "[35m[1mGET /dashboard/plans HTTP/1.1[0m" 500 -
+2026-02-06 17:46:52,876 ERROR root Thread-16 (process_request_thread) : 
+--- ERROR INTERNO ---
+Ruta: http://localhost:8080/favicon.ico
+Método: GET
+Usuario: Anónimo
+Detalle: Traceback (most recent call last):
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/esmerlinpaniagua/Develop/cpstudio/studio_backend/.venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2026-02-06 17:46:52,877 INFO werkzeug Thread-16 (process_request_thread) : 127.0.0.1 - - [06/Feb/2026 17:46:52] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -

@@ -581,3 +581,35 @@ def process_scheduled_deletions():
             print(f"Error executing deletion for client {client.clientId}: {e}")
             
     return results
+
+@audit_log(action=ActionType.UPDATE, 
+           resource_type=ResourceTypes.CLIENT, 
+           resource_id_arg="client_id", 
+           description="Actualizar información del cliente")
+def update_client_details(client_id: int, data: dict) -> Client:
+    client = Client.query.get(client_id)
+    if not client:
+        raise ValueError(i18n._("error.client.not_found"))
+    
+    # Mapeo de campos permitidos
+    if 'name' in data: client.name = data['name']
+    if 'contact_name' in data: client.contactName = data['contact_name']
+    if 'contact_phone' in data: client.contactPhone = data['contact_phone']
+    if 'business_name' in data: client.businessName = data['business_name']
+    if 'billing_address' in data: client.billingAddress = data['billing_address']
+    
+    db.session.commit()
+    return client
+
+@audit_log(action=ActionType.UPDATE, 
+           resource_type=ResourceTypes.CLIENT, 
+           resource_id_arg="client_id", 
+           description="Cambiar estado de cliente")
+def toggle_client_active_status(client_id: int, is_active: bool) -> Client:
+    client = Client.query.get(client_id)
+    if not client:
+        raise ValueError(i18n._("error.client.not_found"))
+    
+    client.isActive = is_active
+    db.session.commit()
+    return client
