@@ -1,459 +1,200 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "es/dashboard/layout.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard | Akdmia Studio</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;600;700&display=swap"
-        rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg-body: #f3f4f6;
-            --bg-side: #0a2540;
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --white: #ffffff;
-            --border: #e5e7eb;
-        }
+{% set active_page = 'inicio' %}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+{% block title %}Dashboard | Akdmia Studio{% endblock %}
+{% block page_title %}Panel de Control{% endblock %}
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-body);
-            display: flex;
-            min-height: 100vh;
-        }
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Total Clientes</h3>
+        <p>{{ stats.total_clients }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Planes Activos</h3>
+        <p>{{ stats.active_plans }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Ingresos Totales</h3>
+        <p>${{ "{:,.2f}".format(stats.total_revenue) }}</p>
+    </div>
+</div>
 
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            background-color: var(--bg-side);
-            color: var(--white);
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
-            position: fixed;
-            height: 100%;
-        }
-
-        .sidebar h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.25rem;
-            margin-bottom: 40px;
-            font-weight: 700;
-            color: white;
-        }
-
-        .sidebar h1 span {
-            color: #818cf8;
-        }
-
-        .nav-link {
-            color: #9ca3af;
-            text-decoration: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-            font-size: 0.95rem;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--white);
-        }
-
-        .nav-link.active {
-            background-color: var(--primary-color);
-        }
-
-        /* Main Content */
-        .main-content {
-            margin-left: 260px;
-            flex: 1;
-            padding: 40px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: var(--white);
-            padding: 24px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-card h3 {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .stat-card p {
-            font-size: 1.875rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        /* Generic Table Container */
-        .table-container {
-            background: var(--white);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            margin-bottom: 24px;
-        }
-
-        .table-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn-view-all {
-            font-size: 0.85rem;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            background: #f9fafb;
-            padding: 12px 24px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
-        }
-
-        td {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.875rem;
-            color: var(--text-main);
-        }
-
-        .status {
-            padding: 4px 8px;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .status-active {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-error {
-            background: #fef2f2;
-            color: #991b1b;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-                padding: 15px;
-            }
-
-            .sidebar h1,
-            .nav-link span {
-                display: none;
-            }
-
-            .main-content {
-                margin-left: 70px;
-                padding: 20px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <aside class="sidebar">
-        <h1>Akdmia <span>Studio</span></h1>
-        <nav>
-            <a href="/dashboard" class="nav-link active">
-                <span>Inicio</span>
-            </a>
-            <a href="/dashboard/clients" class="nav-link">
-                <span>Clientes</span>
-            </a>
-            <a href="/dashboard/plans" class="nav-link">
-                <span>Planes</span>
-            </a>
-            <a href="/dashboard/price-lists" class="nav-link">
-                <span>Listas de Precio</span>
-            </a>
-            <a href="/dashboard/payments" class="nav-link">
-                <span>Pagos</span>
-            </a>
-            <a href="/dashboard/invoices" class="nav-link">
-                <span>Facturas</span>
-            </a>
-        </nav>
-        <div style="margin-top: auto;">
-            <a href="/logout" class="nav-link" style="color: #f87171;">
-                <span>Cerrar Sesión</span>
-            </a>
-        </div>
-    </aside>
-
-    <main class="main-content">
-        <header>
-            <h2 style="font-family: 'Outfit', sans-serif;">Panel de Control</h2>
-            <div class="user-profile">
-                <span style="color: var(--text-muted)">Bienvenido, <strong>Admin</strong></span>
-                <div class="avatar">AD</div>
-            </div>
-        </header>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Clientes</h3>
-                <p>{{ stats.total_clients }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Planes Activos</h3>
-                <p>{{ stats.active_plans }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Ingresos Totales</h3>
-                <p>${{ "{:,.2f}".format(stats.total_revenue) }}</p>
-            </div>
-        </div>
-
-        <div class="table-container">
-            <div class="table-header">
-                <span>Clientes Recientes</span>
-                <a href="/dashboard/clients" class="btn-view-all">Ver todos →</a>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Institución</th>
-                        <th>Fecha Registro</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for client in recent_clients %}
-                    <tr>
-                        <td style="font-weight: 600;">{{ client.name }}</td>
-                        <td>{{ client.created_at or 'N/A' }}</td>
-                        <td>
-                            {% if client.is_active %}
-                            <span class="status status-active">Activo</span>
-                            {% else %}
-                            <span class="status status-pending">Inactivo</span>
-                            {% endif %}
-                        </td>
-                    </tr>
+<div class="table-container">
+    <div class="table-header">
+        <span>Clientes Recientes</span>
+        <a href="/dashboard/clients" class="btn-view-all">Ver todos →</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Institución</th>
+                <th>Fecha Registro</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in recent_clients %}
+            <tr>
+                <td style="font-weight: 600;">{{ client.name }}</td>
+                <td>{{ client.created_at or 'N/A' }}</td>
+                <td>
+                    {% if client.is_active %}
+                    <span class="status badge badge-success"
+                        style="background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Activo</span>
                     {% else %}
-                    <tr>
-                        <td colspan="3" style="text-align: center; color: var(--text-muted);">No hay clientes recientes
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                    <span class="status badge badge-pending"
+                        style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Inactivo</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" style="text-align: center; color: var(--text-muted);">No hay clientes recientes
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-        <div class="table-header">
-            <span>Últimos Pagos</span>
-            <a href="/dashboard/payments" class="btn-view-all">Ver todos →</a>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Referencia</th>
-                    <th>Monto</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in recent_payments %}
-                <tr>
-                    <td style="font-family: monospace;">{{ record.internalReference[:12] }}...</td>
-                    <td>${{ "{:,.2f}".format(record.amount) }} {{ record.currency }}</td>
-                    <td>
-                        {% if record.status == 'SUCCESS' or record.status == 'APPROVED' %}
-                        <span class="status status-active">Completado</span>
-                        {% elif record.status == 'PENDING' %}
-                        <span class="status status-pending">Pendiente</span>
-                        {% else %}
-                        <span class="status status-error">Fallido</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <button class="status" onclick="showPaymentDetails({{ record.id }})"
-                            style="border: 1px solid var(--border); background: white; cursor: pointer;">Detalles</button>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="4" style="text-align: center; color: var(--text-muted);">No hay transacciones
-                        recientes</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        </div>
-    </main>
+<div class="table-container">
+    <div class="table-header">
+        <span>Últimos Pagos</span>
+        <a href="/dashboard/payments" class="btn-view-all">Ver todos →</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Referencia</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in recent_payments %}
+            <tr>
+                <td style="font-family: monospace;">{{ record.internalReference[:12] }}...</td>
+                <td>${{ "{:,.2f}".format(record.amount) }} {{ record.currency }}</td>
+                <td>
+                    {% if record.status == 'SUCCESS' or record.status == 'APPROVED' %}
+                    <span class="status badge badge-success"
+                        style="background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Completado</span>
+                    {% elif record.status == 'PENDING' %}
+                    <span class="status badge badge-pending"
+                        style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Pendiente</span>
+                    {% else %}
+                    <span class="status badge badge-error"
+                        style="background: #fef2f2; color: #991b1b; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Fallido</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="status" onclick="showPaymentDetails({{ record.id }})"
+                        style="border: 1px solid var(--border); background: white; cursor: pointer; padding: 4px 8px; border-radius: 4px;">Detalles</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted);">No hay transacciones
+                    recientes</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-    <!-- Modal Detalles Pago (Duplicado para Dashboard Home) -->
-    <div id="detailsModal"
-        style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+<!-- Modal Detalles Pago -->
+<div id="detailsModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div
+        style="background-color: white; padding: 24px; border-radius: 12px; width: 600px; max-width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto;">
         <div
-            style="background-color: white; padding: 24px; border-radius: 12px; width: 600px; max-width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto;">
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1px; margin-bottom: 16px;">
-                <h3>Detalle de Transacción</h3>
-                <button onclick="closeDetailsModal()"
-                    style="background:none; border:none; font-size: 1.5rem; cursor:pointer;">&times;</button>
-            </div>
+            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1px; margin-bottom: 16px;">
+            <h3>Detalle de Transacción</h3>
+            <button onclick="closeDetailsModal()"
+                style="background:none; border:none; font-size: 1.5rem; cursor:pointer;">&times;</button>
+        </div>
 
-            <div id="modalContent" style="font-size: 0.9rem; line-height: 1.6;">
-                Cargando...
-            </div>
+        <div id="modalContent" style="font-size: 0.9rem; line-height: 1.6;">
+            Cargando...
+        </div>
 
-            <div style="margin-top: 20px; text-align: right;">
-                <button onclick="closeDetailsModal()"
-                    style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cerrar</button>
-            </div>
+        <div style="margin-top: 20px; text-align: right;">
+            <button onclick="closeDetailsModal()"
+                style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cerrar</button>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        async function showPaymentDetails(paymentId) {
-            const modal = document.getElementById('detailsModal');
-            const content = document.getElementById('modalContent');
-            modal.style.display = 'flex';
-            content.innerHTML = '<div style="text-align:center; padding: 20px;">Cargando detalles...</div>';
+{% block extra_js %}
+<script>
+    async function showPaymentDetails(paymentId) {
+        const modal = document.getElementById('detailsModal');
+        const content = document.getElementById('modalContent');
+        modal.style.display = 'flex';
+        content.innerHTML = '<div style="text-align:center; padding: 20px;">Cargando detalles...</div>';
 
-            try {
-                const res = await fetch(`/api/v1/master/payments/${paymentId}`);
-                if (!res.ok) throw new Error("Error fetching details");
-                const responseData = await res.json();
-                const data = responseData.data;
+        try {
+            const res = await fetch(`/api/v1/master/payments/${paymentId}`);
+            if (!res.ok) throw new Error("Error fetching details");
+            const responseData = await res.json();
+            const data = responseData.data;
 
-                let statusBadge = '';
-                if (data.status === 'SUCCESS' || data.status === 'APPROVED') statusBadge = '<span class="status status-active">Completado</span>';
-                else if (data.status === 'PENDING') statusBadge = '<span class="status status-pending">Pendiente</span>';
-                else statusBadge = '<span class="status status-error">Fallido</span>';
+            let statusBadge = '';
+            if (data.status === 'SUCCESS' || data.status === 'APPROVED') statusBadge = '<span class="status badge badge-success" style="background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Completado</span>';
+            else if (data.status === 'PENDING') statusBadge = '<span class="status badge badge-pending" style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Pendiente</span>';
+            else statusBadge = '<span class="status badge badge-error" style="background: #fef2f2; color: #991b1b; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Fallido</span>';
 
-                let rawJson = "No disponible";
-                if (data.rawResponse) {
-                    rawJson = JSON.stringify(data.rawResponse, null, 2);
-                }
-
-                content.innerHTML = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-                    <div>
-                        <strong>Referencia Interna:</strong><br>
-                        <span style="font-family: monospace;">${data.internalReference}</span>
-                    </div>
-                    <div>
-                        <strong>Referencia Externa (Stripe):</strong><br>
-                        <span style="font-family: monospace;">${data.externalReference || 'N/A'}</span>
-                    </div>
-                    <div>
-                        <strong>Monto:</strong><br>
-                        <span class="price-text">$${data.amount} ${data.currency}</span>
-                    </div>
-                    <div>
-                        <strong>Estado:</strong><br>
-                        ${statusBadge}
-                    </div>
-                    <div>
-                        <strong>Fecha:</strong><br>
-                        ${data.paymentDate || 'N/A'}
-                    </div>
-                     <div>
-                        <strong>Cliente ID:</strong><br>
-                        ${data.clientId}
-                    </div>
-                </div>
-                
-                <div style="background: #f4f4f5; padding: 12px; border-radius: 8px;">
-                    <strong style="display:block; margin-bottom: 8px;">Respuesta Pasarela (Raw):</strong>
-                    <pre style="margin:0; overflow-x: auto; font-size: 0.75rem; color: #4b5563; max-height: 200px;">${rawJson}</pre>
-                </div>
-            `;
-
-            } catch (err) {
-                console.error(err);
-                content.innerHTML = '<div style="color: red; text-align: center;">Error cargando detalles.</div>';
+            let rawJson = "No disponible";
+            if (data.rawResponse) {
+                rawJson = JSON.stringify(data.rawResponse, null, 2);
             }
+
+            content.innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div>
+                    <strong>Referencia Interna:</strong><br>
+                    <span style="font-family: monospace;">${data.internalReference}</span>
+                </div>
+                <div>
+                    <strong>Referencia Externa (Stripe):</strong><br>
+                    <span style="font-family: monospace;">${data.externalReference || 'N/A'}</span>
+                </div>
+                <div>
+                    <strong>Monto:</strong><br>
+                    <span class="price-text">$${data.amount} ${data.currency}</span>
+                </div>
+                <div>
+                    <strong>Estado:</strong><br>
+                    ${statusBadge}
+                </div>
+                <div>
+                    <strong>Fecha:</strong><br>
+                    ${data.paymentDate || 'N/A'}
+                </div>
+                 <div>
+                    <strong>Cliente ID:</strong><br>
+                    ${data.clientId}
+                </div>
+            </div>
+            
+            <div style="background: #f4f4f5; padding: 12px; border-radius: 8px;">
+                <strong style="display:block; margin-bottom: 8px;">Respuesta Pasarela (Raw):</strong>
+                <pre style="margin:0; overflow-x: auto; font-size: 0.75rem; color: #4b5563; max-height: 200px;">${rawJson}</pre>
+            </div>
+        `;
+
+        } catch (err) {
+            console.error(err);
+            content.innerHTML = '<div style="color: red; text-align: center;">Error cargando detalles.</div>';
         }
+    }
 
-        function closeDetailsModal() {
-            document.getElementById('detailsModal').style.display = 'none';
-        }
-    </script>
-
-</body>
-
-</html>
+    function closeDetailsModal() {
+        document.getElementById('detailsModal').style.display = 'none';
+    }
+</script>
+{% endblock %}
