@@ -1,0 +1,588 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'clientes' %}
+
+{% block title %}Detalle Cliente | Akdmia{% endblock %}
+
+{% block page_title %}Detalle de Cliente{% endblock %}
+{% block page_subtitle %}Visualiza toda la información relacionada con este cliente.{% endblock %}
+
+{% block content %}
+<style>
+    .details-header {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .tab-nav {
+        display: flex;
+        gap: 20px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 24px;
+        overflow-x: auto;
+    }
+
+    .tab-btn {
+        padding: 12px 16px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--text-muted);
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .tab-btn.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+    }
+
+    .tab-content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+
+    .info-item span {
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .loading-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-muted);
+    }
+
+    .data-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 24px;
+    }
+</style>
+
+<div id="loader" class="loading-state">
+    Cargando información del cliente...
+</div>
+
+<div id="mainContent" style="display: none;">
+    <!-- Header info -->
+    <div class="details-header">
+        <div>
+            <h2 id="clientName" style="margin: 0; font-size: 1.5rem;">Cargando...</h2>
+            <div id="clientStatus" style="margin-top: 8px;"></div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button id="btnEdit" class="btn" onclick="openEditModal()"
+                style="border: 1px solid var(--border); background: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                Editar Información
+            </button>
+            <button id="btnSuspend" class="btn"
+                style="border: 1px solid var(--border); background: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; color: var(--error);">
+                Suspender
+            </button>
+            <a href="/dashboard/clients" class="btn"
+                style="border: 1px solid var(--border); background: white; text-decoration: none; padding: 8px 16px; border-radius: 6px; color: inherit;">
+                &larr; Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('overview')">Información General</button>
+        <button class="tab-btn" onclick="switchTab('payments')">Pagos</button>
+        <button class="tab-btn" onclick="switchTab('plans')">Planes</button>
+        <button class="tab-btn" onclick="switchTab('storage')">Almacenamiento</button>
+        <button class="tab-btn" onclick="switchTab('users')">Usuarios</button>
+        <button class="tab-btn" onclick="switchTab('logs')">Auditoría (Logs)</button>
+    </div>
+
+    <!-- Tab: Overview -->
+    <div id="overview" class="tab-content active">
+        <div class="data-card">
+            <h3>Perfil del Cliente</h3>
+            <div class="info-grid" id="profileGrid">
+                <!-- Javascript will populate this -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Payments -->
+    <div id="payments" class="tab-content">
+        <div class="data-card">
+            <h3>Historial de Pagos</h3>
+            <div class="table-responsive">
+                <table id="paymentsTable">
+                    <thead>
+                        <tr>
+                            <th>Referencia</th>
+                            <th>Fecha</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Tab: Plans -->
+    <div id="plans" class="tab-content">
+        <div class="data-card">
+            <h3>Plan Actual y Servicios</h3>
+            <div id="currentPlanInfo" style="margin-bottom: 24px;"></div>
+
+            <h4>Historial de Planes</h4>
+            <div class="table-responsive">
+                <table id="plansHistoryTable">
+                    <thead>
+                        <tr>
+                            <th>Plan</th>
+                            <th>Fecha Inicio</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Storage -->
+    <div id="storage" class="tab-content">
+        <div class="data-card">
+            <h3>Cuotas de Almacenamiento</h3>
+            <div id="storageInfo" class="info-grid">
+                <!-- Populated by JS -->
+            </div>
+            <div class="progress-bar-container"
+                style="margin-top: 20px; background: #eee; height: 10px; border-radius: 5px; overflow: hidden;">
+                <div id="storageBar" style="background: var(--primary); height: 100%; width: 0%;"></div>
+            </div>
+            <p id="storageText"
+                style="text-align: right; font-size: 0.9rem; margin-top: 5px; color: var(--text-muted);"></p>
+        </div>
+    </div>
+
+    <!-- Tab: Users -->
+    <div id="users" class="tab-content">
+        <div class="data-card">
+            <h3>Usuarios Asociados</h3>
+            <div class="table-responsive">
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Logs -->
+    <div id="logs" class="tab-content">
+        <div class="data-card">
+            <h3>Logs de Actividad</h3>
+            <div class="table-responsive">
+                <table id="logsTable">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Acción</th>
+                            <th>Recurso</th>
+                            <th>Descripción</th>
+                            <th>Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+
+<!-- Modal Editar Cliente -->
+<div id="editModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div
+        style="background-color: white; padding: 24px; border-radius: 12px; width: 500px; max-width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h3 style="margin-top: 0; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+            Editar Cliente</h3>
+        <form id="editForm" onsubmit="saveClient(event)">
+            <input type="hidden" id="editClientId">
+
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Nombre Institución</label>
+                <input type="text" id="editBusinessName" required
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Nombre Corto (Display)</label>
+                <input type="text" id="editName" required
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Nombre Contacto</label>
+                    <input type="text" id="editContactName"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Teléfono</label>
+                    <input type="text" id="editContactPhone"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Dirección</label>
+                <textarea id="editAddress" rows="2"
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" onclick="closeEditModal()"
+                    style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                <button type="submit"
+                    style="padding: 8px 16px; border: none; background: var(--primary); color: white; border-radius: 6px; cursor: pointer;">Guardar
+                    Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const clientId = {{ clientId }};
+    let clientData = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadClientData();
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+
+        loadPayments();
+        loadPlans();
+        loadStorage();
+        loadUsers();
+        loadLogs();
+    });
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    async function fetchData(endpoint) {
+        try {
+            const res = await fetch(`/api/v1/master/clients/${clientId}${endpoint}`);
+            if (!res.ok) throw new Error('Network error');
+            const data = await res.json();
+            return data.data;
+        } catch (e) {
+            console.error(`Error fetching ${endpoint}:`, e);
+            return null;
+        }
+    }
+
+    async function loadClientData() {
+        const data = await fetchData('');
+        if (!data) return;
+        clientData = data;
+
+        document.getElementById('clientName').textContent = data.name || data.business_name;
+
+        const statusBadge = data.is_active
+            ? '<span class="badge badge-success">Activo</span>'
+            : '<span class="badge badge-pending">Inactivo</span>';
+        document.getElementById('clientStatus').innerHTML = statusBadge;
+
+        // Update Action Buttons
+        const suspendBtn = document.getElementById('btnSuspend');
+        if (data.is_active) {
+            suspendBtn.textContent = 'Suspender';
+            suspendBtn.style.color = 'var(--error)';
+            suspendBtn.onclick = () => toggleStatus(false);
+        } else {
+            suspendBtn.textContent = 'Reactivar';
+            suspendBtn.style.color = 'var(--success)';
+            suspendBtn.onclick = () => toggleStatus(true);
+        }
+
+
+        const grid = document.getElementById('profileGrid');
+        grid.innerHTML = `
+            <div class="info-item"><label>ID Cliente</label><span>#${data.id}</span></div>
+            <div class="info-item"><label>Institución</label><span>${data.business_name || '-'}</span></div>
+            <div class="info-item"><label>Contacto</label><span>${data.contact_name || '-'}</span></div>
+            <div class="info-item"><label>Teléfono</label><span>${data.contact_phone || '-'}</span></div>
+            <div class="info-item"><label>Email Facturación</label><span>${data.billing_email || '-'}</span></div>
+            <div class="info-item"><label>Esquema DB</label><span>${data.schema || '-'}</span></div>
+            <div class="info-item"><label>Fecha Registro</label><span>${data.created_at || '-'}</span></div>
+            <div class="info-item"><label>Dirección</label><span>${data.billing_address || '-'}</span></div>
+        `;
+    }
+
+    async function loadPayments() {
+        const data = await fetchData('/payments/orders');
+        const tbody = document.querySelector('#paymentsTable tbody');
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay pagos registrados</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.map(p => `
+            <tr>
+                <td style="font-family: monospace;">${p.internalReference}</td>
+                <td>${p.created_at || p.paymentDate}</td>
+                <td>$${p.amount} ${p.currency}</td>
+                <td>
+                    <span class="badge ${p.status === 'APPROVED' || p.status === 'SUCCESS' ? 'badge-success' : 'badge-pending'}">
+                        ${p.status}
+                    </span>
+                </td>
+                <td>
+                    <button class="badge" onclick="downloadInvoice('${p.id}')" style="border: 1px solid var(--border); background: white; cursor: pointer;">Descargar</button>
+                    <button class="badge" onclick="emailInvoice('${p.id}')" style="border: 1px solid var(--border); background: white; cursor: pointer;">Email</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function downloadInvoice(id) {
+        alert('Descargando factura ' + id + ' (Demo)');
+    }
+
+    function emailInvoice(id) {
+        alert('Enviando factura ' + id + ' por email (Demo)');
+    }
+
+    async function loadPlans() {
+        // Active Plan
+        const currentData = await fetchData('/plan');
+        const infoDiv = document.getElementById('currentPlanInfo');
+
+        if (currentData) {
+            infoDiv.innerHTML = `
+                <div class="info-grid">
+                    <div class="info-item"><label>Plan Actual</label><span>${currentData.plan_name || 'N/A'}</span></div>
+                    <div class="info-item"><label>Estado</label><span>${currentData.status}</span></div>
+                    <div class="info-item"><label>Fecha Inicio</label><span>${currentData.start_date || '-'}</span></div>
+                    <div class="info-item"><label>Renovación</label><span>${currentData.end_date || 'Automática'}</span></div>
+                </div>
+            `;
+        } else {
+            infoDiv.innerHTML = '<span class="text-muted">No hay plan activo</span>';
+        }
+
+        // Plan History
+        const historyData = await fetchData('/plan/all');
+        const tbody = document.querySelector('#plansHistoryTable tbody');
+
+        if (!historyData || historyData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No hay historial</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = historyData.map(h => `
+            <tr>
+                <td>${h.plan_name || h.plan_code || 'Desconocido'}</td>
+                <td>${h.start_date}</td>
+                <td>${h.status}</td>
+            </tr>
+        `).join('');
+    }
+
+    async function loadStorage() {
+        const data = await fetchData('/storage');
+        const div = document.getElementById('storageInfo');
+
+        if (!data || !data.used_storage_mb) {
+            div.innerHTML = '<span class="text-muted">Sin datos de uso</span>';
+            return;
+        }
+
+        const usedMB = data.used_storage_mb || 0;
+
+        div.innerHTML = `
+            <div class="info-item"><label>Uso Actual</label><span>${(usedMB / 1024).toFixed(2)} GB</span></div>
+            <div class="info-item"><label>Última Act.</label><span>${data.last_updated || '-'}</span></div>
+        `;
+    }
+
+    async function loadUsers() {
+        const data = await fetchData('/users');
+        const tbody = document.querySelector('#usersTable tbody');
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No hay usuarios asociados</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.map(u => `
+            <tr>
+                <td>${u.first_name} ${u.last_name}</td>
+                <td>${u.email}</td>
+                <td>${u.role || '-'}</td>
+                 <td>
+                    <span class="badge ${u.isActive ? 'badge-success' : 'badge-pending'}">
+                        ${u.isActive ? 'Activo' : 'Inactivo'}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function loadLogs() {
+        const data = await fetchData('/logs');
+        const tbody = document.querySelector('#logsTable tbody');
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay logs recientes</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.map(l => `
+            <tr>
+                <td>${l.created_at}</td>
+                 <td>${l.action}</td>
+                 <td>${l.resource_type}</td>
+                 <td>${l.description || '-'}</td>
+                 <td>${l.user_id || 'System'}</td>
+            </tr>
+        `).join('');
+    }
+
+    // --- EDIT & STATUS ACTIONS ---
+
+    function openEditModal() {
+        if (!clientData) return;
+        document.getElementById('editClientId').value = clientData.id;
+        document.getElementById('editBusinessName').value = clientData.business_name || clientData.name;
+        document.getElementById('editName').value = clientData.name;
+        document.getElementById('editContactName').value = clientData.contact_name || '';
+        document.getElementById('editContactPhone').value = clientData.contact_phone || '';
+        document.getElementById('editAddress').value = clientData.billing_address || '';
+
+        const modal = document.getElementById('editModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    async function saveClient(e) {
+        e.preventDefault();
+        const clientId = document.getElementById('editClientId').value;
+        const payload = {
+            business_name: document.getElementById('editBusinessName').value,
+            name: document.getElementById('editName').value,
+            contact_name: document.getElementById('editContactName').value,
+            contact_phone: document.getElementById('editContactPhone').value,
+            billing_address: document.getElementById('editAddress').value
+        };
+
+        if (!confirm('¿Estás seguro de guardar los cambios?')) return;
+
+        try {
+            const res = await fetch(`/api/v1/master/clients/${clientId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert('Cliente actualizado correctamente');
+                window.location.reload();
+            } else {
+                const data = await res.json();
+                alert('Error: ' + (data.message || data.msg || 'Error desconocido'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error de conexión');
+        }
+    }
+
+    async function toggleStatus(isActive) {
+        const action = isActive ? "reactivar" : "suspender";
+        if (!confirm(`¿Estás seguro de ${action} este cliente?`)) return;
+
+        try {
+            const res = await fetch(`/api/v1/master/clients/${clientId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_active: isActive })
+            });
+
+            if (res.ok) {
+                alert(`Cliente ${isActive ? 'reactivado' : 'suspendido'} correctamente`);
+                window.location.reload();
+            } else {
+                const data = await res.json();
+                alert('Error: ' + (data.message || data.msg));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error de conexión');
+        }
+    }
+
+</script>{% endblock %}

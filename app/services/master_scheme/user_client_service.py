@@ -78,9 +78,6 @@ def get_client_by_user(user_id: int) -> Client:
     return cliente
 
 
-@audit_log(action=ActionType.READ,
-           resource_type=ResourceTypes.USER_CLIENT,
-           resource_id_arg="client_uuid")
 def get_users_by_client(client_uuid: UUID) -> List[UsuarioCliente]:
     """
     Retorna todos los usuarios asociados a un cliente.
@@ -88,9 +85,6 @@ def get_users_by_client(client_uuid: UUID) -> List[UsuarioCliente]:
     return UsuarioCliente.query.filter_by(client_uuid=client_uuid).all()
 
 
-@audit_log(action=ActionType.READ,
-           resource_type=ResourceTypes.USER_CLIENT,
-           resource_id_arg="client_uuid")
 def get_user_by_client(client_uuid: UUID) -> UsuarioCliente:
     """
     Retorna el cliente del usuario.

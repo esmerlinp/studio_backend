@@ -253,6 +253,13 @@ def dashboard_clients():
     clients = get_clients()
     return render_template("es/dashboard/clients.html", clients=[c.to_dict() for c in clients])
 
+@app.route("/dashboard/clients/<int:clientId>")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_client_details(clientId):
+    # We pass the ID and let the frontend fetch the details via API
+    return render_template("es/dashboard/client_details.html", clientId=clientId)
+
 @app.route("/dashboard/plans")
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])

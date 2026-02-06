@@ -5,7 +5,8 @@ from app.api.v1.master.clients.controller import (get_client_preferences, new_cl
                                            change_plan, get_client_plans, 
                                            get_client_payments, handle_export_data,
                                            request_deletion, cancel_deletion, trigger_cleanup,
-                                           update_client, toggle_client_status)
+                                           update_client, toggle_client_status,
+                                           get_client_users, get_client_storage, get_client_logs_admin)
 
 
 client_bp = Blueprint('clients', __name__, url_prefix='/api/v1/master/clients')
@@ -29,3 +30,8 @@ client_bp.post("/cleanup")(trigger_cleanup)
 
 client_bp.patch("/<int:clientId>")(update_client)
 client_bp.patch("/<int:clientId>/status")(toggle_client_status)
+
+# Client Details Endpoints
+client_bp.get("/<int:clientId>/users")(get_client_users)
+client_bp.get("/<int:clientId>/storage")(get_client_storage)
+client_bp.get("/<int:clientId>/logs")(get_client_logs_admin)

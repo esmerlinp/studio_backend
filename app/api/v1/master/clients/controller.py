@@ -6,15 +6,16 @@ from app.services.master_scheme.client_service import (get_client_preferences, g
                                                        create_client, get_clients,
                                                        get_client_by_id, get_client_payment_orders,
                                                        request_scheme_deletion, cancel_scheme_deletion, process_scheduled_deletions,
-                                                       update_client_details, toggle_client_active_status)
+                                                       update_client_details, toggle_client_active_status, set_schema)
 
-from app.services.master_scheme.user_client_service import get_client_by_user   
+from app.services.master_scheme.user_client_service import get_client_by_user, get_users_by_client 
 from app.services.master_scheme.client_plan_service import get_active_client_plan, assign_plan_to_client, change_client_plan, get_client_plan_history
 from app.services.master_scheme.user_service import get_user_by_id
 from app.utils.responses import success
 from flask import request, g, current_app
 from app.utils.responses import success, error
-from app import limiter
+from app import db, limiter
+from sqlalchemy import text
 from datetime import date
 from app.utils.types import Roles as r
 from app.utils import i18n
@@ -360,4 +361,60 @@ def toggle_client_status(clientId):
     except ValueError as e:
         return error(str(e), 400)
     except Exception as e:
+        return error(str(e), 500)
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES + [r.AUDITOR])
+def get_client_storage(clientId):
+    storage = storage_info(client_id=clientId)
+    if storage:
+        return success(data=storage.to_dict())
+    return success(data={})
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES + [r.AUDITOR])
+def get_client_users(clientId):
+    client = get_client_by_id(clientId)
+    if not client:
+        return error(i18n._("error.client.not_found"), 404)
+        
+    relations = get_users_by_client(client_uuid=client.uuid)
+    
+    users_data = []
+    for rel in relations:
+        user = get_user_by_id(rel.user_id)
+        if user:
+            u_dict = user.to_dict()
+            users_data.append(u_dict)
+            
+    return success(data=users_data)
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES + [r.AUDITOR])
+def get_client_logs_admin(clientId):
+    try:
+        client = get_client_by_id(clientId)
+        if not client:
+            return error(i18n._("error.client.not_found"), 404)
+
+        current_schema = getattr(g, 'scheme', 'public') 
+        target_schema = client.schemaName
+        
+        set_schema(target_schema)
+        
+        logs = get_client_logs() 
+        
+        set_schema(current_schema)
+        
+        return success(data=logs.get('info', []))
+        
+    except Exception as e:
+        try:
+             current_schema = getattr(g, 'scheme', 'public')
+             set_schema(current_schema)
+        except:
+            pass
         return error(str(e), 500)
