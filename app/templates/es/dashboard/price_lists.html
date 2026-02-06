@@ -11,8 +11,8 @@
 <div class="data-card">
     <div class="card-header">
         <h3>Listas de Precios Activas</h3>
-        <button class="nav-link active"
-            style="padding: 8px 16px; border:none; cursor:pointer; background: var(--primary); color: white;">
+        <button onclick="openCreatePriceModal()"
+            style="padding: 8px 16px; border:none; border-radius: 6px; cursor:pointer; background-color: #4f46e5; color: white; font-weight: 600; font-family: 'Inter', sans-serif;">
             + Nueva Lista
         </button>
     </div>
@@ -53,7 +53,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <button class="badge" onclick="openEditPriceModal({{ list | tojson }})"
+                        <button class="badge" onclick='openEditPriceModal({{ list | tojson | safe }})'
                             style="border: 1px solid var(--border); background: white; cursor: pointer;">Editar</button>
                     </td>
                 </tr>
@@ -66,6 +66,75 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Modal Crear Precio -->
+<div id="createPriceModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div
+        style="background-color: white; padding: 24px; border-radius: 12px; width: 500px; max-width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h3 style="margin-top: 0; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+            Nueva Lista de Precio</h3>
+        <form id="createPriceForm" onsubmit="createPriceList(event)">
+
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Plan Relacionado</label>
+                <select id="createPlanId" required
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                    <option value="">Cargando planes...</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Precio</label>
+                    <input type="number" step="0.01" id="createPrice" required
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Moneda</label>
+                    <select id="createCurrency"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                        <option value="USD">USD</option>
+                        <option value="DOP">DOP</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Ciclo de Facturación</label>
+                <select id="createBillingCycle"
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                    <option value="MONTHLY">Mensual</option>
+                    <option value="ANNUAL">Anual</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Válido Desde</label>
+                <input type="date" id="createValidFrom" required
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+                <input type="checkbox" id="createPricePerUser">
+                <label for="createPricePerUser" style="font-size: 0.85rem;">Precio por Usuario Adicional</label>
+            </div>
+
+            <div style="margin-bottom: 12px;" id="minUsersContainer" style="display: none;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Usuarios Mínimos</label>
+                <input type="number" id="createMinUsers" value="1"
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" onclick="closeCreatePriceModal()"
+                    style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                <button type="submit"
+                    style="padding: 8px 16px; border: none; background: #4f46e5; color: white; border-radius: 6px; cursor: pointer;">Crear</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -106,20 +175,71 @@
                 <button type="button" onclick="closeEditPriceModal()"
                     style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
                 <button type="submit"
-                    style="padding: 8px 16px; border: none; background: var(--primary); color: white; border-radius: 6px; cursor: pointer;">Guardar</button>
+                    style="padding: 8px 16px; border: none; background: #4f46e5; color: white; border-radius: 6px; cursor: pointer;">Guardar</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
+    // --- CREATE ---
+    async function openCreatePriceModal() {
+        document.getElementById('createPriceForm').reset();
+
+        // Set default date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('createValidFrom').value = today;
+
+        await loadPlansForDropdown('createPlanId');
+        document.getElementById('createPriceModal').style.display = 'flex';
+    }
+
+    function closeCreatePriceModal() {
+        document.getElementById('createPriceModal').style.display = 'none';
+    }
+
+    async function createPriceList(e) {
+        e.preventDefault();
+
+        const payload = {
+            plan_id: document.getElementById('createPlanId').value,
+            price: parseFloat(document.getElementById('createPrice').value),
+            currency: document.getElementById('createCurrency').value,
+            billing_cycle: document.getElementById('createBillingCycle').value,
+            valid_from: document.getElementById('createValidFrom').value,
+            price_per_user: document.getElementById('createPricePerUser').checked,
+            min_users: parseInt(document.getElementById('createMinUsers').value) || 1,
+            features_config: {}
+        };
+
+        try {
+            const res = await fetch('/api/v1/master/plans/prices-list', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'No se pudo crear la lista de precios'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error de conexión');
+        }
+    }
+
+    // --- EDIT ---
     function openEditPriceModal(item) {
         document.getElementById('editPriceId').value = item.id;
         document.getElementById('editPriceValue').value = item.price;
         document.getElementById('editBillingCycle').value = item.billing_cycle;
         document.getElementById('editIsActive').checked = item.is_active;
         document.getElementById('editPricePerUser').checked = item.price_per_user;
-        
+
         document.getElementById('editPriceModal').style.display = 'flex';
     }
 
@@ -137,7 +257,7 @@
             price_per_user: document.getElementById('editPricePerUser').checked
         };
 
-        if(!confirm('¿Confirmar cambios en la lista de precios?')) return;
+        if (!confirm('¿Confirmar cambios en la lista de precios?')) return;
 
         try {
             const res = await fetch(`/api/v1/master/plans/prices/${id}`, {
@@ -156,6 +276,33 @@
         } catch (err) {
             console.error(err);
             alert('Error de conexión');
+        }
+    }
+
+    // --- HELPER ---
+    async function loadPlansForDropdown(selectId) {
+        const select = document.getElementById(selectId);
+        if (select.options.length > 1) return; // Already loaded
+
+        try {
+            const res = await fetch('/api/v1/master/plans/', {
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const response = await res.json();
+
+            // The API returns { data: [...] }
+            const plans = response.data || [];
+
+            select.innerHTML = '<option value="">Seleccione un Plan...</option>';
+            plans.forEach(plan => {
+                const option = document.createElement('option');
+                option.value = plan.id;
+                option.textContent = `${plan.code} - ${plan.name}`;
+                select.appendChild(option);
+            });
+        } catch (err) {
+            console.error(err);
+            select.innerHTML = '<option value="">Error cargando planes</option>';
         }
     }
 </script>
