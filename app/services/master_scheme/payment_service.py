@@ -16,7 +16,8 @@ from app.utils.helpers import send_email_template
 from app.utils.types import states
 from dotenv import load_dotenv
 from sqlalchemy import text
-import stripe, os
+from app.models.master_scheme.pyments.stripe_event_model import StripeEventLog
+import stripe, os, threading
 
 
 
@@ -190,7 +191,7 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
     stripe_sub_id = stripe_obj.get('subscription') # Aquí viene el sub_xxx
     stripe_cus_id = stripe_obj.get('customer')     # Aquí viene el cus_xxx    
         
-        
+    transaction.subscriptionId = stripe_sub_id
 
     transaction.paymentDate = payment_date_dt
     
@@ -241,7 +242,7 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
     if commit:
         db.session.commit()
 
-    # 4. Enviar Email
+    # 4. Enviar Email (Asíncrono)
     try:
         # En invoice.payment_succeeded el email está en customer_email
         email_to = stripe_obj.get('customer_email') or stripe_obj.get('customer_details', {}).get('email')
@@ -251,7 +252,7 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
         if is_trial:
             d_fin = payment_date_dt + timedelta(days=client_plan.price_list.trial_days)
             # CASO TRIAL: Email de bienvenida a la prueba gratuita
-            send_email_template(
+            run_async(send_email_template,
                 subject = i18n._("email.subject.trial_welcome") % {'plan': plan_name, 'app': app_name},
                 to=[email_to],
                 path_template=f"emails/{i18n.get_locale()}/trial_welcome.html", # Template específico
@@ -263,12 +264,9 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
         else:
                         # --- AQUÍ OBTIENES LAS URL ---
             invoice_url = stripe_obj.get('hosted_invoice_url')
-            # pdf_url = stripe_obj.get('invoice_pdf')
-            # customer_email = stripe_obj.get('customer_email')
-            # order_id = stripe_obj.get('metadata', {}).get('order_id') # Si lo pasaste en metadata
             
             # CASO PAGO REAL: Email de factura normal
-            send_email_template(
+            run_async(send_email_template,
                 subject = i18n._("email.subject.invoice_ready") % {'num': num_factura, 'app': app_name},
                 to=[email_to],
                 path_template=f"emails/{i18n.get_locale()}/invoice_ready.html",
@@ -283,6 +281,10 @@ def process_successful_payment(transaction, stripe_obj, app_name, is_trial, comm
 
     except Exception as e:
         print(f"Error enviando email: {e}")
+
+def run_async(func, *args, **kwargs):
+    """Ejecuta una función en un hilo separado para no bloquear el webhook."""
+    threading.Thread(target=func, args=args, kwargs=kwargs).start()
         
 def handle_checkout_session_completed(session, app_name):
     stripe_session_id = session.get('id')
@@ -314,7 +316,7 @@ def handle_invoice_payment_failed(invoice, app_name):
             plan.status = 'PAST_DUE'
             db.session.commit()
 
-        send_email_template(
+        run_async(send_email_template,
             subject=i18n._("email.subject.payment_failed"),
             to=[client.billingEmail],
             path_template=f"emails/{i18n.get_locale()}/payment_failed.html",
@@ -422,9 +424,14 @@ def handle_invoice_paid(invoice_data, app_name):
         payment_date_dt = datetime.fromtimestamp(stripe_paid_at, tz=timezone.utc)
         
         if subscription_id:
-            prev_trans = PaymentTransaction.query.filter(
-                PaymentTransaction.rawResponse['subscription'].astext == subscription_id
-            ).first()
+            # OPTIMIZACIÓN: Buscamos por la nueva columna indexada
+            prev_trans = PaymentTransaction.query.filter_by(subscriptionId=subscription_id).first()
+
+            if not prev_trans:
+                # Fallback por si la columna aún no está poblada para transacciones viejas
+                prev_trans = PaymentTransaction.query.filter(
+                    PaymentTransaction.rawResponse['subscription'].astext == subscription_id
+                ).first()
 
             if prev_trans:
                 print(f"prev_trans clientId : {prev_trans.clientId}")
@@ -520,7 +527,7 @@ def handle_subscription_deleted(subscription):
             client.isActive = False
             
             db.session.commit()
-            send_goodbye_email(client.billingEmail, client.contactName, business_name=client.businessName)
+            run_async(send_goodbye_email, client.billingEmail, client.contactName, business_name=client.businessName)
                        
 def handle_subscription_trial_will_end(subscription, app_name):
     load_dotenv()
@@ -536,8 +543,8 @@ def handle_subscription_trial_will_end(subscription, app_name):
         client_plan = ClientPlan.query.filter_by(client_id=client.clientId, status=states.ACTIVE).first()
         plan_name = client_plan.plan.code if client_plan else "Suscripción"
         
-        # 3. Enviar email recordatorio
-        send_email_template(
+        # 3. Enviar email recordatorio (Asíncrono)
+        run_async(send_email_template,
             subject=i18n._("email.subject.trial_ending") % {'app': app_name},
             to=[client.billingEmail],
             path_template=f"emails/{i18n.get_locale()}/trial_ending.html",

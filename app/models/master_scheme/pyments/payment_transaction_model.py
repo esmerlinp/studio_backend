@@ -23,6 +23,10 @@ class PaymentTransaction(db.Model):
     status = db.Column("sestado", db.String(20), default="PENDING")
     
     paymentDate = db.Column("dfechapago", db.DateTime(timezone=True))
+    
+    # NUEVO: Referencia directa a la suscripción para evitar búsquedas en JSONB
+    subscriptionId = db.Column("ssubscripcion_id", db.String(255), index=True)
+    
     rawResponse = db.Column("jrespuesta_pasarela", JSONB) 
     
     # Corregido para evitar el aviso de desuso

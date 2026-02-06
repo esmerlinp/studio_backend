@@ -33,11 +33,24 @@ def stripe_webhook():
     sig_header = request.headers.get('Stripe-Signature')
     endpoint_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
     app_name = os.getenv("APP_NAME")
-    
+
+    # 1. Construir el evento
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+    # 2. VERIFICACIÓN DE IDEMPOTENCIA
+    # Evita procesar el mismo evento dos veces si Stripe reintenta el envío
+    event_id = event.get('id')
+    if StripeEventLog.query.filter_by(stripe_event_id=event_id).first():
+        print(f"Evento {event_id} ya procesado. Ignorando.")
+        return jsonify({"status": "already_processed"}), 200
+
+    # Registrar el evento para futuras verificaciones
+    new_event_log = StripeEventLog(stripe_event_id=event_id, event_type=event['type'])
+    db.session.add(new_event_log)
+    db.session.commit()
 
     event_type = event['type']
     data_object = event['data']['object']
@@ -186,7 +199,6 @@ def restore_canceled_subscription():
         
         if not price_id:
             # Opción A: Buscar el precio que el cliente tenía antes de cancelar
-            # Buscamos en su última transacción exitosa
             plan_cliente = ClientPlan.query.filter_by(client_id=client.clientId).first()
 
             if plan_cliente.stripe_price_id:
@@ -323,10 +335,16 @@ def restore_canceled_subscription():
 
 def show_restore_view():
     load_dotenv()
-    #user_id = user_id
-    #relacion = UsuarioCliente.query.filter_by(user_id=user_id).first()
-    client_id = 68
-    client = Client.query.get(client_id)
+    user_id = get_jwt_identity()
+    relacion = UsuarioCliente.query.filter_by(user_id=user_id).first()
+    
+    if not relacion:
+         return render_template("errors/404.html"), 404
+         
+    client = Client.query.filter_by(uuid=relacion.client_uuid).first()
+    
+    if not client:
+        return render_template("errors/404.html"), 404
     
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
     # Obtenemos el cliente de Stripe para ver su tarjeta predeterminada
