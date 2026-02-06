@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Iniciar Sesión | {{ app_name }}</title>
@@ -18,7 +19,9 @@
             --accent-soft: #e8f0fe;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -34,7 +37,10 @@
             padding: 20px;
         }
 
-        .brand { text-align: center; margin-bottom: 24px; }
+        .brand {
+            text-align: center;
+            margin-bottom: 24px;
+        }
 
         .brand-name {
             font-size: 26px;
@@ -51,19 +57,43 @@
             width: 100%;
             max-width: 440px;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
             border: 1px solid var(--border-color);
         }
 
-        h2 { font-size: 22px; color: var(--text-color); margin: 0 0 8px 0; font-weight: 500; text-align: center; }
+        h2 {
+            font-size: 22px;
+            color: var(--text-color);
+            margin: 0 0 8px 0;
+            font-weight: 500;
+            text-align: center;
+        }
 
-        p.subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; text-align: center; }
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
 
-        .form-group { margin-bottom: 18px; position: relative; }
+        .form-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
 
-        label { display: block; font-size: 14px; font-weight: 600; color: var(--text-color); margin-bottom: 8px; }
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
 
-        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
 
         input {
             width: 100%;
@@ -95,7 +125,12 @@
             transition: color 0.2s;
         }
 
-        .options { display: flex; justify-content: flex-end; margin-top: 8px; margin-bottom: 24px; }
+        .options {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+            margin-bottom: 24px;
+        }
 
         .link-btn {
             background: none;
@@ -108,7 +143,9 @@
             border-radius: 4px;
         }
 
-        .link-btn:hover { background-color: var(--accent-soft); }
+        .link-btn:hover {
+            background-color: var(--accent-soft);
+        }
 
         /* Botón con Spinner */
         button.main-btn {
@@ -128,19 +165,26 @@
             gap: 10px;
         }
 
-        button.main-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        button.main-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
 
         .spinner {
             width: 18px;
             height: 18px;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: #fff;
             animation: spin 0.8s linear infinite;
             display: none;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         #message {
             margin-top: 20px;
@@ -150,16 +194,31 @@
             border-radius: 6px;
         }
 
-        .error-msg { color: var(--error-color); background-color: #fce8e6; border: 1px solid #f9d2ce; }
-        .success-msg { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
-        .hidden { display: none !important; }
+        .error-msg {
+            color: var(--error-color);
+            background-color: #fce8e6;
+            border: 1px solid #f9d2ce;
+        }
+
+        .success-msg {
+            background-color: #e6f4ea;
+            color: #137333;
+            border: 1px solid #ceead6;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="brand">
         <div class="brand-name">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z" />
+            </svg>
             {{ app_name }}
         </div>
     </div>
@@ -172,15 +231,18 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label for="login-username">Nombre de usuario</label>
-                    <input type="text" id="login-username" name="username" placeholder="Usuario o email" required autocomplete="username">
+                    <input type="text" id="login-username" name="username" placeholder="Usuario o email" required
+                        autocomplete="username">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="login-password">Contraseña</label>
                     <div class="password-wrapper">
-                        <input type="password" id="login-password" name="password" placeholder="Tu contraseña" required autocomplete="current-password">
+                        <input type="password" id="login-password" name="password" placeholder="Tu contraseña" required
+                            autocomplete="current-password">
                         <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
-                            <svg id="eye-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <svg id="eye-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                 <circle cx="12" cy="12" r="3"></circle>
                             </svg>
@@ -189,7 +251,8 @@
                 </div>
 
                 <div class="options">
-                    <button type="button" class="link-btn" onclick="toggleViews('forgot-view')">¿Has olvidado tu contraseña?</button>
+                    <button type="button" class="link-btn" onclick="toggleViews('forgot-view')">¿Has olvidado tu
+                        contraseña?</button>
                 </div>
 
                 <button type="submit" id="submit-btn" class="main-btn">
@@ -217,83 +280,84 @@
         <div id="message" class="hidden"></div>
     </div>
 
-<script>
-    const loginForm = document.getElementById('loginForm');
-    const submitBtn = document.getElementById('submit-btn');
-    const btnText = document.getElementById('btn-text');
-    const btnSpinner = document.getElementById('btn-spinner');
-    const message = document.getElementById('message');
-    const passwordInput = document.getElementById('login-password');
-    const eyeIcon = document.getElementById('eye-icon');
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const message = document.getElementById('message');
+        const passwordInput = document.getElementById('login-password');
+        const eyeIcon = document.getElementById('eye-icon');
 
-    function togglePasswordVisibility() {
-        const isPassword = passwordInput.type === 'password';
-        passwordInput.type = isPassword ? 'text' : 'password';
-        eyeIcon.style.color = isPassword ? 'var(--primary-color)' : 'var(--text-muted)';
-    }
-
-    function toggleViews(viewId) {
-        message.classList.add('hidden');
-        document.getElementById('login-view').classList.toggle('hidden', viewId === 'forgot-view');
-        document.getElementById('forgot-view').classList.toggle('hidden', viewId === 'login-view');
-    }
-
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('login-username').value;
-        const password = passwordInput.value;
-
-        // UI State: Cargando
-        message.classList.add('hidden');
-        submitBtn.disabled = true;
-        btnText.innerText = 'Validando...';
-        btnSpinner.style.display = 'block';
-
-        try {
-            const response = await fetch('/api/v1/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-
-            // CASO 200: Éxito
-            if (response.status === 200) {
-                window.location.href = '/dashboard';
-                return;
-            }
-
-            const data = await response.json();
-
-            // CASO 403: Suscripción Inactiva (Redirección a Restore)
-            if (response.status === 403) {
-                const token = data.access_token; // Asumiendo que el login 403 te devuelve el token
-                const clientId = data.clientId; 
-                localStorage.setItem('access_token', token);
-                localStorage.setItem('clientId', clientId);
-
-                // window.location.href = '/billing/restore';
-                //window.location.href = `/billing/restore?clientId=${clientId}`;
-                window.location.href = `/billing/restore?clientId=${clientId}&token=${token}`;
-                return;
-            }
-
-            // OTROS ERRORES (401, etc.)
-            showMessage(data.message || 'Credenciales incorrectas', 'error');
-
-        } catch (err) {
-            showMessage('Error de red. Intenta de nuevo.', 'error');
-        } finally {
-            submitBtn.disabled = false;
-            btnText.innerText = 'Siguiente';
-            btnSpinner.style.display = 'none';
+        function togglePasswordVisibility() {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            eyeIcon.style.color = isPassword ? 'var(--primary-color)' : 'var(--text-muted)';
         }
-    });
 
-    function showMessage(text, type) {
-        message.classList.remove('hidden', 'error-msg', 'success-msg');
-        message.classList.add(type === 'error' ? 'error-msg' : 'success-msg');
-        message.innerHTML = text;
-    }
-</script>
+        function toggleViews(viewId) {
+            message.classList.add('hidden');
+            document.getElementById('login-view').classList.toggle('hidden', viewId === 'forgot-view');
+            document.getElementById('forgot-view').classList.toggle('hidden', viewId === 'login-view');
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = passwordInput.value;
+
+            // UI State: Cargando
+            message.classList.add('hidden');
+            submitBtn.disabled = true;
+            btnText.innerText = 'Validando...';
+            btnSpinner.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/v1/master/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                // CASO 200: Éxito
+                if (response.status === 200) {
+                    window.location.href = '/dashboard';
+                    return;
+                }
+
+                const data = await response.json();
+
+                // CASO 403: Suscripción Inactiva (Redirección a Restore)
+                if (response.status === 403) {
+                    const token = data.access_token; // Asumiendo que el login 403 te devuelve el token
+                    const clientId = data.clientId;
+                    localStorage.setItem('access_token', token);
+                    localStorage.setItem('clientId', clientId);
+
+                    // window.location.href = '/billing/restore';
+                    //window.location.href = `/billing/restore?clientId=${clientId}`;
+                    window.location.href = `/billing/restore?clientId=${clientId}&token=${token}`;
+                    return;
+                }
+
+                // OTROS ERRORES (401, etc.)
+                showMessage(data.message || 'Credenciales incorrectas', 'error');
+
+            } catch (err) {
+                showMessage('Error de red. Intenta de nuevo.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.innerText = 'Siguiente';
+                btnSpinner.style.display = 'none';
+            }
+        });
+
+        function showMessage(text, type) {
+            message.classList.remove('hidden', 'error-msg', 'success-msg');
+            message.classList.add(type === 'error' ? 'error-msg' : 'success-msg');
+            message.innerHTML = text;
+        }
+    </script>
 </body>
+
 </html>

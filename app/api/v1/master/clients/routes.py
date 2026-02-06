@@ -7,7 +7,7 @@ from app.api.v1.master.clients.controller import (get_client_preferences, new_cl
                                            request_deletion, cancel_deletion, trigger_cleanup)
 
 
-client_bp = Blueprint('clients', __name__, url_prefix='/api/v1/clients')
+client_bp = Blueprint('clients', __name__, url_prefix='/api/v1/master/clients')
 
 client_bp.get("/")(get_all_clients)
 client_bp.get("/<int:clientId>")(get_client)

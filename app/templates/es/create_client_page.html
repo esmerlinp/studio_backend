@@ -107,7 +107,7 @@
     <script>
         async function fetchPlans() {
             try {
-                const apiUrl = `${window.location.protocol}//${window.location.host}/api/v1/plans`;
+                const apiUrl = `${window.location.protocol}//${window.location.host}/api/v1/master/plans`;
                 const response = await fetch(apiUrl);
                 const result = await response.json();
                 if (result.success) renderPlans(result.data);
@@ -209,7 +209,7 @@
             btn.innerText = 'Procesando...';
 
             try {
-                const response = await fetch("/api/v1/clients/onboard", {
+                const response = await fetch("/api/v1/master/clients/onboard", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

@@ -134,7 +134,7 @@ def before_request():
 
     print(endpoint)
     # 2. Excluir Webhooks y Públicos (VITAL para evitar errores de conexión en pagos)
-    if request.path.startswith('/api/v1/payments/webhook') or endpoint in MASTER_PUBLIC_ENDPOINTS:
+    if request.path.startswith('/api/v1/master/payments/webhook') or endpoint in MASTER_PUBLIC_ENDPOINTS:
         # Aseguramos que los webhooks siempre operen sobre public
         #db.session.execute(text("SET search_path TO cliente"))
         return

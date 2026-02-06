@@ -9,6 +9,7 @@ from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.services.master_scheme.session_service import close_all_session
 from app.services.master_scheme.payment_factory import get_current_provider
 from app.services.master_scheme.client_plan_service import  get_active_pending
+from app.services.master_scheme.ecf_service import ECFService
 from app.utils import i18n
 from datetime import datetime, timezone, timedelta, date
 from ...extensions import db
@@ -399,6 +400,47 @@ def handle_invoice_created(invoice, app_name):
             
             seq.current_number += 1 # Incrementamos la secuencia
             db.session.add(ncf_log)
+            
+            # --- FLUJO ELECTRÓNICO (e-CF) ---
+            if seq.prefix == 'E':
+                try:
+                    # Preparar datos para el XML
+                    invoice_data = {
+                        "tipo_ecf": seq.type_ncf,
+                        "ncf": nuevo_ncf,
+                        "rnc_emisor": os.getenv("COMPANY_RNC"),
+                        "razon_social_emisor": os.getenv("COMPANY_NAME"),
+                        "nombre_comercial": os.getenv("COMPANY_TRADE_NAME"),
+                        "actividad_economica": os.getenv("COMPANY_ACTIVITY"),
+                        "correo_emisor": os.getenv("COMPANY_EMAIL"),
+                        "rnc_receptor": client.documentNumber,
+                        "razon_social_receptor": client.businessName,
+                        "monto_total": float(invoice.amount_due) / 100,
+                        "items": [
+                            {
+                                "linea": 1,
+                                "nombre": f"Suscripción {app_name}",
+                                "cantidad": 1,
+                                "precio": float(invoice.amount_due) / 100,
+                                "monto": float(invoice.amount_due) / 100
+                            }
+                        ]
+                    }
+                    
+                    ecf_result = ECFService.process_electronic_invoice(
+                        invoice_data=invoice_data,
+                        client_id=client.clientId,
+                        stripe_invoice_id=invoice.id,
+                        ncf=nuevo_ncf
+                    )
+                    
+                    # Si tenemos TrackID, podemos agregarlo al footer de Stripe
+                    if ecf_result.get("track_id"):
+                        footer_msg += f" | TrackID: {ecf_result['track_id']}"
+                        
+                except Exception as ecf_ex:
+                    print(f"Error en el flujo e-CF (no crítico para Stripe): {str(ecf_ex)}")
+
             db.session.commit() # Liberamos el bloqueo de la DB
         
         except Exception as ex:

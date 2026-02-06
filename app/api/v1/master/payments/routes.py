@@ -5,8 +5,8 @@ from app.api.v1.master.payments.controller import (
     cancel_subscription, restore_canceled_subscription, show_restore_view)
 
 
-payment_bp = Blueprint('payments', __name__, url_prefix="/api/v1")
-billing_bp = Blueprint('billing', __name__)
+payment_bp = Blueprint('payments', __name__, url_prefix="/api/v1/master")
+billing_bp = Blueprint('billing', __name__, url_prefix="/api/v1/master")
 
 # ... (configuración de stripe.api_key)
 

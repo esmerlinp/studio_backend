@@ -1,20 +1,34 @@
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Akdmia | Gestión Educativa de Nueva Generación</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z'/></svg>">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z'/></svg>">
     <style>
-        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        
-        @keyframes gradient-move {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
+
+        @keyframes gradient-move {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
         .animated-mesh {
             background: linear-gradient(-45deg, #6366f1, #a855f7, #ec4899, #3b82f6);
             background-size: 400% 400%;
@@ -31,19 +45,21 @@
             transition: all 0.2s ease;
             box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
         }
+
         .btn-stripe:hover {
             transform: translateY(-2px);
             box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
         }
     </style>
 </head>
+
 <body class="bg-white text-[#424770]">
 
     <header class="fixed w-full z-[100] glass-nav border-b border-slate-100">
         <nav class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="#6366f1" class="transform -rotate-12">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z"/>
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z" />
                 </svg>
                 <span class="text-xl font-bold tracking-tight text-[#0a2540]">Akdmia</span>
             </div>
@@ -70,7 +86,8 @@
                     Akdmia unifica la gestión académica, administrativa y financiera en una sola plataforma.
                 </p>
                 <div class="flex flex-wrap justify-center lg:justify-start gap-4">
-                    <a href="#contacto" class="btn-stripe bg-[#0a2540] text-white px-8 py-3.5 rounded-full font-bold text-lg">
+                    <a href="#contacto"
+                        class="btn-stripe bg-[#0a2540] text-white px-8 py-3.5 rounded-full font-bold text-lg">
                         Empezar ahora →
                     </a>
                 </div>
@@ -82,82 +99,117 @@
         <div class="max-w-7xl mx-auto px-6 text-center mb-16">
             <h2 class="text-[#6366f1] font-bold mb-4 uppercase tracking-wider text-sm">Planes</h2>
             <h3 class="text-4xl font-extrabold text-[#0a2540] mb-8">Escalabilidad sin límites.</h3>
-            
+
             <div class="flex justify-center items-center gap-4">
                 <span id="monthly-label" class="text-sm font-medium transition-colors">Mensual</span>
-                <button onclick="toggleBilling()" class="w-14 h-7 bg-[#6366f1] rounded-full p-1 relative transition-all duration-300">
-                    <div id="toggle-circle" class="bg-white w-5 h-5 rounded-full shadow-md transition-transform duration-300 transform translate-x-7"></div>
+                <button onclick="toggleBilling()"
+                    class="w-14 h-7 bg-[#6366f1] rounded-full p-1 relative transition-all duration-300">
+                    <div id="toggle-circle"
+                        class="bg-white w-5 h-5 rounded-full shadow-md transition-transform duration-300 transform translate-x-7">
+                    </div>
                 </button>
-                <span id="annual-label" class="text-sm font-bold text-[#0a2540] transition-colors">Anual <span class="text-emerald-500 font-bold ml-1">(-15%)</span></span>
+                <span id="annual-label" class="text-sm font-bold text-[#0a2540] transition-colors">Anual <span
+                        class="text-emerald-500 font-bold ml-1">(-15%)</span></span>
             </div>
         </div>
 
         <div id="plans-container" class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-            </div>
+        </div>
     </section>
 
     <section id="contacto" class="py-32 bg-[#0a2540] text-white">
         <div class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
             <div>
                 <h2 class="text-5xl font-extrabold mb-8 leading-tight">Comienza a digitalizar hoy.</h2>
-                <p class="text-slate-400 text-xl mb-12">Configura tu cuenta y obtén acceso inmediato a las herramientas de gestión académica.</p>
+                <p class="text-slate-400 text-xl mb-12">Configura tu cuenta y obtén acceso inmediato a las herramientas
+                    de gestión académica.</p>
             </div>
-            
+
             <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-3xl text-[#0a2540]">
                 <form id="onboard-form" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                         <div class="md:col-span-2">
-                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Institución / Razón Social</label>
-                            <input type="text" id="business_name" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="Nombre del Colegio">
+                            <label
+                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Institución
+                                / Razón Social</label>
+                            <input type="text" id="business_name" required
+                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition"
+                                placeholder="Nombre del Colegio">
                         </div>
 
                         <div class="col-span-1">
-                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Nombre Admin</label>
-                            <input type="text" id="first_name" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="Nombre">
+                            <label
+                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Nombre
+                                Admin</label>
+                            <input type="text" id="first_name" required
+                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition"
+                                placeholder="Nombre">
                         </div>
 
                         <div class="col-span-1">
-                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Apellido Admin</label>
-                            <input type="text" id="last_name" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="Apellido">
+                            <label
+                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Apellido
+                                Admin</label>
+                            <input type="text" id="last_name" required
+                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition"
+                                placeholder="Apellido">
                         </div>
 
                         <div class="col-span-1">
-                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">WhatsApp</label>
-                            <input type="tel" id="contact_phone" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="809-000-0000">
+                            <label
+                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">WhatsApp</label>
+                            <input type="tel" id="contact_phone" required
+                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition"
+                                placeholder="809-000-0000">
                         </div>
 
                         <div class="col-span-1">
-                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Email Corporativo</label>
-                            <input type="email" id="email" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition" placeholder="admin@colegio.com">
+                            <label
+                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Email
+                                Corporativo</label>
+                            <input type="email" id="email" required
+                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none transition"
+                                placeholder="admin@colegio.com">
                         </div>
-                        
+
                         <div class="md:col-span-2">
-                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">País de Facturación</label>
-                            <select id="country_id_select" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none bg-transparent">
+                            <label
+                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">País
+                                de Facturación</label>
+                            <select id="country_id_select" required
+                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none bg-transparent">
                                 <option value="">Cargando países...</option>
                             </select>
-                            <p id="tax-notice" class="text-[9px] text-emerald-600 mt-1 hidden font-bold">✓ Se aplicará ITBIS (18%) por residencia en RD</p>
+                            <p id="tax-notice" class="text-[9px] text-emerald-600 mt-1 hidden font-bold">✓ Se aplicará
+                                ITBIS (18%) por residencia en RD</p>
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Plan</label>
-                            <select id="plan_id_select" required class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none bg-transparent">
+                            <label
+                                class="block text-[10px] font-bold uppercase mb-1 text-slate-400 tracking-widest">Plan</label>
+                            <select id="plan_id_select" required
+                                class="w-full border-b-2 border-slate-100 py-3 focus:border-[#6366f1] outline-none bg-transparent">
                                 <option value="">Selecciona un plan arriba</option>
                             </select>
                         </div>
 
                     </div>
-                    <button type="submit" id="submit-btn" class="w-full btn-stripe bg-[#6366f1] text-white py-4 rounded-2xl font-bold text-lg mt-4">
+                    <button type="submit" id="submit-btn"
+                        class="w-full btn-stripe bg-[#6366f1] text-white py-4 rounded-2xl font-bold text-lg mt-4">
                         Empezar ahora
                     </button>
-                    <p class="text-center text-[10px] text-slate-400 tracking-widest uppercase mt-4">Tarjeta de crédito requerida para iniciar</p>
+                    <p class="text-center text-[10px] text-slate-400 tracking-widest uppercase mt-4">Tarjeta de crédito
+                        requerida para iniciar</p>
                 </form>
 
                 <div id="success-msg" class="hidden text-center py-10">
-                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">✓</div>
+                    <div
+                        class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
+                        ✓</div>
                     <h3 class="text-2xl font-bold mb-3 text-[#0a2540]">¡Gracias por unirte a nosotros!</h3>
                     <p class="text-slate-500">
-                        Estamos emocionados de ayudarte a transformar tu colegio. Revisa tu email para validar tu cuenta y dar el siguiente paso.
+                        Estamos emocionados de ayudarte a transformar tu colegio. Revisa tu email para validar tu cuenta
+                        y dar el siguiente paso.
                     </p>
                 </div>
             </div>
@@ -170,7 +222,7 @@
 
         async function init() {
             try {
-                const res = await fetch("/api/v1/plans");
+                const res = await fetch("/api/v1/master/plans");
                 const json = await res.json();
                 if (json.success) {
                     plansData = json.data;
@@ -178,12 +230,12 @@
                 }
 
                 // NUEVO: Carga de Países
-                const resCountries = await fetch("/api/v1/countries");
+                const resCountries = await fetch("/api/v1/master/countries");
                 const jsonCountries = await resCountries.json();
                 if (jsonCountries.success) {
                     const countrySelect = document.getElementById('country_id_select');
                     countrySelect.innerHTML = '<option value="">Selecciona tu país</option>';
-                    
+
                     jsonCountries.data.forEach(country => {
                         const opt = new Option(country.name, country.id);
                         // Guardamos el ISO para la lógica de impuestos visual
@@ -195,7 +247,7 @@
                     countrySelect.addEventListener('change', (e) => {
                         const selectedIso = e.target.options[e.target.selectedIndex].getAttribute('data-iso');
                         const notice = document.getElementById('tax-notice');
-                        if(selectedIso === 'DOM') {
+                        if (selectedIso === 'DOM') {
                             notice.classList.remove('hidden');
                         } else {
                             notice.classList.add('hidden');
@@ -274,7 +326,7 @@
                     </div>
                 `;
 
-                const optLabel = `${plan.name} - $${priceObj.price} (${currentBillingCycle}) ${isTrial ? '[Trial '+trialDays+'d]' : ''}`;
+                const optLabel = `${plan.name} - $${priceObj.price} (${currentBillingCycle}) ${isTrial ? '[Trial ' + trialDays + 'd]' : ''}`;
                 const opt = new Option(optLabel, plan.id);
                 opt.setAttribute('data-price-id', priceObj.id);
                 select.add(opt);
@@ -303,34 +355,34 @@
             btn.innerHTML = 'Procesando registro...';
 
             const payload = {
-                client_data: { 
+                client_data: {
                     business_name: document.getElementById('business_name').value,
-                    contact_phone: document.getElementById('contact_phone').value ,
+                    contact_phone: document.getElementById('contact_phone').value,
                     country_id: parseInt(document.getElementById('country_id_select').value)
                 },
-                user_data: { 
-                    first_name: document.getElementById('first_name').value, 
-                    last_name: document.getElementById('last_name').value, 
-                    email: document.getElementById('email').value 
+                user_data: {
+                    first_name: document.getElementById('first_name').value,
+                    last_name: document.getElementById('last_name').value,
+                    email: document.getElementById('email').value
                 },
-                plan_data: { 
-                    plan_id: parseInt(select.value), 
+                plan_data: {
+                    plan_id: parseInt(select.value),
                     price_list_id: parseInt(priceId)
                 }
             };
 
             try {
-                const res = await fetch('/api/v1/clients/onboard', {
+                const res = await fetch('/api/v1/master/clients/onboard', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
-                
-                if(res.ok) {
+
+                if (res.ok) {
                     document.getElementById('onboard-form').classList.add('hidden');
                     document.getElementById('success-msg').classList.remove('hidden');
-                    if(data.checkout_url) {
+                    if (data.checkout_url) {
                         setTimeout(() => window.location.href = data.checkout_url, 1200);
                     }
                 } else {
@@ -338,8 +390,8 @@
                     btn.disabled = false;
                     btn.innerText = 'Empezar ahora';
                 }
-            } catch (err) { 
-                alert("Error de red"); 
+            } catch (err) {
+                alert("Error de red");
                 btn.disabled = false;
                 btn.innerText = 'Empezar ahora';
             }
@@ -348,4 +400,5 @@
         window.onload = init;
     </script>
 </body>
+
 </html>

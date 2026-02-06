@@ -39,14 +39,25 @@ class NCFLog(db.Model):
     client_id = db.Column('idcliente', db.Integer, db.ForeignKey('master.clientes.idcliente'))
     ncf_assigned = db.Column('sncfasignado', db.String(11))
     stripe_invoice_id = db.Column('stripe_invoice_id', db.String(50))
+    
+    # e-CF specific fields
+    track_id = db.Column('strackid', db.String(50), nullable=True)
+    security_code = db.Column('scodigoseguridad', db.String(50), nullable=True)
+    ecf_status = db.Column('secfstatus', db.String(20), default='PENDIENTE') # PENDIENTE, ACEPTADO, RECHAZADO
+    xml_url = db.Column('sxmlurl', db.String(255), nullable=True)
+    
     created_at = db.Column('dfechacreacion', db.DateTime, default=db.func.current_timestamp())
     
     def to_dict(self):
         created_at = format_datetime_user(self.created_at) if self.created_at else None
         return {
-            "id":self.id,
+            "id": self.id,
             "client_id": self.client_id,
             "ncf_assigned": self.ncf_assigned,
-            "stripe_invoice_id":self.stripe_invoice_id,
-            "create_at":created_at
+            "stripe_invoice_id": self.stripe_invoice_id,
+            "track_id": self.track_id,
+            "security_code": self.security_code,
+            "ecf_status": self.ecf_status,
+            "xml_url": self.xml_url,
+            "created_at": created_at
         }
