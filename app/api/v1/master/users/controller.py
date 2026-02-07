@@ -178,6 +178,36 @@ def update_user_preferences():
     except Exception as e:
         return error("an error has occure")
     
+@jwt_required()
+@track_activity
+def get_permissions():
+    try:
+        current_user_id = get_jwt_identity()
+        client_uuid = request.args.get("client_uuid")
+        module_uuid = request.args.get("module_uuid")
+        screen_uuid = request.args.get("screen_uuid")
+        functionality_uuid = request.args.get("functionality_uuid")
+        summary = request.args.get("summary", "false").lower() == "true"
+
+        if not client_uuid:
+            return error("client_uuid is required", 400)
+
+        # Import inside function to avoid circular imports if any
+        from app.services.master_scheme.permission_service import get_user_effective_permissions
+
+        permissions = get_user_effective_permissions(
+            user_id=current_user_id,
+            client_uuid=client_uuid,
+            module_uuid=module_uuid,
+            screen_uuid=screen_uuid,
+            functionality_uuid=functionality_uuid,
+            summary=summary
+        )
+
+        return success(permissions)
+
+    except Exception as e:
+        return error(str(e), 500)
 
 @jwt_required()
 @track_activity

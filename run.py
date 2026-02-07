@@ -74,6 +74,7 @@ from app.api.v1.client_scheme.active_cycle_grade_corrections.routes import activ
 from app.api.v1.client_scheme.active_cycle_student_grades.routes import active_cycle_student_grades_bp
 from app.api.v1.client_scheme.school_payments.routes import school_payments_bp
 from app.api.v1.client_scheme.sub_cycle_course_competencies.routes import sub_cycle_course_competencies_bp
+from app.api.v1.client_scheme.payments.routes import payments_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role, require_permission
 from app.utils import i18n
@@ -155,6 +156,7 @@ app.register_blueprint(concepts_bp)
 app.register_blueprint(courses_bp)
 app.register_blueprint(child_discounts_bp)
 app.register_blueprint(students_bp)
+app.register_blueprint(payments_bp)
 
 # ------------------------------
 # Configuración de idioma

@@ -309,3 +309,35 @@ Devuelve las preferencias actualizadas.
 ```
 
 ---
+
+---
+
+## GET /api/v1/user/permissions
+
+**Requiere Autenticación**: Sí
+
+**Descripción**: Obtiene los permisos efectivos del usuario para un cliente específico.
+
+**Parámetros de Consulta**:
+- `client_uuid`: UUID del cliente (Requerido).
+- `module_uuid`: Filtrar por módulo (Opcional).
+- `screen_uuid`: Filtrar por pantalla (Opcional).
+- `functionality_uuid`: Filtrar por funcionalidad (Opcional).
+- `summary`: `true` para obtener un resumen (Opcional).
+
+**Respuesta**:
+Devuelve una lista de permisos o un resumen.
+
+### Ejemplo de Respuesta
+```json
+[
+  {
+    "idusuario": 1,
+    "uuidcliente": "uuid",
+    "uuidrol": "uuid",
+    "uuidpantalla": "uuid",
+    "sapodo": "CREAR",
+    "bpermitido": true
+  }
+]
+```

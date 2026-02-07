@@ -1286,3 +1286,60 @@ Devuelve un objeto JSON que contiene la lista y los metadatos de paginación.
 
 
 ---
+
+---
+
+## Cálculo de Pagos
+
+### POST /api/v1/client/payments/calculate
+
+**Requiere Autenticación**: Sí
+
+**Descripción**: Calcula los montos de descuento, recargo e impuesto para un pago.
+
+**Cuerpo de la Solicitud**:
+```json
+{
+  "cycle_id": 1,
+  "concept_id": 1,
+  "base_amount": 1000.0,
+  "child_number": 1,
+  "date_applied": "2024-01-01",
+  "payment_frequency_id": 1,
+  "installment_number": 1
+}
+```
+
+**Respuesta**:
+Devuelve los montos calculados.
+
+### Ejemplo de Respuesta
+```json
+{
+  "discount": 50.0,
+  "surcharge": 0.0,
+  "tax": 180.0,
+  "total_amount": 1130.0
+}
+```
+
+---
+
+## Activación de Ciclos
+
+### PUT /api/v1/client/cycles/<cycle_id>/activate
+
+**Requiere Autenticación**: Sí
+
+**Descripción**: Activa un ciclo y desactiva automáticamente todos los demás ciclos.
+
+**Parámetros de URL**:
+- `cycle_id`: ID del ciclo a activar.
+
+**Respuesta**:
+Mensaje de éxito.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
