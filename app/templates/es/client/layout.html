@@ -9,6 +9,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- CSS Reset & Base -->
     <style>
         :root {
@@ -295,6 +296,15 @@
                         </path>
                     </svg>
                     <span>Asistencia</span>
+                </a>
+                <a href="/client/grades" class="nav-link {% if active_page == 'grades' %}active{% endif %}">
+                    <i class="fas fa-edit" style="width: 20px; font-size: 16px;"></i>
+                    <span>Digitación de Notas</span>
+                </a>
+                <a href="/client/classroom-assignment"
+                    class="nav-link {% if active_page == 'classroom_assignment' %}active{% endif %}">
+                    <i class="fas fa-chalkboard-teacher" style="width: 20px; font-size: 16px;"></i>
+                    <span>Asignación de Aulas</span>
                 </a>
             </div>
 

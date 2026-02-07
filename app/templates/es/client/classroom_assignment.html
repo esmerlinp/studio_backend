@@ -1,0 +1,522 @@
+{% extends "es/client/layout.html" %}
+
+{% block title %}Asignación de Aulas - AKDMIA{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Board Layout */
+    .board-container {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding-bottom: 20px;
+        min-height: calc(100vh - 250px);
+        align-items: flex-start;
+    }
+
+    .board-column {
+        min-width: 320px;
+        width: 320px;
+        background: #f8fafc;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #e2e8f0;
+        max-height: calc(100vh - 250px);
+    }
+
+    .column-header {
+        padding: 16px;
+        background: #fff;
+        border-bottom: 1px solid #e2e8f0;
+        border-radius: 12px 12px 0 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .column-title {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .student-count {
+        background: #e2e8f0;
+        color: #475569;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 700;
+    }
+
+    .students-list {
+        padding: 12px;
+        flex: 1;
+        overflow-y: auto;
+        min-height: 100px;
+        /* Drop zone area */
+    }
+
+    /* Student Card */
+    .student-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+        cursor: grab;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .student-card:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        border-color: #cbd5e1;
+    }
+
+    .student-card.sortable-ghost {
+        opacity: 0.4;
+        background: #f1f5f9;
+        border: 1px dashed #94a3b8;
+    }
+
+    .student-card.sortable-drag {
+        cursor: grabbing;
+        opacity: 1;
+        background: white;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transform: rotate(2deg);
+    }
+
+    .student-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--stripe-indigo-soft);
+        color: var(--stripe-indigo);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    /* Controls */
+    .controls-bar {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 24px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .controls-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex: 1;
+    }
+
+    .filter-select {
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        min-width: 250px;
+        font-size: 14px;
+    }
+
+    .btn-action {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-primary {
+        background: var(--stripe-indigo);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #534feb;
+    }
+
+    .btn-success {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #059669;
+    }
+
+    .btn-secondary {
+        background: white;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+    }
+
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="height: 100%;">
+
+    <!-- Header -->
+    <div style="margin-bottom: 24px;">
+        <h1 style="font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">Asignación de Aulas</h1>
+        <p style="color: #64748b; font-size: 14px;">Organice a los estudiantes en sus respectivas aulas.</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-bar">
+        <div class="controls-left">
+            <div>
+                <label
+                    style="display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Curso</label>
+                <select id="courseSelect" class="filter-select" onchange="loadBoard()">
+                    <option value="">Seleccione un Curso</option>
+                </select>
+            </div>
+
+            <div id="loadingStatus"
+                style="display: none; color: #64748b; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-spinner fa-spin"></i> Cargando...
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+            <button onclick="autoAssign()" class="btn-action btn-success">
+                <i class="fas fa-magic"></i> Asignar Automáticamente
+            </button>
+            <button onclick="saveChanges()" class="btn-action btn-primary" id="btnSave">
+                <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+        </div>
+    </div>
+
+    <!-- Board Area -->
+    <div id="boardContainer" class="board-container">
+        <!-- Columns will be injected here -->
+        <div style="width: 100%; text-align: center; padding: 40px; color: #94a3b8;">
+            <i class="fas fa-chalkboard-teacher" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <p>Seleccione un curso para ver el tablero.</p>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- SortableJS for Drag and Drop -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+<script>
+    let currentClassrooms = [];
+    let initialAssignments = {}; // Track initial state
+    let changes = {}; // Track pending changes: { studentId: newClassroomId }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCourses();
+    });
+
+    async function loadCourses() {
+        try {
+            // Using existing endpoint to load courses
+            const data = await fetchData('/api/v1/client/active-cycle-courses/');
+            const courses = uniqueBy(data, 'courseId').map(c => ({ id: c.courseId, name: c.courseName }));
+            populateSelect('courseSelect', courses);
+        } catch (error) {
+            console.error("Error loading courses", error);
+        }
+    }
+
+    async function loadClassrooms(courseId) {
+        // Fetch classrooms for the specific course
+        try {
+            return await fetchData(`/api/v1/client/classrooms/?courseId=${courseId}`);
+        } catch (e) {
+            console.error("Error loading classrooms", e);
+            return [];
+        }
+    }
+
+    async function loadBoard() {
+        const courseId = document.getElementById('courseSelect').value;
+        const container = document.getElementById('boardContainer');
+
+        if (!courseId) {
+            container.innerHTML = `
+                <div style="width: 100%; text-align: center; padding: 40px; color: #94a3b8;">
+                    <i class="fas fa-chalkboard-teacher" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <p>Seleccione un curso para ver el tablero.</p>
+                </div>`;
+            return;
+        }
+
+        setLoading(true);
+        changes = {}; // Reset changes
+
+        try {
+            // Fetch Board Data
+            const boardData = await fetchData(`/api/v1/client/active-cycle-students/assignment-board?courseId=${courseId}`);
+            // Fetch Classrooms Definitions
+            const classrooms = await loadClassrooms(courseId);
+            currentClassrooms = classrooms;
+
+            renderBoard(boardData, classrooms);
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = `<div style="color: #ef4444; padding: 20px;">Error al cargar datos: ${error.message}</div>`;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    function renderBoard(data, classrooms) {
+        const container = document.getElementById('boardContainer');
+        container.innerHTML = '';
+
+        // 1. Unassigned Column
+        const unassignedCol = createColumn('Sin Aula Asignada', 'unassigned', data.unassigned, null);
+        container.appendChild(unassignedCol);
+
+        // 2. Classroom Columns
+        classrooms.forEach(classroom => {
+            const students = data.classrooms[classroom.id] || [];
+            const col = createColumn(classroom.name, `classroom-${classroom.id}`, students, classroom.id);
+            container.appendChild(col);
+        });
+
+        // Initialize Sortable
+        initSortable();
+    }
+
+    function createColumn(title, id, students, classroomId) {
+        const colDiv = document.createElement('div');
+        colDiv.className = 'board-column';
+
+        const count = students ? students.length : 0;
+
+        colDiv.innerHTML = `
+            <div class="column-header">
+                <div class="column-title">
+                    ${title}
+                    <span class="student-count" id="count-${id}">${count}</span>
+                </div>
+            </div>
+            <div class="students-list" id="${id}" data-classroom-id="${classroomId || ''}">
+                ${students.map(s => createStudentCard(s)).join('')}
+            </div>
+        `;
+
+        return colDiv;
+    }
+
+    function createStudentCard(student) {
+        const avatarText = getInitials(student.studentName);
+        return `
+            <div class="student-card" data-id="${student.studentCycleClassroomId}">
+                <div class="student-avatar">${avatarText}</div>
+                <div>
+                    <div style="font-weight: 600; font-size: 13px; color: #1e293b;">${student.studentName}</div>
+                    <div style="font-size: 11px; color: #64748b;">${student.studentCode || ''}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function initSortable() {
+        const lists = document.querySelectorAll('.students-list');
+        lists.forEach(list => {
+            new Sortable(list, {
+                group: 'students', // Allow dragging between lists
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function (evt) {
+                    const itemEl = evt.item;
+                    const newContainer = evt.to;
+                    const oldContainer = evt.from;
+
+                    if (newContainer !== oldContainer) {
+                        // Update counts
+                        updateCount(oldContainer.id, -1);
+                        updateCount(newContainer.id, 1);
+
+                        // Track changes
+                        const studentId = itemEl.getAttribute('data-id');
+                        const newClassroomId = newContainer.getAttribute('data-classroom-id');
+
+                        // If newClassroomId is empty string, it means "unassigned" (null in DB)
+                        changes[studentId] = newClassroomId || null;
+
+                        highlightSave(true);
+                    }
+                }
+            });
+        });
+    }
+
+    function updateCount(containerId, delta) {
+        const countEl = document.getElementById(`count-${containerId}`);
+        if (countEl) {
+            let val = parseInt(countEl.innerText);
+            countEl.innerText = val + delta;
+        }
+    }
+
+    function highlightSave(hasChanges) {
+        const btn = document.getElementById('btnSave');
+        if (hasChanges) {
+            btn.classList.add('pulse-animation'); // Optional visual cue
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios *';
+        } else {
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+        }
+    }
+
+    // --- Actions ---
+
+    async function autoAssign() {
+        const courseId = document.getElementById('courseSelect').value;
+        if (!courseId) return alert('Seleccione un curso');
+
+        if (!confirm('¿Está seguro de ejecutar la asignación automática? Esto sobrescribirá las asignaciones actuales de este curso.')) return;
+
+        setLoading(true);
+        try {
+            const res = await fetch('/api/v1/client/active-cycle-students/auto-assign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId: parseInt(courseId) })
+            });
+
+            if (!res.ok) throw new Error((await res.json()).error || 'Error en asignación automática');
+
+            alert('Asignación automática completada.');
+            loadBoard(); // Reload to see changes
+        } catch (error) {
+            alert('Error: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function saveChanges() {
+        const payloadKeys = Object.keys(changes);
+        if (payloadKeys.length === 0) {
+            alert('No hay cambios pendientes de guardar.');
+            return;
+        }
+
+        const assignments = payloadKeys.map(studentId => ({
+            studentCycleClassroomId: parseInt(studentId),
+            classroomId: changes[studentId] ? parseInt(changes[studentId]) : null
+        }));
+
+        setLoading(true);
+        const btn = document.getElementById('btnSave');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        try {
+            const res = await fetch('/api/v1/client/active-cycle-students/bulk-assign-classrooms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assignments: assignments })
+            });
+
+            if (!res.ok) throw new Error((await res.json()).error || 'Error al guardar');
+
+            // Success
+            changes = {}; // Clear changes
+            highlightSave(false);
+            btn.innerHTML = '<i class="fas fa-check"></i> Guardado';
+            setTimeout(() => { btn.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios'; }, 2000);
+
+        } catch (error) {
+            alert('Error: ' + error.message);
+            btn.innerHTML = originalText;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // --- Helpers ---
+
+    function setLoading(isLoading) {
+        const loading = document.getElementById('loadingStatus');
+        loading.style.display = isLoading ? 'flex' : 'none';
+
+        document.getElementById('courseSelect').disabled = isLoading;
+        // Optionally disable drag and drop
+    }
+
+    async function fetchData(url) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(res.statusText);
+        return await res.json();
+    }
+
+    function populateSelect(id, items, valKey = 'id', textKey = 'name') {
+        const select = document.getElementById(id);
+        const placeholder = select.options[0].text;
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        items.forEach(item => {
+            select.innerHTML += `<option value="${item[valKey]}">${item[textKey]}</option>`;
+        });
+    }
+
+    function uniqueBy(arr, key) {
+        return [...new Map(arr.map(item => [item[key], item])).values()];
+    }
+
+    function getInitials(name) {
+        if (!name) return '??';
+        const parts = name.split(' ');
+        if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+</script>
+{% endblock %}

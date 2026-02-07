@@ -11,8 +11,11 @@ def get_all():
     if request.args.get('cycleId'):
         filters['cycleId'] = request.args.get('cycleId', type=int)
         
-    if request.args.get('levelId'):
+    if filters.get('levelId'):
         filters['levelId'] = request.args.get('levelId', type=int)
+
+    if request.args.get('subCycleId'):
+        filters['subCycleId'] = request.args.get('subCycleId', type=int)
         
     data = get_cycle_partials(filters)
         

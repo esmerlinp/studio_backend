@@ -52,3 +52,76 @@ def get_all():
         "pages": pagination.pages,
         "page": pagination.page
     }), 200
+
+@jwt_required()
+def get_assignment_board():
+    """
+    Get students grouped by classroom for assignment board.
+    """
+    course_id = request.args.get('courseId', type=int)
+    if not course_id:
+        return jsonify({"error": "Course ID is required"}), 400
+        
+    from app.services.client_scheme.active_cycle_student_service import get_students_by_course_grouped
+    data = get_students_by_course_grouped(course_id)
+    return jsonify(data), 200
+
+@jwt_required()
+def assign_classroom():
+    """
+    Assign a student to a classroom.
+    Payload: { studentCycleClassroomId, classroomId }
+    """
+    data = request.get_json()
+    student_cycle_classroom_id = data.get('studentCycleClassroomId')
+    classroom_id = data.get('classroomId')
+    
+    if not student_cycle_classroom_id:
+        return jsonify({"error": "Student ID is required"}), 400
+        
+    # classroom_id can be null if moving to unassigned
+    
+    from app.services.client_scheme.active_cycle_student_service import update_student_classroom
+    try:
+        update_student_classroom(student_cycle_classroom_id, classroom_id)
+        return jsonify({"message": "Assigned successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@jwt_required()
+def bulk_assign_classrooms():
+    """
+    Bulk assign students to classrooms.
+    Payload: { assignments: [ { studentCycleClassroomId, classroomId } ] }
+    """
+    data = request.get_json()
+    assignments = data.get('assignments', [])
+    
+    if not assignments:
+        return jsonify({"error": "No assignments provided"}), 400
+        
+    from app.services.client_scheme.active_cycle_student_service import update_student_classrooms_bulk
+    try:
+        update_student_classrooms_bulk(assignments)
+        return jsonify({"message": "Bulk assignment completed"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@jwt_required()
+def auto_assign():
+    """
+    Trigger automatic classroom assignment SP.
+    Payload: { courseId }
+    """
+    data = request.get_json()
+    course_id = data.get('courseId')
+    
+    if not course_id:
+        return jsonify({"error": "Course ID is required"}), 400
+        
+    from app.services.client_scheme.active_cycle_student_service import assign_classrooms_automatically
+    try:
+        assign_classrooms_automatically(course_id)
+        return jsonify({"message": "Automatic assignment completed"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

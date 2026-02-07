@@ -73,6 +73,7 @@ from app.api.v1.client_scheme.active_cycle_grade_corrections.routes import activ
 from app.api.v1.client_scheme.active_cycle_student_grades.routes import active_cycle_student_grades_bp
 from app.api.v1.client_scheme.school_payments.routes import school_payments_bp
 from app.api.v1.client_scheme.sub_cycle_course_competencies.routes import sub_cycle_course_competencies_bp
+from app.api.v1.client_scheme.classrooms.routes import classrooms_bp
 from app.api.v1.client_scheme.payments.routes import payments_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role, require_permission
@@ -489,6 +490,16 @@ def client_admissions():
 def client_attendance():
     return render_template("es/client/attendance.html", active_page='attendance')
 
+@app.route("/client/grades")
+@jwt_required()
+def client_grades():
+    return render_template("es/client/grades.html", active_page='grades')
+
+@app.route("/client/classroom-assignment")
+@jwt_required()
+def client_classroom_assignment():
+    return render_template("es/client/classroom_assignment.html", active_page='classroom_assignment')
+
 @app.route("/dashboard/plans")
 @jwt_required()
 @require_permission("SC_PLANES", "CONSULTAR")
@@ -798,6 +809,8 @@ def dashboard_weekday_names():
     from app.services.master_scheme.weekday_name_service import get_weekday_names
     days = get_weekday_names()
     return render_template("es/dashboard/weekday_names.html", days=[d.to_dict() for d in days])
+
+app.register_blueprint(classrooms_bp)
 
 @app.route("/dashboard/other-schools")
 @jwt_required()

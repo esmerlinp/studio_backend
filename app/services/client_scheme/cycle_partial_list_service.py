@@ -12,5 +12,8 @@ def get_cycle_partials(filters=None):
             
         if filters.get('levelId'):
             query = query.filter_by(levelId=filters['levelId'])
+
+        if filters.get('subCycleId'):
+            query = query.filter_by(subCycleId=filters['subCycleId'])
             
     return query.order_by(CyclePartialListView.partialName).all()

@@ -10,9 +10,10 @@ def get_all():
     """
     cycle_id = request.args.get('cycleId', type=int)
     course_id = request.args.get('courseId', type=int)
+    sub_cycle_id = request.args.get('subCycleId', type=int)
     
-    if cycle_id or course_id:
-        data = get_active_cycle_courses_filtered(cycle_id, course_id)
+    if cycle_id or course_id or sub_cycle_id:
+        data = get_active_cycle_courses_filtered(cycle_id, course_id, sub_cycle_id)
     else:
         data = get_active_cycle_courses()
         
