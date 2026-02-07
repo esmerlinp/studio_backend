@@ -52,7 +52,10 @@ def paginate_query(query):
         "meta": {
             "total": pagination.total,
             "pages": pagination.pages,
-            "current_page": pagination.page
+            "page": pagination.page,
+            "current_page": pagination.page,
+            "has_next": pagination.has_next,
+            "has_prev": pagination.has_prev
         }
     }, pagination
     

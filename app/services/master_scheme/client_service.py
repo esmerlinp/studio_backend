@@ -641,3 +641,23 @@ def toggle_client_active_status(client_id: int, is_active: bool) -> Client:
     client.isActive = is_active
     db.session.commit()
     return client
+@audit_log(action=ActionType.READ, 
+           resource_type=ResourceTypes.STORAGE, 
+           resource_id_arg="client_id", 
+           description="Consultar documentos guardados del cliente")
+def get_client_documents(client_id: int, page: int = 1, per_page: int = 10) -> dict:
+    """
+    Retorna todos los documentos activos de un cliente (desde su esquema) con paginación.
+    """
+    from app.models.client_scheme.storage_model import Storage
+    
+    client = Client.query.get(client_id)
+    if not client:
+        raise ValueError(i18n._("error.client.not_found"))
+        
+    set_schema(client.schemaName)
+    
+    query = Storage.query.filter_by(deleted_at=None)
+    
+    data_dict, _ = paginate_query(query=query)
+    return data_dict

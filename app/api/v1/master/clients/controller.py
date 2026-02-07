@@ -6,7 +6,8 @@ from app.services.master_scheme.client_service import (get_client_preferences, g
                                                        create_client, get_clients,
                                                        get_client_by_id, get_client_payment_orders,
                                                        request_scheme_deletion, cancel_scheme_deletion, process_scheduled_deletions,
-                                                       update_client_details, toggle_client_active_status, set_schema)
+                                                       update_client_details, toggle_client_active_status, set_schema,
+                                                       get_client_documents)
 
 from app.services.master_scheme.user_client_service import get_client_by_user, get_users_by_client 
 from app.services.master_scheme.client_plan_service import get_active_client_plan, assign_plan_to_client, change_client_plan, get_client_plan_history
@@ -440,4 +441,24 @@ def get_client_logs_admin(clientId):
              set_schema(current_schema)
         except:
             pass
+        return error(str(e), 500)
+
+@jwt_required()
+@track_activity
+@require_role(ADMIN_ROLES + [r.AUDITOR])
+def get_client_documents_list(clientId):
+    try:
+        page = request.args.get('page', 1, type=int)
+        current_schema = getattr(g, 'scheme', 'public')
+        docs_paginated = get_client_documents(clientId, page=page)
+        set_schema(current_schema)
+        
+        return success(data=docs_paginated)
+    except Exception as e:
+        try:
+             current_schema = getattr(g, 'scheme', 'public')
+             set_schema(current_schema)
+        except:
+            pass
+        return error(str(e), 500)
         return error(str(e), 500)

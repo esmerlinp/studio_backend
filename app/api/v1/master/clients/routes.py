@@ -6,7 +6,8 @@ from app.api.v1.master.clients.controller import (get_client_preferences, new_cl
                                            get_client_payments, handle_export_data,
                                            request_deletion, cancel_deletion, trigger_cleanup,
                                            update_client, toggle_client_status,
-                                           get_client_users, get_client_storage, get_client_logs_admin)
+                                            get_client_users, get_client_storage, get_client_logs_admin,
+                                            get_client_documents_list)
 
 
 client_bp = Blueprint('clients', __name__, url_prefix='/api/v1/master/clients')
@@ -34,4 +35,5 @@ client_bp.patch("/<int:clientId>/status")(toggle_client_status)
 # Client Details Endpoints
 client_bp.get("/<int:clientId>/users")(get_client_users)
 client_bp.get("/<int:clientId>/storage")(get_client_storage)
+client_bp.get("/<int:clientId>/documents")(get_client_documents_list)
 client_bp.get("/<int:clientId>/logs")(get_client_logs_admin)
