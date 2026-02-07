@@ -25,7 +25,7 @@
                 window.fetch = async (...args) => {
                     const response = await originalFetch(...args);
                     if (response.status === 440) {
-                        window.location.href = '/login';
+                        window.location.href = '/dashboard/login';
                     }
                     return response;
                 };

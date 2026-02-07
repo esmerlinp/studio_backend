@@ -80,7 +80,8 @@ MASTER_PUBLIC_ENDPOINTS = {
     "payments.stripe_webhook",
     "payments.cancel",
     "payments.show_restore_view",
-    "countries.get_countries"
+    "countries.get_countries",
+    "dashboard_login"
 }
 
 
@@ -96,7 +97,7 @@ def health():
 @app.route("/logout")
 def logout_dashboard():
     from flask_jwt_extended import unset_jwt_cookies
-    response = redirect("/login")
+    response = redirect("/dashboard/login")
     unset_jwt_cookies(response)
     # Opcional: Inhabilitar sesión en DB si se desea mayor seguridad
     # Pero para un logout simple de UI, esto es suficiente si el token vive en cookies
@@ -157,6 +158,12 @@ def before_request():
     except Exception:
         if request.path.startswith('/api/'):
             return error(i18n._("auth.not_authenticated"), 401)
+        
+        # Redireccionar al login correspondiente
+        if request.path.startswith('/dashboard'):
+            return redirect('/dashboard/login')
+        
+        # Si es /client o cualquier otro, va al login del main
         return redirect('/login')
 
     # 4. Obtener datos del usuario (Intenta optimizar esta función para que traiga el esquema de una vez)
@@ -245,6 +252,10 @@ def login():
     app_name = os.getenv("APP_NAME")
     return render_template("es/login.html", app_name=app_name)
 
+@app.route("/dashboard/login")
+def dashboard_login():
+    return render_template("es/dashboard/login.html")
+
 @app.route("/dashboard")
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
@@ -324,6 +335,40 @@ def dashboard_ncf():
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_ncf_logs():
     return render_template("es/dashboard/ncf_logs.html")
+
+# ------------------------------
+# Client Environment Routes
+# ------------------------------
+
+@app.route("/client/dashboard")
+@jwt_required()
+def client_dashboard():
+    return render_template("es/client/dashboard.html", active_page='dashboard')
+
+@app.route("/client/admissions")
+@jwt_required()
+def client_admissions():
+    return render_template("es/client/admissions.html", active_page='admissions')
+
+@app.route("/client/students")
+@jwt_required()
+def client_students():
+    return render_template("es/client/students.html", active_page='students')
+
+@app.route("/client/config/cycles")
+@jwt_required()
+def client_config_cycles():
+    return render_template("es/client/cycles.html", active_page='config_cycles')
+
+@app.route("/client/attendance")
+@jwt_required()
+def client_attendance():
+    return render_template("es/client/attendance.html", active_page='attendance')
+
+@app.route("/client/config/courses")
+@jwt_required()
+def client_config_courses():
+    return render_template("es/client/courses.html", active_page='config_courses')
 
 @app.route("/reset-password")
 def reset_password_page():

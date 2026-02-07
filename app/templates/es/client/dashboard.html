@@ -1,0 +1,95 @@
+{% extends "es/client/layout.html" %}
+
+{% block title %}Dashboard | Akdmia Studio{% endblock %}
+
+{% block content %}
+<div class="welcome-section" style="margin-bottom: 40px;">
+    <h1 style="font-family: 'Outfit', sans-serif; font-size: 32px; color: var(--stripe-dark); margin-bottom: 8px;">¡Hola
+        de nuevo, Admin!</h1>
+    <p style="font-size: 16px; color: var(--stripe-slate);">Aquí tienes un resumen de lo que está pasando en **Colegio
+        Girasol** hoy.</p>
+</div>
+
+<!-- Stats Grid -->
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 48px;">
+    <div
+        style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e6ebf1; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <p
+            style="font-size: 13px; font-weight: 600; color: var(--stripe-light); text-transform: uppercase; margin-bottom: 12px;">
+            Estudiantes Activos</p>
+        <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 32px; font-weight: 700; color: var(--stripe-dark);">1,284</span>
+            <span style="font-size: 12px; font-weight: 600; color: #059669;">+12%</span>
+        </div>
+    </div>
+
+    <div
+        style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e6ebf1; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <p
+            style="font-size: 13px; font-weight: 600; color: var(--stripe-light); text-transform: uppercase; margin-bottom: 12px;">
+            Solicitudes Pendientes</p>
+        <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 32px; font-weight: 700; color: var(--stripe-dark);">42</span>
+            <span style="font-size: 12px; font-weight: 600; color: #d97706;">Urgente</span>
+        </div>
+    </div>
+
+    <div
+        style="background: white; padding: 24px; border-radius: 12px; border: 1px solid #e6ebf1; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <p
+            style="font-size: 13px; font-weight: 600; color: var(--stripe-light); text-transform: uppercase; margin-bottom: 12px;">
+            Asistencia Hoy</p>
+        <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 32px; font-weight: 700; color: var(--stripe-dark);">96.5%</span>
+            <span style="font-size: 12px; font-weight: 600; color: var(--stripe-indigo);">Normal</span>
+        </div>
+    </div>
+</div>
+
+<!-- Shortcuts Section -->
+<h2 style="font-family: 'Outfit'; font-size: 20px; color: var(--stripe-dark); margin-bottom: 24px;">Accesos Directos
+</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+    <a href="/client/admissions"
+        style="text-decoration: none; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e6ebf1; display: flex; align-items: center; gap: 16px; transition: 0.2s;"
+        class="shortcut-card">
+        <div
+            style="background: var(--stripe-indigo-soft); color: var(--stripe-indigo); width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+        </div>
+        <div>
+            <p style="font-weight: 600; color: var(--stripe-dark); font-size: 15px;">Nueva Admisión</p>
+            <p style="font-size: 13px; color: var(--stripe-slate);">Registrar un nuevo prospecto</p>
+        </div>
+    </a>
+
+    <a href="/client/students"
+        style="text-decoration: none; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e6ebf1; display: flex; align-items: center; gap: 16px; transition: 0.2s;"
+        class="shortcut-card">
+        <div
+            style="background: var(--stripe-indigo-soft); color: var(--stripe-indigo); width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 012-2h2a2 2 0 012 2v1m-4 0h4">
+                </path>
+            </svg>
+        </div>
+        <div>
+            <p style="font-weight: 600; color: var(--stripe-dark); font-size: 15px;">Expedientes</p>
+            <p style="font-size: 13px; color: var(--stripe-slate);">Ver base de datos de alumnos</p>
+        </div>
+    </a>
+</div>
+
+<style>
+    .shortcut-card:hover {
+        border-color: var(--stripe-indigo);
+        box-shadow: 0 4px 12px rgba(99, 91, 255, 0.08);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
