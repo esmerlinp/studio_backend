@@ -12,6 +12,10 @@ from app.utils.responses import error
 from app.models.master_scheme.user_model import User
 from app.models.master_scheme.user_roles_model import UserRole
 from app.models.master_scheme.roles_model import Role
+from app.models.master_scheme.role_permission_model import RolePermission
+from app.models.master_scheme.screen_functionality_model import ScreenFunctionality
+from app.models.master_scheme.screen_model import Screen
+from app.models.master_scheme.functionality_model import Functionality
 from datetime import datetime, timezone
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import g, request, redirect
@@ -85,6 +89,16 @@ def create_app():
 
     
     
+
+    # Jinja Globals (Available in Macros)
+    def url_args_without_page():
+        args = request.args.copy()
+        if 'page' in args:
+            args.pop('page')
+        return args
+    
+    app.jinja_env.globals['url_args_without_page'] = url_args_without_page
+
     return app
 
 def track_activity(func):
@@ -240,6 +254,80 @@ def require_role(role_codes:list[str]):
 
                 return fn(*args, **kwargs)
             return wrapper
+    return decorator
+
+
+def require_permission(screen_code: str, functionality_code: str):
+    """
+    Verifica si el usuario tiene permiso para acceder a una funcionalidad específica de una pantalla.
+    
+    Args:
+        screen_code (str): Código único de la pantalla (ej: SC_DASHBOARD)
+        functionality_code (str): Código de la funcionalidad (ej: VIEW, EDIT, DELETE)
+    """
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            user_id = get_jwt_identity()
+            
+            if not user_id:
+                return error(i18n._("auth.not_authenticated"), 401)
+                
+            # Verifica si el usuario es ROOT (acceso total)
+            is_root = (
+                db.session.query(UserRole)
+                .join(Role)
+                .filter(UserRole.user_id == user_id, Role.code == "ROOT", Role.is_active == True)
+                .first()
+            )
+            
+            if is_root:
+                return fn(*args, **kwargs)
+
+            try:
+                # 1. Obtener IDs de Roles del usuario
+                user_roles_subquery = (
+                    select(UserRole.role_id)
+                    .join(Role)
+                    .where(
+                        UserRole.user_id == user_id,
+                        Role.is_active == True
+                    )
+                    .scalar_subquery()
+                )
+
+                # 2. Verificar si alguno de esos roles tiene permiso
+                # Join: RolePermission -> ScreenFunctionality -> Screen & Functionality
+                has_permission = (
+                    db.session.query(RolePermission)
+                    .join(ScreenFunctionality, RolePermission.screen_functionality_id == ScreenFunctionality.id)
+                    .join(Screen, ScreenFunctionality.screen_id == Screen.id)
+                    .join(Functionality, ScreenFunctionality.functionality_id == Functionality.id)
+                    .filter(
+                        RolePermission.role_id.in_(user_roles_subquery),
+                        RolePermission.is_allowed == True,
+                        ScreenFunctionality.is_active == True,
+                        Screen.code == screen_code,
+                        Functionality.code == functionality_code
+                    )
+                    .first()
+                )
+
+                if not has_permission:
+                    # Log attempt?
+                    app.logger.warning(f"Access Denied: User {user_id} tried to access {screen_code}:{functionality_code}")
+                    if request.path.startswith('/api/'):
+                        return error(i18n._("auth.insufficient_permissions"), 403)
+                    return redirect('/')
+
+                return fn(*args, **kwargs)
+
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(f"Error checking permissions: {str(e)}")
+                return error(i18n._("system.error_processing_permissions"), 500)
+
+        return wrapper
     return decorator
 
 

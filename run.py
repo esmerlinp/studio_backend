@@ -39,7 +39,7 @@ from app.api.v1.master.roles.routes import roles_bp as master_roles_bp
 from app.api.v1.master.sectors.routes import sectors_bp
 from app.api.v1.master.search.controller import search_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
-from app import create_app, require_role
+from app import create_app, require_role, require_permission
 from app.utils import i18n
 from app.utils.helpers import verify_reset_token
 from app.utils.responses import error
@@ -305,7 +305,7 @@ def dashboard_login():
 
 @app.route("/dashboard")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_DASHBOARD", "CONSULTAR")
 def dashboard():
     from app.services.master_scheme.dashboard_service import get_admin_dashboard_data
     data = get_admin_dashboard_data()
@@ -316,7 +316,7 @@ def dashboard():
 
 @app.route("/dashboard/clients")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_CLIENTES", "CONSULTAR")
 def dashboard_clients():
     from app.models.master_scheme.client_model import Client
     from app.models.master_scheme.client_model import Client
@@ -357,20 +357,20 @@ def dashboard_clients():
 
 @app.route("/dashboard/clients/<int:clientId>")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_CLIENTES", "CONSULTAR")
 def dashboard_client_details(clientId):
     # We pass the ID and let the frontend fetch the details via API
     return render_template("es/dashboard/client_details.html", clientId=clientId)
 
 @app.route("/dashboard/clients/create")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_CLIENTES", "CREAR")
 def dashboard_create_client():
     return render_template("es/dashboard/create_client.html")
 
 @app.route("/dashboard/plans")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_PLANES", "CONSULTAR")
 def dashboard_plans():
     from app.models.master_scheme.plans_model import Plan
     from app.models.master_scheme.price_list_model import PriceList  # Required for relationship mapping
@@ -408,7 +408,7 @@ def dashboard_plans():
 
 @app.route("/dashboard/price-lists")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_LISTAS_DE_PRECIOS", "CONSULTAR")
 def dashboard_price_lists():
     from app.models.master_scheme.price_list_model import PriceList
     from app.models.master_scheme.plans_model import Plan  # Ensure relationship loading
@@ -419,7 +419,7 @@ def dashboard_price_lists():
 
 @app.route("/dashboard/payments")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_PAGOS", "CONSULTAR")
 def dashboard_payments():
     from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
     page = request.args.get('page', 1, type=int)
@@ -455,7 +455,7 @@ def dashboard_payments():
 
 @app.route("/dashboard/invoices")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_INVOICES", "CONSULTAR")
 def dashboard_invoices():
     # Invoices (PaymentTransactions with SUCCESS/APPROVED status)
     from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
@@ -492,19 +492,19 @@ def dashboard_invoices():
 
 @app.route("/dashboard/ncf")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_SECUENCIAS_NCF", "CONSULTAR")
 def dashboard_ncf():
     return render_template("es/dashboard/ncf_sequences.html")
 
 @app.route("/dashboard/ncf/logs")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_LOGS_NCF", "CONSULTAR")
 def dashboard_ncf_logs():
     return render_template("es/dashboard/ncf_logs.html")
 
 @app.route("/dashboard/allergies")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_ALERGIAS", "CONSULTAR")
 def dashboard_allergies():
     from app.models.master_scheme.allergy_model import Allergy
     
@@ -537,7 +537,7 @@ def dashboard_allergies():
 
 @app.route("/dashboard/banks")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_BANCOS", "CONSULTAR")
 def dashboard_banks():
     from app.services.master_scheme.bank_service import get_banks
     banks = get_banks()
@@ -545,7 +545,7 @@ def dashboard_banks():
 
 @app.route("/dashboard/cities")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_CIUDADES", "CONSULTAR")
 def dashboard_cities():
     from app.models.master_scheme.city_model import City
     from app.models.master_scheme.country_model import Country
@@ -572,7 +572,7 @@ def dashboard_cities():
 
 @app.route("/dashboard/marital-status")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_ESTADOS_CIVILES", "CONSULTAR")
 def dashboard_marital_status():
     from app.services.master_scheme.marital_status_service import get_marital_statuses
     statuses = get_marital_statuses()
@@ -580,7 +580,7 @@ def dashboard_marital_status():
 
 @app.route("/dashboard/functionalities")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_FUNCIONALIDADES", "CONSULTAR")
 def dashboard_functionalities():
     from app.models.master_scheme.functionality_model import Functionality
     
@@ -616,7 +616,7 @@ def dashboard_functionalities():
 
 @app.route("/dashboard/functions")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_FUNCIONES", "CONSULTAR")
 def dashboard_functions():
     from app.services.master_scheme.function_service import get_functions
     funcs = get_functions()
@@ -624,7 +624,7 @@ def dashboard_functions():
 
 @app.route("/dashboard/medical-institutions")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_INSTITUCIONES_MÉDICAS", "CONSULTAR")
 def dashboard_medical_institutions():
     from app.services.master_scheme.medical_institution_service import get_medical_institutions
     insts = get_medical_institutions()
@@ -632,7 +632,7 @@ def dashboard_medical_institutions():
 
 @app.route("/dashboard/health-insurance-institutions")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_ARS", "CONSULTAR")
 def dashboard_health_insurance_institutions():
     from app.services.master_scheme.health_insurance_institution_service import get_health_insurance_institutions
     insts = get_health_insurance_institutions()
@@ -640,7 +640,7 @@ def dashboard_health_insurance_institutions():
 
 @app.route("/dashboard/logs-webhooks")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_LOGS_WEBHOOKS", "CONSULTAR")
 def dashboard_logs_webhooks():
     from app.services.master_scheme.log_service import get_logs
     logs = get_logs()
@@ -648,7 +648,7 @@ def dashboard_logs_webhooks():
 
 @app.route("/dashboard/modules")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_MÓDULOS", "CONSULTAR")
 def dashboard_modules():
     from app.services.master_scheme.module_service import get_modules
     modules = get_modules()
@@ -656,7 +656,7 @@ def dashboard_modules():
 
 @app.route("/dashboard/currencies")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_MONEDAS", "CONSULTAR")
 def dashboard_currencies():
     from app.services.master_scheme.currency_service import get_currencies
     currencies = get_currencies()
@@ -664,7 +664,7 @@ def dashboard_currencies():
 
 @app.route("/dashboard/month-names")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_NOMBRES_DE_MESES", "CONSULTAR")
 def dashboard_month_names():
     from app.services.master_scheme.month_name_service import get_month_names
     months = get_month_names()
@@ -672,7 +672,7 @@ def dashboard_month_names():
 
 @app.route("/dashboard/weekday-names")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_NOMBRES_DE_DÍAS", "CONSULTAR")
 def dashboard_weekday_names():
     from app.services.master_scheme.weekday_name_service import get_weekday_names
     days = get_weekday_names()
@@ -680,7 +680,7 @@ def dashboard_weekday_names():
 
 @app.route("/dashboard/other-schools")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_OTRAS_ESCUELAS", "CONSULTAR")
 def dashboard_other_schools():
     from app.services.master_scheme.other_school_service import get_other_schools
     schools = get_other_schools()
@@ -688,7 +688,7 @@ def dashboard_other_schools():
 
 @app.route("/dashboard/countries")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_COUNTRIES", "CONSULTAR")
 def dashboard_countries():
     from app.models.master_scheme.country_model import Country
     
@@ -724,7 +724,7 @@ def dashboard_countries():
 
 @app.route("/dashboard/users")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_USUARIOS", "CONSULTAR")
 def dashboard_users():
     from app.models.master_scheme.user_model import User
     page = request.args.get('page', 1, type=int)
@@ -867,7 +867,7 @@ def confirmation_account():
 
 @app.route("/dashboard/screens")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_PANTALLAS", "CONSULTAR")
 def dashboard_screens():
     from app.models.master_scheme.screen_model import Screen
     from app.models.master_scheme.module_model import Module
@@ -911,7 +911,7 @@ def dashboard_screens():
 
 @app.route("/dashboard/screen-functionalities")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_FUNCIONALIDADES_PANTALLA", "CONSULTAR")
 def dashboard_screen_functionalities():
     from app.models.master_scheme.screen_functionality_model import ScreenFunctionality
     from app.models.master_scheme.screen_model import Screen
@@ -931,7 +931,7 @@ def dashboard_screen_functionalities():
 
 @app.route("/dashboard/payment-processors")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_PROCESADORES_DE_PAGO", "CONSULTAR")
 def dashboard_payment_processors():
     from app.services.master_scheme.payment_processor_service import get_payment_processors
     pp = get_payment_processors()
@@ -939,7 +939,7 @@ def dashboard_payment_processors():
 
 @app.route("/dashboard/professions")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_PROFESIONES", "CONSULTAR")
 def dashboard_professions():
     from app.models.master_scheme.profession_model import Profession
     
@@ -971,7 +971,7 @@ def dashboard_professions():
 
 @app.route("/dashboard/role-permissions")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_PERMISOS_DE_ROLES", "CONSULTAR")
 def dashboard_role_permissions():
     from app.models.master_scheme.role_permission_model import RolePermission
     from app.models.master_scheme.roles_model import Role
@@ -995,7 +995,7 @@ def dashboard_role_permissions():
 
 @app.route("/dashboard/genders")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_GÉNEROS", "CONSULTAR")
 def dashboard_genders():
     from app.services.master_scheme.gender_service import get_genders
     g = get_genders()
@@ -1003,7 +1003,7 @@ def dashboard_genders():
 
 @app.route("/dashboard/attendance-types")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_TIPOS_DE_ASISTENCIA", "CONSULTAR")
 def dashboard_attendance_types():
     from app.services.master_scheme.attendance_type_service import get_attendance_types
     at = get_attendance_types()
@@ -1011,7 +1011,7 @@ def dashboard_attendance_types():
 
 @app.route("/dashboard/document-types")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_TIPOS_DE_DOCUMENTO", "CONSULTAR")
 def dashboard_document_types():
     from app.services.master_scheme.document_type_service import get_document_types
     dt = get_document_types()
@@ -1019,7 +1019,7 @@ def dashboard_document_types():
 
 @app.route("/dashboard/blood-types")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_TIPOS_DE_SANGRE", "CONSULTAR")
 def dashboard_blood_types():
     from app.services.master_scheme.blood_type_service import get_blood_types
     bt = get_blood_types()
@@ -1027,7 +1027,7 @@ def dashboard_blood_types():
 
 @app.route("/dashboard/phone-types")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_TIPOS_DE_TELÉFONO", "CONSULTAR")
 def dashboard_phone_types():
     from app.services.master_scheme.phone_type_service import get_phone_types
     pt = get_phone_types()
@@ -1035,7 +1035,7 @@ def dashboard_phone_types():
 
 @app.route("/dashboard/roles-master")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_ROLES", "CONSULTAR")
 def dashboard_roles_master():
     from app.models.master_scheme.roles_model import Role
     page = request.args.get('page', 1, type=int)
@@ -1045,7 +1045,7 @@ def dashboard_roles_master():
 
 @app.route("/dashboard/sectors")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_SECTORES", "CONSULTAR")
 def dashboard_sectors():
     from app.services.master_scheme.sector_service import get_sectors
     s = get_sectors()
@@ -1053,7 +1053,7 @@ def dashboard_sectors():
 
 @app.route("/dashboard/user-roles")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_ROLES_DE_USUARIO", "CONSULTAR")
 def dashboard_user_roles():
     from app.models.master_scheme.user_roles_model import UserRole
     from app.models.master_scheme.user_model import User
@@ -1073,7 +1073,7 @@ def dashboard_user_roles():
 
 @app.route("/dashboard/user-sessions")
 @jwt_required()
-@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_SESIONES", "CONSULTAR")
 def dashboard_user_sessions():
     from app.models.master_scheme.session_model import Session
     from app.models.master_scheme.user_model import User

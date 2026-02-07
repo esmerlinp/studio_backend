@@ -12,6 +12,7 @@ class Screen(db.Model):
     description = db.Column("sdescripcion", db.String(200))
     route = db.Column("sruta", db.String(200))
     icon = db.Column("sicono", db.String(50))
+    code = db.Column("scodigo", db.String(50), unique=True, nullable=True) # Nullable for now, will be populated
     order = db.Column("iorden", db.SmallInteger)
     is_active = db.Column("bactivo", db.Boolean, nullable=False, default=True)
 
@@ -23,7 +24,10 @@ class Screen(db.Model):
             "name": self.name,
             "description": self.description,
             "route": self.route,
+            "route": self.route,
             "icon": self.icon,
+            "code": self.code,
+            "order": self.order,
             "order": self.order,
             "is_active": self.is_active
         }
