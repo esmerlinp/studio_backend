@@ -1,50 +1,75 @@
-# cpstudio python 3.12
+# Descripción del Proyecto: Studio Backend
 
+Este proyecto es el backend para una plataforma de gestión (Studio), desarrollado con **Flask** (Python). Utiliza una arquitectura multi-inquilino (multi-tenant) basada en esquemas de base de datos PostgreSQL.
 
-# desde bash Compila los archivos .po a .mo
-msgfmt locales/es/LC_MESSAGES/messages.po -o locales/es/LC_MESSAGES/messages.mo
-msgfmt locales/en/LC_MESSAGES/messages.po -o locales/en/LC_MESSAGES/messages.mo
+## Tecnologías Principales
+- **Framework:** Flask (Python)
+- **Base de Datos:** PostgreSQL (con SQLAlchemy)
+- **Autenticación:** JWT (Flask-JWT-Extended)
+- **Pagos:** Stripe API
+- **Infraestructura:** Docker, Google Cloud (GCS para almacenamiento)
+- **Internacionalización (i18n):** Soporte multi-idioma (es, en)
 
+## Arquitectura Multi-tenant
+El sistema utiliza un modelo de **esquemas aislados** en PostgreSQL:
+- **Esquema `public` (o `master`):** Contiene información global como usuarios, clientes, planes de suscripción y países.
+- **Esquemas de Clientes:** Cada cliente (empresa) tiene su propio esquema donde se almacenan sus datos específicos (estudiantes, roles locales, documentos, etc.). La aplicación cambia el `search_path` dinámicamente según el usuario autenticado.
 
+## Estructura de Directorios
 
-
-> `duplicate key value violates unique constraint "usuarios_pkey"`
-**Resumen del error y causa**
-
-Se presenta el error:
-
-> `duplicate key value violates unique constraint "usuarios_pkey"`
->
-> `Key (idusuario)=(1) already exists`
-
-Este error ocurre cuando se intenta insertar un registro en la tabla **usuarios** y el valor de la clave primaria (`idusuario`) ya existe.
-La causa más común es que el **sequence** asociado a la columna autoincremental (`idusuario`) no está sincronizado con los datos reales de la tabla, algo que suele suceder al **crear nuevos esquemas copiando datos o restaurando estructuras**.
-
----
-
-**Solución / prevención al crear nuevos esquemas**
-
-Al crear un nuevo esquema o cargar datos manualmente, es necesario **ajustar el sequence** de la clave primaria para que apunte al siguiente valor disponible:
-
-```sql
-SELECT setval(
-    'master.usuarios_idusuario_seq',
-    (SELECT MAX(idusuario) FROM master.usuarios)
-);
+```text
+studio_backend/
+├── app/                    # Directorio principal de la aplicación
+│   ├── api/                # Definición de rutas y controladores API
+│   │   └── v1/
+│   │       ├── base/       # Funcionalidades específicas del cliente (estudiantes, roles)
+│   │       └── master/     # Funcionalidades globales (auth, clientes, planes, pagos)
+│   ├── models/             # Modelos de SQLAlchemy (master_scheme y client_scheme)
+│   ├── services/           # Lógica de negocio separada de las rutas
+│   ├── utils/              # Funciones auxiliares (i18n, helpers de red, respuestas)
+│   ├── extensions.py       # Inicialización de extensiones (DB, JWT, etc.)
+│   └── templates/          # Plantillas HTML para correos y vistas simples
+├── docs/                   # Documentación técnica
+├── run.py                  # Punto de entrada y configuración de middleware
+├── requirements.txt        # Dependencias de Python
+└── Dockerfile              # Configuración para despliegue en contenedores
 ```
 
-Esto garantiza que los próximos `INSERT` usen un ID válido y evita conflictos de clave primaria.
+## Funcionalidades Actuales
+
+### 1. Gestión de Autenticación y Usuarios
+- Registro y login con JWT.
+- Recuperación de contraseña mediante tokens por correo.
+- Gestión de preferencias de usuario (idioma, zona horaria, formatos de fecha).
+- Confirmación de cuenta.
+
+### 2. Sistema de Suscripciones y Pagos (Master)
+- Integración completa con **Stripe**.
+- Manejo de planes de suscripción.
+- Pasarela de facturación y webhook para eventos de pago.
+- Flujo de "onboarding" para nuevos clientes.
+
+### 3. Gestión de Clientes (Multi-tenancy)
+- Creación dinámica de esquemas de base de datos.
+- Aislamiento de datos por cliente.
+- Middleware en `run.py` que asegura el contexto correcto de base de datos por petición.
+
+### 4. Funcionalidades de Negocio (Base)
+- **Estudiantes:** Gestión de perfiles de estudiantes.
+- **Documentos:** Sistema de almacenamiento (posiblemente vinculado a GCS).
+- **Roles y Permisos:** Control de acceso basado en roles tanto a nivel global como local por cliente.
+- **Campos Dinámicos:** Soporte para campos personalizados.
+
+### 5. Utilidades y Sistema
+- Soporte internacional (i18n) para respuestas de error y plantillas.
+- Registro de auditoría (logs) para administradores.
+- Sistema de notificaciones.
+- Inteligencia (análisis de datos o reportes básicos).
+
+### 6. Integración de Vistas y Catálogos
+- **Vistas del Esquema de Cliente:** Acceso de solo lectura a vistas SQL complejas para reportes (asistencias, calificaciones, bloques horarios, etc.).
+- **Catálogos Maestros:** Endpoints para obtener datos de catálogos (países, monedas, tipos de documentos, etc.).
+- **Documentación API:** Documentación detallada con ejemplos de respuesta disponible en `docs/api/`.
 
 ---
-
-**Recomendación**
-
-Siempre que se cree un nuevo esquema o se migren datos:
-
-* Verificar que **todas las secuencias (`SEQUENCE`) estén alineadas** con los valores existentes en sus tablas.
-* Especial atención a tablas maestras como `usuarios`.
-
-
-
-
-
+*Este documento fue generado automáticamente como parte del análisis de estructura y funcionalidad del proyecto.*

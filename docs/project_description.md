@@ -66,5 +66,10 @@ studio_backend/
 - Sistema de notificaciones.
 - Inteligencia (análisis de datos o reportes básicos).
 
+### 6. Integración de Vistas y Catálogos
+- **Vistas del Esquema de Cliente:** Acceso de solo lectura a vistas SQL complejas para reportes (asistencias, calificaciones, bloques horarios, etc.).
+- **Catálogos Maestros:** Endpoints para obtener datos de catálogos (países, monedas, tipos de documentos, etc.).
+- **Documentación API:** Documentación detallada con ejemplos de respuesta disponible en `docs/api/`.
+
 ---
 *Este documento fue generado automáticamente como parte del análisis de estructura y funcionalidad del proyecto.*
