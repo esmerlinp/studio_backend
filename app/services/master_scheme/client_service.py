@@ -343,8 +343,36 @@ def get_client_preferences():
 @audit_log(action=ActionType.READ, 
            resource_type=ResourceTypes.AUDIT, 
            description="Consultar Log")
-def get_client_logs()-> dict:    
-    query = AuditLog.query.order_by(AuditLog.created_at.desc())
+def get_client_logs(action: str = None, 
+                    resource_type: str = None, 
+                    user_id: int | str = None, 
+                    start_date: str = None, 
+                    end_date: str = None) -> dict:    
+    
+    query = AuditLog.query
+
+    if action:
+        query = query.filter(AuditLog.action == action)
+    
+    if resource_type:
+        query = query.filter(AuditLog.resource_type == resource_type)
+        
+    if user_id:
+        try:
+             query = query.filter(AuditLog.user_id == int(user_id))
+        except ValueError:
+             pass # Ignore invalid user_id format
+
+    if start_date:
+        query = query.filter(AuditLog.created_at >= start_date)
+        
+    if end_date:
+        # Hacer la fecha final inclusiva (hasta el final del día)
+        # Asumiendo formato YYYY-MM-DD
+        end_date_inclusive = f"{end_date} 23:59:59"
+        query = query.filter(AuditLog.created_at <= end_date_inclusive)
+
+    query = query.order_by(AuditLog.created_at.desc())
     data_dict, data_model = paginate_query(query=query)
         
     return data_dict

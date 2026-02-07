@@ -153,7 +153,8 @@ def get_active_client_plan(client_id: int) -> Optional[ClientPlan]:
             ClientPlan.end_date >= today)
     ).order_by(ClientPlan.start_date.desc()).first()
 
-    g.audit_resource_id = client_plan.id
+    if client_plan:
+        g.audit_resource_id = client_plan.id
     return client_plan
 
 
@@ -173,7 +174,8 @@ def get_active_plan(id: int) -> Optional[ClientPlan]:
             ClientPlan.end_date >= today)
     ).order_by(ClientPlan.start_date.desc()).first()
     
-    g.audit_resource_id = client_plan.id
+    if client_plan:
+        g.audit_resource_id = client_plan.id
     return client_plan
     
     
@@ -184,7 +186,7 @@ def get_active_plan(id: int) -> Optional[ClientPlan]:
 def get_active_pending(id: int) -> Optional[ClientPlan]:
     today = date.today()
 
-    return ClientPlan.query.filter(
+    client_plan = ClientPlan.query.filter(
         ClientPlan.id == id,
         ClientPlan.status == states.PENDING_PAYMENT,
         ClientPlan.start_date <= today,
@@ -192,6 +194,10 @@ def get_active_pending(id: int) -> Optional[ClientPlan]:
             ClientPlan.end_date.is_(None),
             ClientPlan.end_date >= today)
     ).order_by(ClientPlan.start_date.desc()).first()
+
+    if client_plan:
+        g.audit_resource_id = client_plan.id
+    return client_plan
     
 
 @audit_log(action=ActionType.READ, 
@@ -203,7 +209,6 @@ def get_client_plan_history(client_id: int) -> List[ClientPlan]:
         client_id=client_id
     ).order_by(ClientPlan.start_date.desc()).all()
     
-    g.audit_resource_id = client_plan.id
     return client_plan
 
 @audit_log(action=ActionType.UPDATE, 

@@ -405,11 +405,25 @@ def get_client_logs_admin(clientId):
         
         set_schema(target_schema)
         
-        logs = get_client_logs() 
+        # Obtener filtros de la URL
+        action = request.args.get('action')
+        resource_type = request.args.get('resource_type')
+        user_id = request.args.get('user_id')
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+
+        logs = get_client_logs(
+            action=action, 
+            resource_type=resource_type, 
+            user_id=user_id,
+            start_date=start_date,
+            end_date=end_date
+        ) 
         
         set_schema(current_schema)
         
-        return success(data=logs.get('info', []))
+        # Retornar TODA la respuesta (data + meta)
+        return success(data=logs)
         
     except Exception as e:
         try:
