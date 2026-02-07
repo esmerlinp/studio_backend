@@ -42,6 +42,9 @@ from app.api.v1.master.chatbot.routes import chatbot_bp
 from app.api.v1.client_scheme.active_cycle_courses.routes import active_cycle_courses_bp
 from app.api.v1.client_scheme.active_cycle_attendances.routes import active_cycle_attendances_bp
 from app.api.v1.client_scheme.active_cycle_competencies.routes import active_cycle_competencies_bp
+from app.api.v1.client_scheme.schedule_block_details.routes import schedule_block_details_bp
+from app.api.v1.client_scheme.student_charge_balances.routes import student_charge_balances_bp
+from app.api.v1.client_scheme.active_cycle_students.routes import active_cycle_students_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role, require_permission
 from app.utils import i18n
@@ -107,6 +110,9 @@ app.register_blueprint(chatbot_bp)
 app.register_blueprint(active_cycle_courses_bp)
 app.register_blueprint(active_cycle_attendances_bp)
 app.register_blueprint(active_cycle_competencies_bp)
+app.register_blueprint(schedule_block_details_bp)
+app.register_blueprint(student_charge_balances_bp)
+app.register_blueprint(active_cycle_students_bp)
 
 # ------------------------------
 # Configuración de idioma
