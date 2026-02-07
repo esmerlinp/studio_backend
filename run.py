@@ -45,6 +45,13 @@ from app.api.v1.client_scheme.active_cycle_competencies.routes import active_cyc
 from app.api.v1.client_scheme.schedule_block_details.routes import schedule_block_details_bp
 from app.api.v1.client_scheme.student_charge_balances.routes import student_charge_balances_bp
 from app.api.v1.client_scheme.active_cycle_students.routes import active_cycle_students_bp
+from app.api.v1.client_scheme.current_taxes.routes import current_taxes_bp
+from app.api.v1.client_scheme.subject_areas.routes import subject_areas_bp
+from app.api.v1.client_scheme.subjects.routes import subjects_bp
+from app.api.v1.client_scheme.attendances.routes import attendances_bp
+from app.api.v1.client_scheme.schedule_blocks.routes import schedule_blocks_bp
+from app.api.v1.client_scheme.payment_calendar.routes import payment_calendar_bp
+from app.api.v1.client_scheme.cycles.routes import cycles_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role, require_permission
 from app.utils import i18n
@@ -113,6 +120,13 @@ app.register_blueprint(active_cycle_competencies_bp)
 app.register_blueprint(schedule_block_details_bp)
 app.register_blueprint(student_charge_balances_bp)
 app.register_blueprint(active_cycle_students_bp)
+app.register_blueprint(current_taxes_bp)
+app.register_blueprint(subject_areas_bp)
+app.register_blueprint(subjects_bp)
+app.register_blueprint(attendances_bp)
+app.register_blueprint(schedule_blocks_bp)
+app.register_blueprint(payment_calendar_bp)
+app.register_blueprint(cycles_bp)
 
 # ------------------------------
 # Configuración de idioma
