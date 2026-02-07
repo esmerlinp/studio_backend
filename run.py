@@ -455,6 +455,11 @@ def client_dashboard():
 def client_configuration():
     return render_template("es/client/configuration/index.html")
 
+@app.route("/client/config/cycles")
+@jwt_required()
+def client_config_cycles():
+    return render_template("es/client/cycles.html", active_page='cycles')
+
 @app.route("/client/configuration/payments")
 @jwt_required()
 def client_payments():

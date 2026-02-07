@@ -15,12 +15,16 @@
     <div
         style="padding: 20px 24px; border-bottom: 1px solid #f6f9fc; display: flex; justify-content: space-between; align-items: center;">
         <h2 style="font-size: 16px; font-weight: 600; color: var(--stripe-dark);">Periodos Registrados</h2>
-        <button
+        <button onclick="openCreateModal()"
             style="background: var(--stripe-indigo); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">+
             Crear Ciclo</button>
     </div>
 
-    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <div id="loadingState" style="padding: 40px; text-align: center; color: #64748b;">
+        <i class="fas fa-spinner fa-spin"></i> Cargando ciclos...
+    </div>
+
+    <table id="cyclesTable" style="width: 100%; border-collapse: collapse; text-align: left; display: none;">
         <thead>
             <tr style="background: #fafbff; border-bottom: 1px solid #e6ebf1;">
                 <th
@@ -33,49 +37,102 @@
                     style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
                     Fecha Fin</th>
                 <th
+                    style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase; text-align: center;">
+                    SubCiclos</th>
+                <th
+                    style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase; text-align: center;">
+                    Estudiantes</th>
+                <th
                     style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
                     Estado</th>
                 <th style="padding: 16px 24px;"></th>
             </tr>
         </thead>
-        <tbody>
-            <tr style="border-bottom: 1px solid #f6f9fc;">
-                <td style="padding: 16px 24px; font-weight: 600; color: var(--stripe-dark);">Ciclo Escolar 2025-2026
-                </td>
-                <td style="padding: 16px 24px; font-size: 14px;">15 Ago, 2025</td>
-                <td style="padding: 16px 24px; font-size: 14px;">20 Jun, 2026</td>
-                <td style="padding: 16px 24px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="width: 8px; height: 8px; background: #059669; border-radius: 50%;"></span>
-                        <span style="font-size: 13px; font-weight: 500; color: #059669;">Activo</span>
-                    </div>
-                </td>
-                <td style="padding: 16px 24px; text-align: right;">
-                    <button
-                        style="color: var(--stripe-slate); font-size: 13px; font-weight: 600; background: none; border: none; cursor: pointer; margin-right: 16px;">Editar</button>
-                    <button
-                        style="color: #dc2626; font-size: 13px; font-weight: 600; background: none; border: none; cursor: pointer;">Cerrar</button>
-                </td>
-            </tr>
-            <tr style="border-bottom: 1px solid #f6f9fc;">
-                <td style="padding: 16px 24px; font-weight: 600; color: var(--stripe-dark);">Ciclo Escolar 2024-2025
-                </td>
-                <td style="padding: 16px 24px; font-size: 14px;">15 Ago, 2024</td>
-                <td style="padding: 16px 24px; font-size: 14px;">20 Jun, 2025</td>
-                <td style="padding: 16px 24px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span
-                            style="width: 8px; height: 8px; background: var(--stripe-light); border-radius: 50%;"></span>
-                        <span style="font-size: 13px; font-weight: 500; color: var(--stripe-slate);">Finalizado</span>
-                    </div>
-                </td>
-                <td style="padding: 16px 24px; text-align: right;">
-                    <button
-                        style="color: var(--stripe-slate); font-size: 13px; font-weight: 600; background: none; border: none; cursor: pointer;">Ver
-                        Histórico</button>
-                </td>
-            </tr>
+        <tbody id="cyclesTableBody">
+            <!-- Rows injected here -->
         </tbody>
     </table>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCycles();
+    });
+
+    async function loadCycles() {
+        try {
+            const response = await fetch('/api/v1/client/cycles/');
+            if (!response.ok) throw new Error('Error loading cycles');
+            const cycles = await response.json();
+            renderCycles(cycles);
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loadingState').innerText = 'Error al cargar datos.';
+        }
+    }
+
+    function renderCycles(cycles) {
+        const tbody = document.getElementById('cyclesTableBody');
+        tbody.innerHTML = '';
+
+        if (cycles.length === 0) {
+            document.getElementById('loadingState').innerText = 'No hay ciclos registrados.';
+            return;
+        }
+
+        cycles.forEach(cycle => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #f6f9fc';
+
+            const startDate = formatDate(cycle.startDate);
+            const endDate = formatDate(cycle.endDate);
+
+            const statusHtml = cycle.isActive
+                ? `<div style="display: flex; align-items: center; gap: 8px;">
+                     <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span>
+                     <span style="font-size: 13px; font-weight: 500; color: #10b981;">Activo</span>
+                   </div>`
+                : `<div style="display: flex; align-items: center; gap: 8px;">
+                     <span style="width: 8px; height: 8px; background: #94a3b8; border-radius: 50%;"></span>
+                     <span style="font-size: 13px; font-weight: 500; color: #64748b;">Inactivo</span>
+                   </div>`;
+
+            tr.innerHTML = `
+                <td style="padding: 16px 24px; font-weight: 600; color: var(--stripe-dark);">${cycle.name}</td>
+                <td style="padding: 16px 24px; font-size: 14px; color: #334155;">${startDate}</td>
+                <td style="padding: 16px 24px; font-size: 14px; color: #334155;">${endDate}</td>
+                <td style="padding: 16px 24px; font-size: 14px; text-align: center; color: #334155;">${cycle.subCycleCount}</td>
+                <td style="padding: 16px 24px; font-size: 14px; text-align: center; color: #334155;">${cycle.studentCount}</td>
+                <td style="padding: 16px 24px;">${statusHtml}</td>
+                <td style="padding: 16px 24px; text-align: right;">
+                    <button onclick="editCycle(${cycle.id})" 
+                        style="color: #635bff; background: none; border: none; cursor: pointer; font-weight: 600; margin-right: 12px;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('cyclesTable').style.display = 'table';
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function openCreateModal() {
+        alert("Funcionalidad de crear ciclo en desarrollo.");
+    }
+
+    function editCycle(id) {
+        alert("Funcionalidad de editar ciclo en desarrollo. ID: " + id);
+    }
+</script>
 {% endblock %}
