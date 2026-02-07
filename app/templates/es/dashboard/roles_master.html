@@ -72,9 +72,130 @@
     {{ render_pagination(pagination) }}
 </div>
 
+
+<!-- Modal -->
+<div id="roleModal" class="modal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); backdrop-filter: blur(4px);">
+    <div class="modal-content"
+        style="background-color: #fefefe; margin: 10% auto; padding: 0; border: 1px solid #888; width: 50%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+
+        <div class="modal-header"
+            style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="modalTitle" style="margin: 0; font-size: 1.25rem; color: var(--text-main);">Nuevo Rol</h3>
+            <span class="close" onclick="closeModal()"
+                style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        </div>
+
+        <div class="modal-body" style="padding: 24px;">
+            <form id="roleForm">
+                <input type="hidden" id="roleId">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="roleName"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Nombre
+                        del Rol</label>
+                    <input type="text" id="roleName" name="name" required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem;">
+                </div>
+                <!-- Code is often generated or fixed, but let's allow editing if needed or just display -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="roleCode"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Código
+                        (Único)</label>
+                    <input type="text" id="roleCode" name="code" required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; text-transform: uppercase;">
+                    <small style="color: var(--text-muted);">Ej: SYS_ADMIN, USUARIO_VENTAS</small>
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="roleDescription"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Descripción</label>
+                    <textarea id="roleDescription" name="description" rows="3"
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; font-family: inherit;"></textarea>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="roleActive" name="is_active" checked style="width: 16px; height: 16px;">
+                    <label for="roleActive" style="color: var(--text-main);">Activo</label>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer"
+            style="padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px;">
+            <button onclick="closeModal()"
+                style="padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 500;">Cancelar</button>
+            <button onclick="saveRole()"
+                style="padding: 8px 16px; border-radius: 6px; border: none; background: var(--primary-color); color: white; cursor: pointer; font-weight: 600;">Guardar</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    function openModal(mode, data) {
-        alert("En desarrollo: " + mode + (data ? " " + data.id : ""));
+    const modal = document.getElementById("roleModal");
+    const form = document.getElementById("roleForm");
+    const modalTitle = document.getElementById("modalTitle");
+
+    function openModal(mode, data = null) {
+        modal.style.display = "block";
+        if (mode === 'edit' && data) {
+            modalTitle.innerText = "Editar Rol";
+            document.getElementById('roleId').value = data.id;
+            document.getElementById('roleName').value = data.name;
+            document.getElementById('roleCode').value = data.code;
+            document.getElementById('roleDescription').value = data.description;
+            document.getElementById('roleActive').checked = data.is_active;
+        } else {
+            modalTitle.innerText = "Nuevo Rol";
+            form.reset();
+            document.getElementById('roleId').value = "";
+        }
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    async function saveRole() {
+        const id = document.getElementById('roleId').value;
+        const name = document.getElementById('roleName').value;
+        const code = document.getElementById('roleCode').value;
+        const description = document.getElementById('roleDescription').value;
+        const is_active = document.getElementById('roleActive').checked;
+
+        if (!name || !code) {
+            alert("Nombre y Código son obligatorios");
+            return;
+        }
+
+        const payload = { name, code, description, is_active };
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/v1/master/roles/${id}` : '/api/v1/master/roles/';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() if csrf_token else "" }}' // Handle if CSRF is enabled/disabled
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const err = await response.json();
+                alert("Error: " + (err.msg || err.message || "Error al guardar"));
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error de conexión");
+        }
+    }
+
+    // Close modal if clicked outside
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            closeModal();
+        }
     }
 </script>
 {% endblock %}

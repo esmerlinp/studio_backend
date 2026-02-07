@@ -67,9 +67,160 @@
     {{ render_pagination(pagination) }}
 </div>
 
+
+<!-- Modal -->
+<div id="urModal" class="modal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); backdrop-filter: blur(4px);">
+    <div class="modal-content"
+        style="background-color: #fefefe; margin: 10% auto; padding: 0; border: 1px solid #888; width: 50%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+
+        <div class="modal-header"
+            style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="modalTitle" style="margin: 0; font-size: 1.25rem; color: var(--text-main);">Asignar Rol a Usuario
+            </h3>
+            <span class="close" onclick="closeModal()"
+                style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        </div>
+
+        <div class="modal-body" style="padding: 24px;">
+            <form id="urForm">
+                <input type="hidden" id="urId">
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="userSelect"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Usuario</label>
+                    <select id="userSelect" name="user_id" required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; background: white;">
+                        <option value="">Seleccione un Usuario...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="roleSelect"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Rol</label>
+                    <select id="roleSelect" name="role_id" required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; background: white;">
+                        <option value="">Seleccione un Rol...</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer"
+            style="padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px;">
+            <button onclick="closeModal()"
+                style="padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 500;">Cancelar</button>
+            <button onclick="saveUR()"
+                style="padding: 8px 16px; border-radius: 6px; border: none; background: var(--primary-color); color: white; cursor: pointer; font-weight: 600;">Guardar</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    function openModal(mode, data) {
-        alert("En desarrollo: " + mode + (data ? " " + data.id : ""));
+    const modal = document.getElementById("urModal");
+    const form = document.getElementById("urForm");
+    const modalTitle = document.getElementById("modalTitle");
+
+    let usersLoaded = false;
+    let rolesLoaded = false;
+
+    function openModal(mode, data = null) {
+        modal.style.display = "block";
+        loadInitialData().then(() => {
+            if (mode === 'edit' && data) {
+                modalTitle.innerText = "Editar Asignación";
+                document.getElementById('urId').value = data.id;
+                document.getElementById('userSelect').value = data.user_id;
+                document.getElementById('roleSelect').value = data.role_id;
+                // Disable user selection on edit? Maybe.
+                document.getElementById('userSelect').disabled = true;
+            } else {
+                modalTitle.innerText = "Asignar Rol";
+                form.reset();
+                document.getElementById('urId').value = "";
+                document.getElementById('userSelect').disabled = false;
+            }
+        });
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    async function loadInitialData() {
+        if (!rolesLoaded) {
+            try {
+                const res = await fetch('/api/v1/master/roles/');
+                const data = await res.json();
+                const select = document.getElementById('roleSelect');
+                (Array.isArray(data) ? data : data.data || []).forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.id;
+                    opt.innerText = r.name;
+                    select.appendChild(opt);
+                });
+                rolesLoaded = true;
+            } catch (e) { console.error("Error loading roles", e); }
+        }
+
+        if (!usersLoaded) {
+            try {
+                // Verified: users_bp prefix is '/api/v1/user'
+                const res = await fetch('/api/v1/user/');
+                const data = await res.json();
+                const select = document.getElementById('userSelect');
+                (Array.isArray(data) ? data : data.data || []).forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.id;
+                    opt.innerText = u.first_name + " " + u.last_name + " (" + u.email + ")"; // Assuming fields
+                    select.appendChild(opt);
+                });
+                usersLoaded = true;
+            } catch (e) { console.error("Error loading users", e); }
+        }
+    }
+
+    async function saveUR() {
+        const id = document.getElementById('urId').value;
+        const user_id = document.getElementById('userSelect').value;
+        const role_id = document.getElementById('roleSelect').value;
+
+        if (!user_id || !role_id) {
+            alert("Usuario y Rol son obligatorios");
+            return;
+        }
+
+        const payload = { user_id, role_id };
+        const method = id ? 'PUT' : 'POST';
+        // Endpoint for UserRole? 
+        // /api/v1/master/user-roles/ ?
+        // Need to verify this route. defaulting to /user-roles/ based on pattern.
+        const url = id ? `/api/v1/master/user-roles/${id}` : '/api/v1/master/user-roles/';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() if csrf_token else "" }}'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const err = await response.json();
+                alert("Error: " + (err.msg || err.message || "Error al guardar"));
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error de conexión");
+        }
+    }
+
+    window.onclick = function (event) {
+        if (event.target == modal) closeModal();
     }
 </script>
 {% endblock %}

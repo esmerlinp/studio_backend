@@ -135,9 +135,188 @@
     {{ render_pagination(pagination) }}
 </div>
 
+
+<!-- Modal -->
+<div id="screenModal" class="modal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); backdrop-filter: blur(4px);">
+    <div class="modal-content"
+        style="background-color: #fefefe; margin: 5% auto; padding: 0; border: 1px solid #888; width: 50%; max-width: 600px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+
+        <div class="modal-header"
+            style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="modalTitle" style="margin: 0; font-size: 1.25rem; color: var(--text-main);">Nueva Pantalla</h3>
+            <span class="close" onclick="closeModal()"
+                style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        </div>
+
+        <div class="modal-body" style="padding: 24px;">
+            <form id="screenForm">
+                <input type="hidden" id="screenId">
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="screenName"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Nombre</label>
+                    <input type="text" id="screenName" name="name" required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="screenRoute"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Ruta /
+                        Endpoint</label>
+                    <input type="text" id="screenRoute" name="route" required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem;">
+                    <small style="color: var(--text-muted);">Ej: /dashboard/invoices</small>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="screenCode"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Código
+                        (Único)</label>
+                    <input type="text" id="screenCode" name="code" required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; text-transform: uppercase;">
+                    <small style="color: var(--text-muted);">Ej: SC_INVOICES</small>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="moduleSelect"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Módulo</label>
+                    <select id="moduleSelect" name="module_id" required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; background: white;">
+                        <option value="">Seleccione un Módulo...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="screenIcon"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Clase de
+                        Icono</label>
+                    <input type="text" id="screenIcon" name="icon"
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem;">
+                    <small style="color: var(--text-muted);">Ej: fas fa-file-invoice</small>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="screenOrder"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Orden</label>
+                    <input type="number" id="screenOrder" name="order" value="0"
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem;">
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="screenActive" name="is_active" checked
+                        style="width: 16px; height: 16px;">
+                    <label for="screenActive" style="color: var(--text-main);">Activo</label>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer"
+            style="padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px;">
+            <button onclick="closeModal()"
+                style="padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 500;">Cancelar</button>
+            <button onclick="saveScreen()"
+                style="padding: 8px 16px; border-radius: 6px; border: none; background: var(--primary-color); color: white; cursor: pointer; font-weight: 600;">Guardar</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    function openModal(mode, data) {
-        alert("En desarrollo: " + mode + (data ? " " + data.id : ""));
+    const modal = document.getElementById("screenModal");
+    const form = document.getElementById("screenForm");
+    const modalTitle = document.getElementById("modalTitle");
+    let modulesLoaded = false;
+
+    function openModal(mode, data = null) {
+        modal.style.display = "block";
+        loadModules().then(() => {
+            if (mode === 'edit' && data) {
+                modalTitle.innerText = "Editar Pantalla";
+                document.getElementById('screenId').value = data.id;
+                document.getElementById('screenName').value = data.name;
+                document.getElementById('screenRoute').value = data.route;
+                document.getElementById('screenCode').value = data.code || '';
+                document.getElementById('moduleSelect').value = data.module_id;
+                document.getElementById('screenIcon').value = data.icon;
+                document.getElementById('screenOrder').value = data.order;
+                document.getElementById('screenActive').checked = data.is_active;
+            } else {
+                modalTitle.innerText = "Nueva Pantalla";
+                form.reset();
+                document.getElementById('screenId').value = "";
+                document.getElementById('screenOrder').value = 0;
+            }
+        });
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    async function loadModules() {
+        if (modulesLoaded) return;
+        try {
+            // Modules API is registered at root /modules without prefix in routes.py and run.py
+            const response = await fetch('/modules');
+
+            const modules = await response.json();
+            const select = document.getElementById('moduleSelect');
+            // Check if array or object wrapper
+            const data = Array.isArray(modules) ? modules : (modules.data || []);
+
+            data.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.innerText = m.name;
+                select.appendChild(opt);
+            });
+            modulesLoaded = true;
+        } catch (e) { console.error("Error loading modules", e); }
+    }
+
+    async function saveScreen() {
+        const id = document.getElementById('screenId').value;
+        const name = document.getElementById('screenName').value;
+        const route = document.getElementById('screenRoute').value;
+        const code = document.getElementById('screenCode').value;
+        const module_id = document.getElementById('moduleSelect').value;
+        const icon = document.getElementById('screenIcon').value;
+        const order = document.getElementById('screenOrder').value;
+        const is_active = document.getElementById('screenActive').checked;
+
+        if (!name || !route || !code || !module_id) {
+            alert("Nombre, Ruta, Código y Módulo son obligatorios");
+            return;
+        }
+
+        const payload = { name, route, code, module_id, icon, order, is_active };
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/v1/master/screens/${id}` : '/api/v1/master/screens/';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() if csrf_token else "" }}'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const err = await response.json();
+                alert("Error: " + (err.msg || err.message || "Error al guardar"));
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error de conexión");
+        }
+    }
+
+    window.onclick = function (event) {
+        if (event.target == modal) closeModal();
     }
 </script>
 {% endblock %}

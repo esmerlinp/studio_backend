@@ -71,9 +71,165 @@
     {{ render_pagination(pagination) }}
 </div>
 
+
+<!-- Modal -->
+<div id="sfModal" class="modal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); backdrop-filter: blur(4px);">
+    <div class="modal-content"
+        style="background-color: #fefefe; margin: 10% auto; padding: 0; border: 1px solid #888; width: 50%; max-width: 600px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+
+        <div class="modal-header"
+            style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="modalTitle" style="margin: 0; font-size: 1.25rem; color: var(--text-main);">Asignar Funcionalidad
+            </h3>
+            <span class="close" onclick="closeModal()"
+                style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        </div>
+
+        <div class="modal-body" style="padding: 24px;">
+            <form id="sfForm">
+                <input type="hidden" id="sfId">
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="screenSelect"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Pantalla</label>
+                    <select id="screenSelect" name="screen_id" required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; background: white;">
+                        <option value="">Seleccione una Pantalla...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="funcSelect"
+                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-main);">Funcionalidad
+                        Base</label>
+                    <select id="funcSelect" name="functionality_id" required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; background: white;">
+                        <option value="">Seleccione una Funcionalidad...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="sfActive" name="is_active" checked style="width: 16px; height: 16px;">
+                    <label for="sfActive" style="color: var(--text-main);">Activo</label>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer"
+            style="padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px;">
+            <button onclick="closeModal()"
+                style="padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 500;">Cancelar</button>
+            <button onclick="saveSF()"
+                style="padding: 8px 16px; border-radius: 6px; border: none; background: var(--primary-color); color: white; cursor: pointer; font-weight: 600;">Guardar</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    function openModal(mode, data) {
-        alert("En desarrollo: " + mode + (data ? " " + data.id : ""));
+    const modal = document.getElementById("sfModal");
+    const form = document.getElementById("sfForm");
+    const modalTitle = document.getElementById("modalTitle");
+
+    let screensLoaded = false;
+    let funcsLoaded = false;
+
+    function openModal(mode, data = null) {
+        modal.style.display = "block";
+        loadInitialData().then(() => {
+            if (mode === 'edit' && data) {
+                modalTitle.innerText = "Editar Asignación";
+                document.getElementById('sfId').value = data.id;
+                document.getElementById('screenSelect').value = data.screen_id;
+                document.getElementById('funcSelect').value = data.functionality_id;
+                document.getElementById('sfActive').checked = data.is_active;
+            } else {
+                modalTitle.innerText = "Asignar Funcionalidad";
+                form.reset();
+                document.getElementById('sfId').value = "";
+            }
+        });
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    async function loadInitialData() {
+        if (!screensLoaded) {
+            try {
+                const res = await fetch('/api/v1/master/screens/');
+                const data = await res.json();
+                const select = document.getElementById('screenSelect');
+                (Array.isArray(data) ? data : data.data || []).forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.innerText = s.name;
+                    select.appendChild(opt);
+                });
+                screensLoaded = true;
+            } catch (e) { console.error("Error loading screens", e); }
+        }
+
+        if (!funcsLoaded) {
+            try {
+                // Fetch Base Functionalities
+                // Endpoint likely /api/v1/master/functionalities or similar
+                // run.py imports functionalities_bp. we need to find its prefix.
+                // Assuming /api/v1/master/functionalities/ based on pattern.
+                const res = await fetch('/api/v1/master/functionalities/');
+                const data = await res.json();
+                const select = document.getElementById('funcSelect');
+                (Array.isArray(data) ? data : data.data || []).forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.id;
+                    opt.innerText = f.name + " (" + f.code + ")";
+                    select.appendChild(opt);
+                });
+                funcsLoaded = true;
+            } catch (e) { console.error("Error loading functionalities", e); }
+        }
+    }
+
+    async function saveSF() {
+        const id = document.getElementById('sfId').value;
+        const screen_id = document.getElementById('screenSelect').value;
+        const functionality_id = document.getElementById('funcSelect').value;
+        const is_active = document.getElementById('sfActive').checked;
+
+        if (!screen_id || !functionality_id) {
+            alert("Pantalla y Funcionalidad son obligatorias");
+            return;
+        }
+
+        const payload = { screen_id, functionality_id, is_active };
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/v1/master/screen-functionalities/${id}` : '/api/v1/master/screen-functionalities/';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() if csrf_token else "" }}'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const err = await response.json();
+                alert("Error: " + (err.msg || err.message || "Error al guardar"));
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error de conexión");
+        }
+    }
+
+    window.onclick = function (event) {
+        if (event.target == modal) closeModal();
     }
 </script>
 {% endblock %}
