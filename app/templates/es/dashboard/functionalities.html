@@ -82,7 +82,7 @@
                     </td>
                     <td>
                         <div style="display: flex; gap: 8px;">
-                            <button class="badge" onclick='openEditModal({{ item | tojson | safe }})'
+                            <button class="badge" onclick='openEditModal({{ item.to_dict() | tojson | safe }})'
                                 style="border: 1px solid var(--border); background: white; cursor: pointer;">Editar</button>
 
                             <button class="badge" onclick="deleteFunc({{ item.id }})"

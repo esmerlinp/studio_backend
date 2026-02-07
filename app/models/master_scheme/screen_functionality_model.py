@@ -12,10 +12,15 @@ class ScreenFunctionality(db.Model):
     functionality_id = db.Column("idfuncionalidad", db.Integer, db.ForeignKey("master.funcionalidades.idfuncionalidad"), nullable=False)
     is_active = db.Column("bactivo", db.Boolean, nullable=False, default=True)
 
+    functionality = db.relationship("Functionality", backref="screen_functionalities")
+    screen = db.relationship("Screen", backref="screen_functionalities")
+
     def to_dict(self):
         return {
             "id": self.id,
             "screen_id": self.screen_id,
             "functionality_id": self.functionality_id,
-            "is_active": self.is_active
+            "is_active": self.is_active,
+            "functionality_name": self.functionality.name if self.functionality else None,
+            "functionality_code": self.functionality.code if self.functionality else None
         }

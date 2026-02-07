@@ -23,18 +23,26 @@ def get_one(sf_id):
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 @audit_log(action=ActionType.CREATE, resource_type="SCREEN_FUNCTIONALITY")
 def create():
-    data = request.get_json()
-    sf = create_screen_functionality(data)
-    return jsonify(sf.to_dict()), 201
+    try:
+        data = request.get_json()
+        sf = create_screen_functionality(data)
+        return jsonify(sf.to_dict()), 201
+    except Exception as e:
+        if "Duplicate entry" in str(e) or "UniqueConstraint" in str(e) or "integrity" in str(e).lower():
+             return jsonify({"error": "La funcionalidad ya está asignada a esta pantalla."}), 409
+        return jsonify({"error": str(e)}), 500
 
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 @audit_log(action=ActionType.UPDATE, resource_type="SCREEN_FUNCTIONALITY")
 def update(sf_id):
-    data = request.get_json()
-    sf = update_screen_functionality(sf_id, data)
-    if not sf: return jsonify({"error": "Screen Functionality not found"}), 404
-    return jsonify(sf.to_dict()), 200
+    try:
+        data = request.get_json()
+        sf = update_screen_functionality(sf_id, data)
+        if not sf: return jsonify({"error": "Screen Functionality not found"}), 404
+        return jsonify(sf.to_dict()), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])

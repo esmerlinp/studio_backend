@@ -259,7 +259,7 @@
             // PROPER FIX: The SF list should include Func Name.
             // Let's assume it has 'functionality_code' or similar if joined in model to_dict.
             // If not, I'll update the model/serializer later. For now, display ID or Code if available.
-            opt.innerText = "#" + sf.id + " (ID Func: " + sf.functionality_id + ")";
+            opt.innerText = sf.functionality_name || ("#" + sf.id + " (ID Func: " + sf.functionality_id + ")");
             // Ideally we want the name. Let's hope SF to_dict has it.
             sfSelect.appendChild(opt);
         });
