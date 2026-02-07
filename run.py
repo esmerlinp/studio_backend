@@ -38,6 +38,7 @@ from app.api.v1.master.phone_types.routes import phone_types_bp
 from app.api.v1.master.roles.routes import roles_bp as master_roles_bp
 from app.api.v1.master.sectors.routes import sectors_bp
 from app.api.v1.master.search.controller import search_bp
+from app.api.v1.master.chatbot.routes import chatbot_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role, require_permission
 from app.utils import i18n
@@ -99,6 +100,7 @@ app.register_blueprint(phone_types_bp)
 app.register_blueprint(master_roles_bp)
 app.register_blueprint(sectors_bp)
 app.register_blueprint(search_bp)
+app.register_blueprint(chatbot_bp)
 
 # ------------------------------
 # Configuración de idioma
