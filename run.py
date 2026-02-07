@@ -52,6 +52,13 @@ from app.api.v1.client_scheme.attendances.routes import attendances_bp
 from app.api.v1.client_scheme.schedule_blocks.routes import schedule_blocks_bp
 from app.api.v1.client_scheme.payment_calendar.routes import payment_calendar_bp
 from app.api.v1.client_scheme.cycles.routes import cycles_bp
+from app.api.v1.client_scheme.cycle_level_schedule_blocks.routes import cycle_level_schedule_blocks_bp
+from app.api.v1.client_scheme.competencies.routes import competencies_bp
+from app.api.v1.client_scheme.concepts.routes import concepts_bp
+from app.api.v1.client_scheme.courses.routes import courses_bp
+from app.api.v1.client_scheme.child_discounts.routes import child_discounts_bp
+from app.api.v1.client_scheme.students.routes import students_bp
+from app.api.v1.client_scheme.evaluation_requests.routes import evaluation_requests_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role, require_permission
 from app.utils import i18n
@@ -127,6 +134,12 @@ app.register_blueprint(attendances_bp)
 app.register_blueprint(schedule_blocks_bp)
 app.register_blueprint(payment_calendar_bp)
 app.register_blueprint(cycles_bp)
+app.register_blueprint(cycle_level_schedule_blocks_bp)
+app.register_blueprint(competencies_bp)
+app.register_blueprint(concepts_bp)
+app.register_blueprint(courses_bp)
+app.register_blueprint(child_discounts_bp)
+app.register_blueprint(students_bp)
 
 # ------------------------------
 # Configuración de idioma
