@@ -59,6 +59,21 @@ from app.api.v1.client_scheme.courses.routes import courses_bp
 from app.api.v1.client_scheme.child_discounts.routes import child_discounts_bp
 from app.api.v1.client_scheme.students.routes import students_bp
 from app.api.v1.client_scheme.evaluation_requests.routes import evaluation_requests_bp
+from app.api.v1.client_scheme.formulas.routes import formulas_bp
+from app.api.v1.client_scheme.payment_frequencies.routes import payment_frequencies_bp
+from app.api.v1.client_scheme.taxes.routes import taxes_bp
+from app.api.v1.client_scheme.inscriptions.routes import inscriptions_bp
+from app.api.v1.client_scheme.levels.routes import levels_bp
+from app.api.v1.client_scheme.grade_corrections.routes import grade_corrections_bp
+from app.api.v1.client_scheme.partials.routes import partials_bp
+from app.api.v1.client_scheme.cycle_partials.routes import cycle_partials_bp
+from app.api.v1.client_scheme.surcharges_per_day.routes import surcharges_per_day_bp
+from app.api.v1.client_scheme.requests.routes import requests_bp
+from app.api.v1.client_scheme.sub_cycles.routes import sub_cycles_bp
+from app.api.v1.client_scheme.active_cycle_grade_corrections.routes import active_cycle_grade_corrections_bp
+from app.api.v1.client_scheme.active_cycle_student_grades.routes import active_cycle_student_grades_bp
+from app.api.v1.client_scheme.school_payments.routes import school_payments_bp
+from app.api.v1.client_scheme.sub_cycle_course_competencies.routes import sub_cycle_course_competencies_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role, require_permission
 from app.utils import i18n
