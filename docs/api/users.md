@@ -1,195 +1,311 @@
-# Users API
+# API de Usuarios
 
-## GET /api/v1/users/
+## GET /api/v1/user/
 
-**Auth Required**: Yes
+**Requiere Autenticación**: Sí
 
-### Response
-Returns a JSON response.
+**Descripción**: Obtiene el listado de usuarios.
 
----
+**Respuesta**:
+Devuelve una lista de usuarios.
 
-## GET /api/v1/users/<userId>
-
-**Auth Required**: Yes
-
-### URL Parameters
-- `userId`
-
-### Response
-Returns a JSON response.
+### Ejemplo de Respuesta
+```json
+{}
+```
 
 ---
 
-## PUT /api/v1/users/<userId>/desactivate
+## GET /api/v1/user/<userId>
 
-**Auth Required**: Yes
+**Requiere Autenticación**: Sí
 
-### URL Parameters
-- `userId`
+**Parámetros de URL**:
+- `userId`: ID del usuario.
 
-### Response
-Returns a JSON response.
+**Respuesta**:
+Devuelve los detalles del usuario.
 
----
-
-## GET /api/v1/users/<userName>
-
-**Auth Required**: Yes
-
-### URL Parameters
-- `userName`
-
-### Response
-Returns a JSON response.
+### Ejemplo de Respuesta
+```json
+{}
+```
 
 ---
 
-## GET /api/v1/users/current
+## PUT /api/v1/user/<userId>/desactivate
 
-**Auth Required**: Yes
+**Requiere Autenticación**: Sí
 
-### Response
-Returns a JSON response.
+**Parámetros de URL**:
+- `userId`: ID del usuario a desactivar.
 
----
+**Respuesta**:
+Devuelve el usuario desactivado.
 
-## GET /api/v1/users/current/organization
-
-**Auth Required**: No
-
-### Response
-Returns a JSON response.
-
----
-
-## GET /api/v1/users/current/subscription
-
-**Auth Required**: No
-
-### Response
-Returns a JSON response.
+### Ejemplo de Respuesta
+```json
+{}
+```
 
 ---
 
-## GET /api/v1/users/current/payments
+## GET /api/v1/user/<userName>
 
-**Auth Required**: No
+**Requiere Autenticación**: Sí
 
-### Response
-Returns a JSON response.
+**Parámetros de URL**:
+- `userName`: Nombre de usuario.
 
----
+**Respuesta**:
+Devuelve los detalles del usuario.
 
-## GET /api/v1/users/current/sessions
-
-**Auth Required**: No
-
-### Response
-Returns a JSON response.
-
----
-
-## GET /api/v1/users/current/storage
-
-**Auth Required**: No
-
-### Response
-Returns a JSON response.
+### Ejemplo de Respuesta
+```json
+{}
+```
 
 ---
 
-## GET /api/v1/users/current/audit
+## GET /api/v1/user/me
 
-**Auth Required**: No
+**Requiere Autenticación**: Sí
 
-### Response
-Returns a JSON response.
+**Descripción**: Obtiene la información del usuario actual autenticado.
 
----
+**Respuesta**:
+Devuelve los datos del usuario.
 
-## GET /api/v1/users/current/audit/<string:entityName>
-
-**Auth Required**: No
-
-### Response
-Returns a JSON response.
+### Ejemplo de Respuesta
+```json
+{}
+```
 
 ---
 
-## GET /api/v1/users/current/notifications
+## GET /api/v1/user/organization
 
-**Auth Required**: No
+**Requiere Autenticación**: Sí
 
-### Response
-Returns a JSON response.
+**Descripción**: Obtiene la organización del usuario actual.
 
----
+**Respuesta**:
+Devuelve los datos de la organización (Cliente).
 
-## GET /api/v1/users/current/plan
-
-**Auth Required**: No
-
-### Response
-Returns a JSON response.
+### Ejemplo de Respuesta
+```json
+{}
+```
 
 ---
 
-## POST /api/v1/users/
+## GET /api/v1/user/subscription
 
-**Auth Required**: No
+**Requiere Autenticación**: Sí
 
-### Body Parameters
-- `userName`
-- `lastName`
-- `firstName`
-- `email`
+**Descripción**: Obtiene la suscripción del usuario actual.
 
-### Response
-Returns a JSON response.
+**Respuesta**:
+Devuelve los datos de la suscripción.
 
----
-
-## POST /api/v1/users/changepassword
-
-**Auth Required**: Yes
-
-### Body Parameters
-- `new_password`
-- `sessionId`
-
-### Response
-Returns a JSON response.
+### Ejemplo de Respuesta
+```json
+{}
+```
 
 ---
 
-## POST /api/v1/users/forgot-password
+## GET /api/v1/user/payments
 
-**Auth Required**: No
+**Requiere Autenticación**: Sí
 
-### Body Parameters
-- `email`
+**Descripción**: Obtiene los pagos del usuario actual.
 
-### Response
-Returns a JSON response.
+**Respuesta**:
+Devuelve el historial de pagos.
 
----
-
-## POST /api/v1/users/preferences/default
-
-**Auth Required**: Yes
-
-### Response
-Returns a JSON response.
+### Ejemplo de Respuesta
+```json
+{}
+```
 
 ---
 
-## PUT /api/v1/users/current/preferences
+## GET /api/v1/user/sessions
 
-**Auth Required**: Yes
+**Requiere Autenticación**: Sí
 
-### Response
-Returns a JSON response.
+**Descripción**: Obtiene las sesiones activas del usuario.
+
+**Respuesta**:
+Devuelve la lista de sesiones.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
 
 ---
 
+## GET /api/v1/user/storage
+
+**Requiere Autenticación**: Sí
+
+**Descripción**: Obtiene el uso de almacenamiento.
+
+**Respuesta**:
+Devuelve los datos de almacenamiento.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
+
+---
+
+## GET /api/v1/user/audit
+
+**Requiere Autenticación**: Sí
+
+**Descripción**: Obtiene los registros de auditoría.
+
+**Respuesta**:
+Devuelve la lista de logs.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
+
+---
+
+## GET /api/v1/user/audit/<string:entityName>
+
+**Requiere Autenticación**: Sí
+
+**Descripción**: Obtiene los registros de auditoría para una entidad específica.
+
+**Respuesta**:
+Devuelve la lista de logs filtrada.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
+
+---
+
+## GET /api/v1/user/notifications
+
+**Requiere Autenticación**: Sí
+
+**Descripción**: Obtiene las notificaciones.
+
+**Respuesta**:
+Devuelve la lista de notificaciones.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
+
+---
+
+## GET /api/v1/user/plan
+
+**Requiere Autenticación**: Sí
+
+**Descripción**: Obtiene el plan activo.
+
+**Respuesta**:
+Devuelve los datos del plan.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
+
+---
+
+## POST /api/v1/user/
+
+**Requiere Autenticación**: Sí (Admin)
+
+**Parámetros del Cuerpo**:
+- `userName`: Nombre de usuario.
+- `lastName`: Apellido.
+- `firstName`: Nombre.
+- `email`: Correo electrónico.
+
+**Respuesta**:
+Devuelve el usuario creado.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
+
+---
+
+## POST /api/v1/user/changepassword
+
+**Requiere Autenticación**: Sí
+
+**Parámetros del Cuerpo**:
+- `new_password`: Nueva contraseña.
+- `sessionId`: ID de sesión.
+
+**Respuesta**:
+Devuelve el usuario actualizado o mensaje de éxito.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
+
+---
+
+## POST /api/v1/user/forgot-password
+
+**Requiere Autenticación**: No
+
+**Parámetros del Cuerpo**:
+- `email`: Correo electrónico.
+
+**Respuesta**:
+Mensaje de confirmación.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
+
+---
+
+## POST /api/v1/user/preferences/default
+
+**Requiere Autenticación**: Sí
+
+**Respuesta**:
+Devuelve las preferencias por defecto.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
+
+---
+
+## PUT /api/v1/user/preferences
+
+**Requiere Autenticación**: Sí
+
+**Respuesta**:
+Devuelve las preferencias actualizadas.
+
+### Ejemplo de Respuesta
+```json
+{}
+```
+
+---
