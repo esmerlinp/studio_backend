@@ -1,0 +1,79 @@
+{% extends "es/dashboard/layout.html" %}
+{% from "es/dashboard/macros/pagination.html" import render_pagination %}
+
+{% set active_page = 'screen_functionalities' %}
+
+{% block title %}Funcionalidades por Pantalla | Akdmia{% endblock %}
+
+{% block page_title %}Funcionalidades por Pantalla{% endblock %}
+{% block page_subtitle %}Asocia capacidades específicas a cada pantalla del sistema.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Asignaciones de Funcionalidad</h3>
+        <button class="btn btn-primary" onclick="openModal('add')"
+            style="padding: 10px 20px; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Asignar Funcionalidad
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Pantalla</th>
+                    <th>Funcionalidad</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sf, screen, func in pagination.items %}
+                <tr>
+                    <td style="color: var(--text-muted); font-size: 0.8rem;">#{{ sf.id }}</td>
+                    <td style="font-weight: 600;">{{ screen.name }}</td>
+                    <td>
+                        <span style="display: block; font-weight: 500;">{{ func.name }}</span>
+                        <small style="color: var(--text-muted);">{{ func.code }}</small>
+                    </td>
+                    <td>
+                        {% if sf.is_active %}
+                        <span class="badge badge-success">Activo</span>
+                        {% else %}
+                        <span class="badge badge-pending">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="badge" onclick='openModal("edit", {{ sf.to_dict() | tojson }})'
+                                style="border: 1px solid var(--border); background: white; cursor: pointer;">
+                                Editar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        No hay asignaciones registradas.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {{ render_pagination(pagination) }}
+</div>
+
+<script>
+    function openModal(mode, data) {
+        alert("En desarrollo: " + mode + (data ? " " + data.id : ""));
+    }
+</script>
+{% endblock %}

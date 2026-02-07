@@ -1,0 +1,66 @@
+{% extends "es/dashboard/layout.html" %}
+{% from "es/dashboard/macros/pagination.html" import render_pagination %}
+
+{% set active_page = 'user_sessions' %}
+
+{% block title %}Sesiones de Usuario | Akdmia{% endblock %}
+
+{% block page_title %}Sesiones Activas{% endblock %}
+{% block page_subtitle %}Monitorea las sesiones activas y el historial de acceso.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Registro de Sesiones</h3>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>IP / Dispositivo</th>
+                    <th>Inicio / Último Acceso</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session, user in pagination.items %}
+                <tr>
+                    <td style="color: var(--text-muted); font-size: 0.8rem;">#{{ session.sessionId }}</td>
+                    <td>
+                        <div style="font-weight: 600;">{{ user.firstName }} {{ user.lastName }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ user.email }}</div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.85rem;">{{ session.ipAddress }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ session.deviceInfo or '-' }}</div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.85rem;">{{ session.createAt.strftime('%d/%m/%Y %H:%M') if
+                            session.createAt else '-' }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{
+                            session.lastAccessDate.strftime('%d/%m/%Y %H:%M') if session.lastAccessDate else '-' }}
+                        </div>
+                    </td>
+                    <td>
+                        {% if session.isActive %}
+                        <span class="badge badge-success">Activa</span>
+                        {% else %}
+                        <span class="badge badge-pending">Cerrada</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        No hay sesiones registradas.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {{ render_pagination(pagination) }}
+</div>
+{% endblock %}

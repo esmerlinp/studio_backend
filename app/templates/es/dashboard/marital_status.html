@@ -1,0 +1,163 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'estados_civiles' %}
+
+{% block title %}Estados Civiles | Akdmia Studio{% endblock %}
+
+{% block page_title %}Gestión de Estados Civiles{% endblock %}
+{% block page_subtitle %}Administra el catálogo maestro de estados civiles.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Listado de Estados Civiles</h3>
+        <button onclick="openCreateModal()"
+            style="padding: 10px 20px; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Nuevo Estado Civil
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 100px;">ID</th>
+                    <th>Estado Civil</th>
+                    <th style="width: 150px;">Estado</th>
+                    <th style="width: 200px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for status in statuses %}
+                <tr>
+                    <td style="font-family: monospace; font-weight: 600;">{{ status.id }}</td>
+                    <td>{{ status.name }}</td>
+                    <td>
+                        {% if status.is_active %}
+                        <span class="badge badge-success">Activo</span>
+                        {% else %}
+                        <span class="badge badge-pending">Desactivado</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="badge" onclick='openEditModal({{ status | tojson | safe }})'
+                                style="border: 1px solid var(--border); background: white; cursor: pointer;">Editar</button>
+
+                            <button class="badge" onclick="deleteStatus({{ status.id }})"
+                                style="border: 1px solid var(--border); background: white; cursor: pointer; color: var(--error);">Eliminar</button>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        No hay estados civiles registrados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modales -->
+<div id="createModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div style="background-color: white; padding: 24px; border-radius: 12px; width: 400px; max-width: 90%;">
+        <h3 style="margin-top:0;">Nuevo Estado Civil</h3>
+        <form id="createForm" onsubmit="createStatus(event)">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Descripción</label>
+                <input type="text" id="createName" required placeholder="Ej: Soltero/a"
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" onclick="closeCreateModal()"
+                    style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                <button type="submit"
+                    style="padding: 8px 16px; border: none; background: #4f46e5; color: white; border-radius: 6px; cursor: pointer;">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div style="background-color: white; padding: 24px; border-radius: 12px; width: 400px; max-width: 90%;">
+        <h3 style="margin-top:0;">Editar Estado Civil</h3>
+        <form id="editForm" onsubmit="saveStatus(event)">
+            <input type="hidden" id="editId">
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-size: 0.85rem; margin-bottom: 4px;">Descripción</label>
+                <input type="text" id="editName" required
+                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;">
+                    <input type="checkbox" id="editIsActive"> Activo
+                </label>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" onclick="closeEditModal()"
+                    style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                <button type="submit"
+                    style="padding: 8px 16px; border: none; background: #4f46e5; color: white; border-radius: 6px; cursor: pointer;">Guardar
+                    Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openCreateModal() { document.getElementById('createModal').style.display = 'flex'; }
+    function closeCreateModal() { document.getElementById('createModal').style.display = 'none'; }
+    function openEditModal(s) {
+        document.getElementById('editId').value = s.id;
+        document.getElementById('editName').value = s.name;
+        document.getElementById('editIsActive').checked = s.is_active;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+
+    async function createStatus(e) {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/v1/master/marital-status/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: document.getElementById('createName').value })
+            });
+            if (res.ok) window.location.reload();
+        } catch (err) { alert('Error de conexión'); }
+    }
+
+    async function saveStatus(e) {
+        e.preventDefault();
+        const id = document.getElementById('editId').value;
+        try {
+            const res = await fetch(`/api/v1/master/marital-status/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: document.getElementById('editName').value,
+                    is_active: document.getElementById('editIsActive').checked
+                })
+            });
+            if (res.ok) window.location.reload();
+        } catch (err) { alert('Error de conexión'); }
+    }
+
+    async function deleteStatus(id) {
+        if (!confirm('¿Seguro?')) return;
+        try {
+            const res = await fetch(`/api/v1/master/marital-status/${id}`, { method: 'DELETE' });
+            if (res.ok) window.location.reload();
+        } catch (err) { alert('Error'); }
+    }
+</script>
+{% endblock %}

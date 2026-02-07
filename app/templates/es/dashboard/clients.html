@@ -1,4 +1,5 @@
 {% extends "es/dashboard/layout.html" %}
+{% from "es/dashboard/macros/pagination.html" import render_pagination %}
 
 {% set active_page = 'clientes' %}
 
@@ -72,6 +73,7 @@
             </tbody>
         </table>
     </div>
+    {{ render_pagination(pagination) }}
 </div>
 
 {% endblock %}

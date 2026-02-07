@@ -8,11 +8,36 @@ from app.api.v1.base.student.routes import students_bp
 from app.api.v1.master.dynamics.routes import dynamic_fields_bp
 from app.api.v1.master.notifications.routes import notification_bp
 from app.api.v1.master.log.routes import admin_bp
-from app.api.v1.master.country.routes import countries_bp
-from app.api.v1.base.storage.routes import documents_bp
-from app.api.v1.master.intelligence.routes import intelligence_bp
+from app.api.v1.master.country.routes import country_bp
+from app.api.v1.master.logs_webhooks.routes import logs_webhooks_bp
+from app.api.v1.master.modules.routes import modules_bp
+from app.api.v1.master.currencies.routes import currencies_bp
+from app.api.v1.master.month_names.routes import month_names_bp
+from app.api.v1.master.weekday_names.routes import weekday_names_bp
+from app.api.v1.master.other_schools.routes import other_schools_bp
 from app.api.v1.master.ncf.routes import ncf_bp
+from app.api.v1.master.allergies.routes import allergies_bp
+from app.api.v1.master.banks.routes import banks_bp
+from app.api.v1.master.cities.routes import cities_bp
+from app.api.v1.master.marital_status.routes import marital_status_bp
+from app.api.v1.master.functionalities.routes import functionalities_bp
+from app.api.v1.master.functions.routes import functions_bp
+from app.api.v1.master.medical_institutions.routes import medical_institutions_bp
+from app.api.v1.master.health_insurance_institutions.routes import health_insurance_institutions_bp
 from app.api.v1.base.roles.routes import roles_bp
+from app.api.v1.master.screens.routes import screens_bp
+from app.api.v1.master.screen_functionalities.routes import screen_functionalities_bp
+from app.api.v1.master.payment_processors.routes import payment_processors_bp
+from app.api.v1.master.professions.routes import professions_bp
+from app.api.v1.master.role_permissions.routes import role_permissions_bp
+from app.api.v1.master.genders.routes import genders_bp
+from app.api.v1.master.attendance_types.routes import attendance_types_bp
+from app.api.v1.master.document_types.routes import document_types_bp
+from app.api.v1.master.blood_types.routes import blood_types_bp
+from app.api.v1.master.phone_types.routes import phone_types_bp
+from app.api.v1.master.roles.routes import roles_bp as master_roles_bp
+from app.api.v1.master.sectors.routes import sectors_bp
+from app.api.v1.master.search.controller import search_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role
 from app.utils import i18n
@@ -46,12 +71,34 @@ app.register_blueprint(students_bp)
 app.register_blueprint(dynamic_fields_bp)
 app.register_blueprint(payment_bp)
 app.register_blueprint(billing_bp)
-app.register_blueprint(countries_bp)
-app.register_blueprint(admin_bp)
-app.register_blueprint(documents_bp)
-app.register_blueprint(roles_bp)
-app.register_blueprint(intelligence_bp)
-app.register_blueprint(ncf_bp, url_prefix='/api/v1/master/ncf')
+app.register_blueprint(country_bp)
+app.register_blueprint(logs_webhooks_bp)
+app.register_blueprint(modules_bp)
+app.register_blueprint(currencies_bp)
+app.register_blueprint(month_names_bp)
+app.register_blueprint(weekday_names_bp)
+app.register_blueprint(other_schools_bp)
+app.register_blueprint(allergies_bp)
+app.register_blueprint(banks_bp)
+app.register_blueprint(cities_bp)
+app.register_blueprint(marital_status_bp)
+app.register_blueprint(functionalities_bp)
+app.register_blueprint(functions_bp)
+app.register_blueprint(medical_institutions_bp)
+app.register_blueprint(health_insurance_institutions_bp)
+app.register_blueprint(screens_bp)
+app.register_blueprint(screen_functionalities_bp)
+app.register_blueprint(payment_processors_bp)
+app.register_blueprint(professions_bp)
+app.register_blueprint(role_permissions_bp)
+app.register_blueprint(genders_bp)
+app.register_blueprint(attendance_types_bp)
+app.register_blueprint(document_types_bp)
+app.register_blueprint(blood_types_bp)
+app.register_blueprint(phone_types_bp)
+app.register_blueprint(master_roles_bp)
+app.register_blueprint(sectors_bp)
+app.register_blueprint(search_bp)
 
 # ------------------------------
 # Configuración de idioma
@@ -271,9 +318,11 @@ def dashboard():
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_clients():
-    from app.services.master_scheme.client_service import get_clients
-    clients = get_clients()
-    return render_template("es/dashboard/clients.html", clients=[c.to_dict() for c in clients])
+    from app.models.master_scheme.client_model import Client
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    pagination = Client.query.order_by(Client.clientId.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/clients.html", clients=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/clients/<int:clientId>")
 @jwt_required()
@@ -295,24 +344,31 @@ def dashboard_plans():
     from app.models.master_scheme.plans_model import Plan
     from app.models.master_scheme.price_list_model import PriceList  # Required for relationship mapping
     
-    plans = Plan.query.order_by(Plan.created_at.desc()).all()
-    return render_template("es/dashboard/plans.html", plans=[p.to_dict() for p in plans])
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    pagination = Plan.query.order_by(Plan.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/plans.html", plans=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/price-lists")
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_price_lists():
     from app.models.master_scheme.price_list_model import PriceList
-    price_lists = PriceList.query.order_by(PriceList.id.desc()).all()
-    return render_template("es/dashboard/price_lists.html", price_lists=[pl.to_dict() for pl in price_lists])
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    pagination = PriceList.query.order_by(PriceList.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/price_lists.html", price_lists=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/payments")
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_payments():
     from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
-    payments = PaymentTransaction.query.order_by(PaymentTransaction.createdAt.desc()).all()
-    return render_template("es/dashboard/payments.html", payments=[p.to_dict() for p in payments])
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    pagination = PaymentTransaction.query.order_by(PaymentTransaction.createdAt.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/payments.html", payments=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/invoices")
 @jwt_required()
@@ -335,6 +391,145 @@ def dashboard_ncf():
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_ncf_logs():
     return render_template("es/dashboard/ncf_logs.html")
+
+@app.route("/dashboard/allergies")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_allergies():
+    from app.services.master_scheme.allergy_service import get_allergies
+    allergies = get_allergies()
+    return render_template("es/dashboard/allergies.html", allergies=[a.to_dict() for a in allergies])
+
+@app.route("/dashboard/banks")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_banks():
+    from app.services.master_scheme.bank_service import get_banks
+    banks = get_banks()
+    return render_template("es/dashboard/banks.html", banks=[b.to_dict() for b in banks])
+
+@app.route("/dashboard/cities")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_cities():
+    from app.services.master_scheme.city_service import get_cities
+    from app.api.v1.master.country.service import get_countries
+    cities = get_cities()
+    countries = get_countries()
+    return render_template("es/dashboard/cities.html", cities=[c.to_dict() for c in cities], countries=[c.to_dict() for c in countries])
+
+@app.route("/dashboard/marital-status")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_marital_status():
+    from app.services.master_scheme.marital_status_service import get_marital_statuses
+    statuses = get_marital_statuses()
+    return render_template("es/dashboard/marital_status.html", statuses=[s.to_dict() for s in statuses])
+
+@app.route("/dashboard/functionalities")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_functionalities():
+    from app.services.master_scheme.functionality_service import get_functionalities
+    funcs = get_functionalities()
+    return render_template("es/dashboard/functionalities.html", functionalities=[f.to_dict() for f in funcs])
+
+@app.route("/dashboard/functions")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_functions():
+    from app.services.master_scheme.function_service import get_functions
+    funcs = get_functions()
+    return render_template("es/dashboard/functions.html", functions=[f.to_dict() for f in funcs])
+
+@app.route("/dashboard/medical-institutions")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_medical_institutions():
+    from app.services.master_scheme.medical_institution_service import get_medical_institutions
+    insts = get_medical_institutions()
+    return render_template("es/dashboard/medical_institutions.html", institutions=[i.to_dict() for i in insts])
+
+@app.route("/dashboard/health-insurance-institutions")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_health_insurance_institutions():
+    from app.services.master_scheme.health_insurance_institution_service import get_health_insurance_institutions
+    insts = get_health_insurance_institutions()
+    return render_template("es/dashboard/health_insurance_institutions.html", institutions=[i.to_dict() for i in insts])
+
+@app.route("/dashboard/logs-webhooks")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_logs_webhooks():
+    from app.services.master_scheme.log_service import get_logs
+    logs = get_logs()
+    return render_template("es/dashboard/logs_webhooks.html", logs=[l.to_dict() for l in logs])
+
+@app.route("/dashboard/modules")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_modules():
+    from app.services.master_scheme.module_service import get_modules
+    modules = get_modules()
+    return render_template("es/dashboard/modules.html", modules=[m.to_dict() for m in modules])
+
+@app.route("/dashboard/currencies")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_currencies():
+    from app.services.master_scheme.currency_service import get_currencies
+    currencies = get_currencies()
+    return render_template("es/dashboard/currencies.html", currencies=[c.to_dict() for c in currencies])
+
+@app.route("/dashboard/month-names")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_month_names():
+    from app.services.master_scheme.month_name_service import get_month_names
+    months = get_month_names()
+    return render_template("es/dashboard/month_names.html", months=[m.to_dict() for m in months])
+
+@app.route("/dashboard/weekday-names")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_weekday_names():
+    from app.services.master_scheme.weekday_name_service import get_weekday_names
+    days = get_weekday_names()
+    return render_template("es/dashboard/weekday_names.html", days=[d.to_dict() for d in days])
+
+@app.route("/dashboard/other-schools")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_other_schools():
+    from app.services.master_scheme.other_school_service import get_other_schools
+    schools = get_other_schools()
+    return render_template("es/dashboard/other_schools.html", schools=[s.to_dict() for s in schools])
+
+@app.route("/dashboard/countries")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_countries():
+    from app.services.master_scheme.country_service import get_countries
+    countries = get_countries()
+    return render_template("es/dashboard/countries.html", countries=[c.to_dict() for c in countries])
+
+@app.route("/dashboard/users")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_users():
+    from app.models.master_scheme.user_model import User
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Optional: filter by ID if provided in query (for search redirection)
+    user_id = request.args.get('id', type=int)
+    query = User.query
+    if user_id:
+        query = query.filter_by(userId=user_id)
+        
+    pagination = query.order_by(User.userId.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/users.html", users=pagination.items, pagination=pagination)
 
 # ------------------------------
 # Client Environment Routes
@@ -430,6 +625,183 @@ def confirmation_account():
 
     return render_template("es/confirmation_template.html")
 
+# ------------------------------
+# Batch 3 Dashboard Routes
+# ------------------------------
+
+@app.route("/dashboard/screens")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_screens():
+    from app.models.master_scheme.screen_model import Screen
+    from app.models.master_scheme.module_model import Module
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    pagination = db.session.query(
+        Screen, Module
+    ).join(Module, Screen.module_id == Module.id
+    ).order_by(Module.name.asc(), Screen.order.asc()
+    ).paginate(page=page, per_page=per_page, error_out=False)
+    
+    return render_template("es/dashboard/screens.html", pagination=pagination)
+
+@app.route("/dashboard/screen-functionalities")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_screen_functionalities():
+    from app.models.master_scheme.screen_functionality_model import ScreenFunctionality
+    from app.models.master_scheme.screen_model import Screen
+    from app.models.master_scheme.functionality_model import Functionality
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    pagination = db.session.query(
+        ScreenFunctionality, Screen, Functionality
+    ).join(Screen, ScreenFunctionality.screen_id == Screen.id
+    ).join(Functionality, ScreenFunctionality.functionality_id == Functionality.id
+    ).order_by(Screen.name.asc(), Functionality.name.asc()
+    ).paginate(page=page, per_page=per_page, error_out=False)
+    
+    return render_template("es/dashboard/screen_functionalities.html", pagination=pagination)
+
+@app.route("/dashboard/payment-processors")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_payment_processors():
+    from app.services.master_scheme.payment_processor_service import get_payment_processors
+    pp = get_payment_processors()
+    return render_template("es/dashboard/payment_processors.html", processors=pp)
+
+@app.route("/dashboard/professions")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_professions():
+    from app.services.master_scheme.profession_service import get_professions
+    professions = get_professions()
+    return render_template("es/dashboard/professions.html", professions=professions)
+
+@app.route("/dashboard/role-permissions")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_role_permissions():
+    from app.models.master_scheme.role_permission_model import RolePermission
+    from app.models.master_scheme.roles_model import Role
+    from app.models.master_scheme.screen_functionality_model import ScreenFunctionality
+    from app.models.master_scheme.screen_model import Screen
+    from app.models.master_scheme.functionality_model import Functionality
+
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    pagination = db.session.query(
+        RolePermission, Role, Screen, Functionality
+    ).join(Role, RolePermission.role_id == Role.id
+    ).join(ScreenFunctionality, RolePermission.screen_functionality_id == ScreenFunctionality.id
+    ).join(Screen, ScreenFunctionality.screen_id == Screen.id
+    ).join(Functionality, ScreenFunctionality.functionality_id == Functionality.id
+    ).order_by(Role.name.asc(), Screen.name.asc()
+    ).paginate(page=page, per_page=per_page, error_out=False)
+    
+    return render_template("es/dashboard/role_permissions.html", pagination=pagination)
+
+@app.route("/dashboard/genders")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_genders():
+    from app.services.master_scheme.gender_service import get_genders
+    g = get_genders()
+    return render_template("es/dashboard/genders.html", genders=g)
+
+@app.route("/dashboard/attendance-types")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_attendance_types():
+    from app.services.master_scheme.attendance_type_service import get_attendance_types
+    at = get_attendance_types()
+    return render_template("es/dashboard/attendance_types.html", attendance_types=at)
+
+@app.route("/dashboard/document-types")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_document_types():
+    from app.services.master_scheme.document_type_service import get_document_types
+    dt = get_document_types()
+    return render_template("es/dashboard/document_types.html", document_types=dt)
+
+@app.route("/dashboard/blood-types")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_blood_types():
+    from app.services.master_scheme.blood_type_service import get_blood_types
+    bt = get_blood_types()
+    return render_template("es/dashboard/blood_types.html", blood_types=bt)
+
+@app.route("/dashboard/phone-types")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_phone_types():
+    from app.services.master_scheme.phone_type_service import get_phone_types
+    pt = get_phone_types()
+    return render_template("es/dashboard/phone_types.html", phone_types=pt)
+
+@app.route("/dashboard/roles-master")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_roles_master():
+    from app.models.master_scheme.roles_model import Role
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    pagination = Role.query.order_by(Role.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/roles_master.html", roles=pagination.items, pagination=pagination)
+
+@app.route("/dashboard/sectors")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_sectors():
+    from app.services.master_scheme.sector_service import get_sectors
+    s = get_sectors()
+    return render_template("es/dashboard/sectors.html", sectors=s)
+
+@app.route("/dashboard/user-roles")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_user_roles():
+    from app.models.master_scheme.user_roles_model import UserRole
+    from app.models.master_scheme.user_model import User
+    from app.models.master_scheme.roles_model import Role
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    pagination = db.session.query(
+        UserRole, User, Role
+    ).join(User, UserRole.user_id == User.userId
+    ).join(Role, UserRole.role_id == Role.id
+    ).order_by(User.username.asc(), Role.name.asc()
+    ).paginate(page=page, per_page=per_page, error_out=False)
+    
+    return render_template("es/dashboard/user_roles.html", pagination=pagination)
+
+@app.route("/dashboard/user-sessions")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_user_sessions():
+    from app.models.master_scheme.session_model import Session
+    from app.models.master_scheme.user_model import User
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    pagination = db.session.query(
+        Session, User
+    ).join(User, Session.userId == User.userId
+    ).order_by(Session.createAt.desc()
+    ).paginate(page=page, per_page=per_page, error_out=False)
+    
+    return render_template("es/dashboard/user_sessions.html", pagination=pagination)
 
 if __name__ == '__main__':
         
@@ -437,3 +809,4 @@ if __name__ == '__main__':
     # Usa la variable de entorno PORT si existe, de lo contrario 8080
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+

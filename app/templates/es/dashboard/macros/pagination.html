@@ -1,0 +1,39 @@
+{% macro render_pagination(pagination) %}
+<nav aria-label="Navegación de páginas"
+    style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-top: 1px solid var(--border);">
+    <div style="color: var(--text-muted); font-size: 0.85rem;">
+        Mostrando {{ pagination.items|length }} de {{ pagination.total }} registros
+    </div>
+    <div style="display: flex; gap: 5px;">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for(request.endpoint, page=pagination.prev_num, **request.args) }}"
+            style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--text-main); background: white; font-size: 0.85rem; font-weight: 600;">
+            Anterior
+        </a>
+        {% else %}
+        <span
+            style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; color: #ccc; background: #f9f9f9; font-size: 0.85rem; font-weight: 600; cursor: not-allowed;">
+            Anterior
+        </span>
+        {% endif %}
+
+        <div style="display: flex; gap: 5px; align-items: center;">
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); padding: 0 10px;">
+                Página {{ pagination.page }} de {{ pagination.pages }}
+            </span>
+        </div>
+
+        {% if pagination.has_next %}
+        <a href="{{ url_for(request.endpoint, page=pagination.next_num, **request.args) }}"
+            style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--text-main); background: white; font-size: 0.85rem; font-weight: 600;">
+            Siguiente
+        </a>
+        {% else %}
+        <span
+            style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; color: #ccc; background: #f9f9f9; font-size: 0.85rem; font-weight: 600; cursor: not-allowed;">
+            Siguiente
+        </span>
+        {% endif %}
+    </div>
+</nav>
+{% endmacro %}

@@ -4,6 +4,7 @@ from app.utils.helpers import format_datetime_user
 
 class AuditLog(db.Model):
     __tablename__ = "auditoria"
+    __table_args__ = {"schema": "cliente"}
 
 
     # -------------------------

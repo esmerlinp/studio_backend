@@ -20,10 +20,11 @@ class Role(db.Model):
     )
     code = db.Column(
         "scodigo",
-        db.String(50),
-        nullable=False,
+        db.String(20),
+        nullable=True,
         unique=True,
-        index=True
+        index=True,
+        default=None
     )
 
     description = db.Column(

@@ -1,0 +1,52 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'monedas' %}
+
+{% block title %}Monedas | Akdmia Studio{% endblock %}
+
+{% block page_title %}Gestión de Monedas{% endblock %}
+{% block page_subtitle %}Administra las divisas soportadas por el sistema.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Listado de Monedas</h3>
+        <button onclick="openCreateModal()" class="badge"
+            style="background: var(--primary); color: white; border: none; padding: 8px 16px; cursor: pointer;">+ Nueva
+            Moneda</button>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Código ISO</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for currency in currencies %}
+                <tr>
+                    <td>{{ currency.id }}</td>
+                    <td>{{ currency.name }}</td>
+                    <td style="font-family: monospace;">{{ currency.iso_code }}</td>
+                    <td>
+                        {% if currency.is_active %}
+                        <span class="badge badge-success">Activo</span>
+                        {% else %}
+                        <span class="badge badge-pending">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="badge" onclick='openEditModal({{ currency | tojson | safe }})'
+                            style="border: 1px solid var(--border); background: white; cursor: pointer;">Editar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

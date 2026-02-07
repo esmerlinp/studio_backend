@@ -1,0 +1,38 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'meses' %}
+
+{% block title %}Meses | Akdmia Studio{% endblock %}
+
+{% block page_title %}Nombres de Meses{% endblock %}
+{% block page_subtitle %}Catálogo maestro de meses del año.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Num.</th>
+                    <th>Nombre</th>
+                    <th>Corto</th>
+                    <th style="width: 120px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for month in months %}
+                <tr>
+                    <td>{{ month.month_num }}</td>
+                    <td>{{ month.name }}</td>
+                    <td>{{ month.short_name }}</td>
+                    <td>
+                        <button class="badge"
+                            style="border: 1px solid var(--border); background: white; cursor: pointer;">Editar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

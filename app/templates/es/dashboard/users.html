@@ -1,0 +1,85 @@
+{% extends "es/dashboard/layout.html" %}
+{% from "es/dashboard/macros/pagination.html" import render_pagination %}
+
+{% set active_page = 'usuarios' %}
+
+{% block title %}Usuarios | Akdmia{% endblock %}
+
+{% block page_title %}Gestión de Usuarios{% endblock %}
+{% block page_subtitle %}Administra los usuarios del sistema master y sus permisos.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Listado de Usuarios</h3>
+        <button onclick="openCreateUserModal()"
+            style="padding: 10px 20px; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Nuevo Usuario
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Nombre Completo</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr {% if request.args.get('id')|int==user.userId %}style="background-color: rgba(79, 70, 229, 0.05);"
+                    {% endif %}>
+                    <td style="color: var(--text-muted); font-size: 0.8rem;">#{{ user.userId }}</td>
+                    <td style="font-weight: 600;">{{ user.username }}</td>
+                    <td>{{ user.firstName }} {{ user.lastName }}</td>
+                    <td>{{ user.email }}</td>
+                    <td><span class="badge" style="background: #e0e7ff; color: #4338ca;">{{ user.rol }}</span></td>
+                    <td>
+                        {% if user.isActive %}
+                        <span class="badge badge-success">Activo</span>
+                        {% else %}
+                        <span class="badge badge-pending">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="badge" onclick='openEditUserModal({{ user.to_dict() | tojson | safe }})'
+                                style="border: 1px solid var(--border); background: white; cursor: pointer;">
+                                Editar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        No se encontraron usuarios.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {{ render_pagination(pagination) }}
+</div>
+
+<!-- Modal logic placeholder (to be implemented if needed) -->
+<script>
+    function openCreateUserModal() {
+        alert("Funcionalidad de creación de usuario en desarrollo.");
+    }
+    function openEditUserModal(user) {
+        alert("Editando usuario: " + user.username);
+    }
+</script>
+{% endblock %}

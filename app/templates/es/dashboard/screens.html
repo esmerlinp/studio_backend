@@ -1,0 +1,94 @@
+{% extends "es/dashboard/layout.html" %}
+{% from "es/dashboard/macros/pagination.html" import render_pagination %}
+
+{% set active_page = 'screens' %}
+
+{% block title %}Gestión de Pantallas | Akdmia{% endblock %}
+
+{% block page_title %}Gestión de Pantallas{% endblock %}
+{% block page_subtitle %}Administra las vistas disponibles en el sistema y sus metadatos.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Listado de Pantallas</h3>
+        <button class="btn btn-primary" onclick="openModal('add')"
+            style="padding: 10px 20px; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Nueva Pantalla
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre / Ruta</th>
+                    <th>Módulo</th>
+                    <th>Icono</th>
+                    <th>Orden</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for screen, module in pagination.items %}
+                <tr>
+                    <td style="color: var(--text-muted); font-size: 0.8rem;">#{{ screen.id }}</td>
+                    <td>
+                        <div style="font-weight: 600;">{{ screen.name }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">{{
+                            screen.route }}</div>
+                    </td>
+                    <td>
+                        <span class="badge"
+                            style="background: #f3f4f6; color: #374151; border: 1px solid var(--border);">
+                            {{ module.name }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--text-muted);">
+                            <i class="{{ screen.icon }}"></i>
+                            <span style="font-size: 0.75rem;">{{ screen.icon }}</span>
+                        </div>
+                    </td>
+                    <td>{{ screen.order }}</td>
+                    <td>
+                        {% if screen.is_active %}
+                        <span class="badge badge-success">Activo</span>
+                        {% else %}
+                        <span class="badge badge-pending">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="badge" onclick='openModal("edit", {{ screen.to_dict() | tojson | safe }})'
+                                style="border: 1px solid var(--border); background: white; cursor: pointer;">
+                                Editar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        No hay pantallas registradas.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {{ render_pagination(pagination) }}
+</div>
+
+<script>
+    function openModal(mode, data) {
+        alert("En desarrollo: " + mode + (data ? " " + data.id : ""));
+    }
+</script>
+{% endblock %}

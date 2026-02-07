@@ -1,0 +1,60 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'modulos' %}
+
+{% block title %}Módulos | Akdmia Studio{% endblock %}
+
+{% block page_title %}Gestión de Módulos{% endblock %}
+{% block page_subtitle %}Configura los módulos disponibles en la plataforma.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Listado de Módulos</h3>
+        <button onclick="openCreateModal()" class="badge"
+            style="background: var(--primary); color: white; border: none; padding: 8px 16px; cursor: pointer;">+ Nuevo
+            Módulo</button>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Orden</th>
+                    <th>Icono</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th style="width: 120px;">Estado</th>
+                    <th style="width: 150px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for module in modules %}
+                <tr>
+                    <td>{{ module.order or '-' }}</td>
+                    <td><i class="{{ module.icon }}"></i></td>
+                    <td style="font-weight: 600;">{{ module.name }}</td>
+                    <td>{{ module.description or '' }}</td>
+                    <td>
+                        {% if module.is_active %}
+                        <span class="badge badge-success">Activo</span>
+                        {% else %}
+                        <span class="badge badge-pending">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="badge" onclick='openEditModal({{ module | tojson | safe }})'
+                            style="border: 1px solid var(--border); background: white; cursor: pointer;">Editar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal logic similar to others... -->
+<script>
+    function openCreateModal() { /* ... */ }
+    function openEditModal(module) { /* ... */ }
+</script>
+{% endblock %}

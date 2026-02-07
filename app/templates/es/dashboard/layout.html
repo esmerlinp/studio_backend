@@ -67,11 +67,62 @@
             color: var(--white);
             display: flex;
             flex-direction: column;
-            padding: 24px;
+            padding: 24px 16px;
+            /* Adjusted horizontal padding */
             position: fixed;
-            height: 100%;
+            height: 100vh;
             transition: width 0.3s ease;
             z-index: 50;
+            overflow: visible;
+            /* Allow toggle button to be visible outside */
+        }
+
+        .sidebar nav {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+            /* Space for scrollbar */
+            margin-right: -4px;
+            /* Offset spacing if needed */
+        }
+
+        /* Subtle scrollbar for sidebar */
+        .sidebar nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .sidebar nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-category {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #4b5563;
+            font-weight: 700;
+            margin: 24px 12px 12px 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar.collapsed .nav-category,
+        html.sidebar-collapsed-state .sidebar .nav-category {
+            opacity: 0;
+            pointer-events: none;
+            margin: 12px 0;
+            /* Still take some space to separate but keep it minimal */
         }
 
         .sidebar-header {
@@ -105,17 +156,83 @@
             color: #818cf8;
         }
 
+        .nav-category {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #6366f1;
+            /* Changed to a lighter blue for better contrast */
+            font-weight: 700;
+            margin: 16px 8px 8px 8px;
+            /* Slightly reduced margins */
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            opacity: 1;
+        }
+
+        .nav-category:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .nav-category .chevron {
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            color: #9ca3af;
+        }
+
+        .nav-category.collapsed .chevron {
+            transform: rotate(-90deg);
+        }
+
+        .nav-links-group {
+            max-height: 1000px;
+            /* Large enough to fit content */
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .nav-links-group.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .sidebar.collapsed .nav-category,
+        html.sidebar-collapsed-state .sidebar .nav-category {
+            opacity: 0;
+            pointer-events: none;
+            margin: 8px 0;
+            padding: 0;
+        }
+
+        .sidebar.collapsed .nav-links-group,
+        html.sidebar-collapsed-state .sidebar .nav-links-group {
+            max-height: none !important;
+            /* Force expand show only icons when sidebar is collapsed */
+            opacity: 1 !important;
+        }
+
         .nav-link {
             color: #9ca3af;
             text-decoration: none;
-            padding: 12px 16px;
+            padding: 10px 16px;
+            /* Slightly reduced vertical padding */
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 12px;
             transition: all 0.2s;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            /* Slightly smaller font */
             white-space: nowrap;
             overflow: hidden;
         }
@@ -358,6 +475,100 @@
             color: var(--text-main);
         }
 
+        /* Search Bar Styles */
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin-left: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            background: #f9fafb;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-item {
+            padding: 10px 16px;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .search-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-item:hover,
+        .search-item.selected {
+            background-color: #f9fafb;
+        }
+
+        .search-item .label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .search-item .category {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .no-results {
+            padding: 16px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
             {
             % block extra_css %
         }
@@ -365,6 +576,7 @@
             {
             % endblock %
         }
+
 
         @media (max-width: 768px) {
             .sidebar {
@@ -405,75 +617,349 @@
             <h1 class="logo-text">Akdmia <span>Studio</span></h1>
         </div>
         <nav>
-            <a href="/dashboard" class="nav-link {% if active_page == 'inicio' %}active{% endif %}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            <!-- PRINCIPAL -->
+            <div class="nav-category" onclick="toggleCategory('cat_principal')">
+                <span>Principal</span>
+                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-                <span>Inicio</span>
-            </a>
-            <a href="/dashboard/clients" class="nav-link {% if active_page == 'clientes' %}active{% endif %}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </div>
+            <div id="cat_principal" class="nav-links-group">
+                <a href="/dashboard" class="nav-link {% if active_page == 'inicio' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span>Inicio</span>
+                </a>
+                <a href="/dashboard/clients" class="nav-link {% if active_page == 'clientes' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span>Clientes</span>
+                </a>
+            </div>
+
+            <!-- VENTAS Y FACTURACIÓN -->
+            <div class="nav-category" onclick="toggleCategory('cat_ventas')">
+                <span>Ventas y Facturación</span>
+                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-                <span>Clientes</span>
-            </a>
-            <a href="/dashboard/plans" class="nav-link {% if active_page == 'planes' %}active{% endif %}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </div>
+            <div id="cat_ventas" class="nav-links-group">
+                <a href="/dashboard/payments" class="nav-link {% if active_page == 'pagos' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    <span>Pagos</span>
+                </a>
+                <a href="/dashboard/invoices" class="nav-link {% if active_page == 'facturas' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>Facturas</span>
+                </a>
+                <a href="/dashboard/ncf" class="nav-link {% if active_page == 'ncf' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <path d="M16 13H8M16 17H8M10 9H8"></path>
+                    </svg>
+                    <span>NCF Secuencias</span>
+                </a>
+                <a href="/dashboard/ncf/logs" class="nav-link {% if active_page == 'ncf_logs' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                    </svg>
+                    <span>NCF Logs</span>
+                </a>
+                <a href="/dashboard/plans" class="nav-link {% if active_page == 'planes' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    <span>Planes</span>
+                </a>
+                <a href="/dashboard/price-lists"
+                    class="nav-link {% if active_page == 'listas_precio' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <span>Listas de Precio</span>
+                </a>
+            </div>
+
+            <!-- CONFIGURACIÓN MAESTRO -->
+            <div class="nav-category" onclick="toggleCategory('cat_maestro')">
+                <span>Configuración Maestro</span>
+                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-                <span>Planes</span>
-            </a>
-            <a href="/dashboard/price-lists" class="nav-link {% if active_page == 'listas_precio' %}active{% endif %}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </div>
+            <div id="cat_maestro" class="nav-links-group">
+                <a href="/dashboard/countries" class="nav-link {% if active_page == 'paises' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                        </path>
+                    </svg>
+                    <span>Países</span>
+                </a>
+                <a href="/dashboard/cities" class="nav-link {% if active_page == 'ciudades' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>Ciudades</span>
+                </a>
+                <a href="/dashboard/sectors" class="nav-link {% if active_page == 'sectors' %}active{% endif %}">
+                    <i class="fas fa-map-marker-alt" style="width: 20px;"></i>
+                    <span>Sectores</span>
+                </a>
+                <a href="/dashboard/currencies" class="nav-link {% if active_page == 'monedas' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                    <span>Monedas</span>
+                </a>
+                <a href="/dashboard/banks" class="nav-link {% if active_page == 'bancos' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M2 10l10-8 10 8"></path>
+                    </svg>
+                    <span>Bancos</span>
+                </a>
+                <a href="/dashboard/marital-status"
+                    class="nav-link {% if active_page == 'estados_civiles' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z">
+                        </path>
+                    </svg>
+                    <span>Estados Civiles</span>
+                </a>
+                <a href="/dashboard/month-names" class="nav-link {% if active_page == 'meses' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>Meses</span>
+                </a>
+                <a href="/dashboard/weekday-names" class="nav-link {% if active_page == 'dias' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Días Semana</span>
+                </a>
+            </div>
+
+            <!-- CATÁLOGOS -->
+            <div class="nav-category" onclick="toggleCategory('cat_catalogos')">
+                <span>Catálogos</span>
+                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-                <span>Listas de Precio</span>
-            </a>
-            <a href="/dashboard/payments" class="nav-link {% if active_page == 'pagos' %}active{% endif %}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                    <line x1="1" y1="10" x2="23" y2="10"></line>
+            </div>
+            <div id="cat_catalogos" class="nav-links-group">
+                <a href="/dashboard/allergies" class="nav-link {% if active_page == 'alergias' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                    </svg>
+                    <span>Alergias</span>
+                </a>
+                <a href="/dashboard/professions"
+                    class="nav-link {% if active_page == 'professions' %}active{% endif %}">
+                    <i class="fas fa-user-tie" style="width: 20px;"></i>
+                    <span>Profesiones</span>
+                </a>
+                <a href="/dashboard/genders" class="nav-link {% if active_page == 'genders' %}active{% endif %}">
+                    <i class="fas fa-venus-mars" style="width: 20px;"></i>
+                    <span>Géneros</span>
+                </a>
+                <a href="/dashboard/attendance-types"
+                    class="nav-link {% if active_page == 'attendance_types' %}active{% endif %}">
+                    <i class="fas fa-clock" style="width: 20px;"></i>
+                    <span>Tipos Asistencia</span>
+                </a>
+                <a href="/dashboard/document-types"
+                    class="nav-link {% if active_page == 'document_types' %}active{% endif %}">
+                    <i class="fas fa-id-card" style="width: 20px;"></i>
+                    <span>Tipos Documento</span>
+                </a>
+                <a href="/dashboard/blood-types"
+                    class="nav-link {% if active_page == 'blood_types' %}active{% endif %}">
+                    <i class="fas fa-tint" style="width: 20px;"></i>
+                    <span>Tipos Sangre</span>
+                </a>
+                <a href="/dashboard/phone-types"
+                    class="nav-link {% if active_page == 'phone_types' %}active{% endif %}">
+                    <i class="fas fa-phone" style="width: 20px;"></i>
+                    <span>Tipos Teléfono</span>
+                </a>
+            </div>
+
+            <!-- SEGURIDAD Y ACCESO -->
+            <div class="nav-category" onclick="toggleCategory('cat_seguridad')">
+                <span>Seguridad y Acceso</span>
+                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-                <span>Pagos</span>
-            </a>
-            <a href="/dashboard/invoices" class="nav-link {% if active_page == 'facturas' %}active{% endif %}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
+            </div>
+            <div id="cat_seguridad" class="nav-links-group">
+                <a href="/dashboard/roles-master"
+                    class="nav-link {% if active_page == 'master_roles' %}active{% endif %}">
+                    <i class="fas fa-users-cog" style="width: 20px;"></i>
+                    <span>Roles Maestro</span>
+                </a>
+                <a href="/dashboard/user-roles" class="nav-link {% if active_page == 'user_roles' %}active{% endif %}">
+                    <i class="fas fa-user-tag" style="width: 20px;"></i>
+                    <span>Roles de Usuario</span>
+                </a>
+                <a href="/dashboard/role-permissions"
+                    class="nav-link {% if active_page == 'role_permissions' %}active{% endif %}">
+                    <i class="fas fa-user-shield" style="width: 20px;"></i>
+                    <span>Permisos Roles</span>
+                </a>
+                <a href="/dashboard/user-sessions"
+                    class="nav-link {% if active_page == 'user_sessions' %}active{% endif %}">
+                    <i class="fas fa-history" style="width: 20px;"></i>
+                    <span>Sesiones</span>
+                </a>
+                <a href="/dashboard/screens" class="nav-link {% if active_page == 'screens' %}active{% endif %}">
+                    <i class="fas fa-desktop" style="width: 20px;"></i>
+                    <span>Pantallas</span>
+                </a>
+                <a href="/dashboard/screen-functionalities"
+                    class="nav-link {% if active_page == 'screen_functionalities' %}active{% endif %}">
+                    <i class="fas fa-list-alt" style="width: 20px;"></i>
+                    <span>Pantallas-Func</span>
+                </a>
+                <a href="/dashboard/functionalities"
+                    class="nav-link {% if active_page == 'funcionalidades' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                    <span>Funcionalidades</span>
+                </a>
+                <a href="/dashboard/functions" class="nav-link {% if active_page == 'funciones' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                    <span>Funciones</span>
+                </a>
+                <a href="/dashboard/modules" class="nav-link {% if active_page == 'modulos' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Módulos</span>
+                </a>
+            </div>
+
+            <!-- INSTITUCIONES -->
+            <div class="nav-category" onclick="toggleCategory('cat_instituciones')">
+                <span>Instituciones</span>
+                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-                <span>Facturas</span>
-            </a>
-            <a href="/dashboard/ncf" class="nav-link {% if active_page == 'ncf' %}active{% endif %}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <path d="M16 13H8M16 17H8M10 9H8"></path>
+            </div>
+            <div id="cat_instituciones" class="nav-links-group">
+                <a href="/dashboard/medical-institutions"
+                    class="nav-link {% if active_page == 'instituciones_medicas' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                    </svg>
+                    <span>Salud (Inst.)</span>
+                </a>
+                <a href="/dashboard/health-insurance-institutions"
+                    class="nav-link {% if active_page == 'instituciones_segmed' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <span>Seguro Médico</span>
+                </a>
+                <a href="/dashboard/other-schools"
+                    class="nav-link {% if active_page == 'otroscolegios' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                    <span>Colegios</span>
+                </a>
+            </div>
+
+            <!-- SISTEMA -->
+            <div class="nav-category" onclick="toggleCategory('cat_sistema')">
+                <span>Sistema</span>
+                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-                <span>NCF Secuencias</span>
-            </a>
-            <a href="/dashboard/ncf/logs" class="nav-link {% if active_page == 'ncf_logs' %}active{% endif %}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                </svg>
-                <span>NCF Logs</span>
-            </a>
+            </div>
+            <div id="cat_sistema" class="nav-links-group">
+                <a href="/dashboard/logs-webhooks"
+                    class="nav-link {% if active_page == 'logs_webhooks' %}active{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                    </svg>
+                    <span>Logs Webhooks</span>
+                </a>
+                <a href="/dashboard/payment-processors"
+                    class="nav-link {% if active_page == 'payment_processors' %}active{% endif %}">
+                    <i class="fas fa-credit-card" style="width: 20px;"></i>
+                    <span>Procesadores Pago</span>
+                </a>
+            </div>
         </nav>
         <div style="margin-top: auto;">
             <a href="/logout" class="nav-link" style="color: #f87171;">
@@ -490,7 +976,20 @@
 
     <main class="main-content" id="main-content">
         <header>
-            <h2 style="font-family: 'Outfit', sans-serif;">{% block page_title %}{% endblock %}</h2>
+            <div style="display: flex; align-items: center; flex: 1;">
+                <h2 style="font-family: 'Outfit', sans-serif; margin-right: 20px;">{% block page_title %}{% endblock %}
+                </h2>
+                <div class="search-container">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Buscar clientes, planes, usuarios..."
+                        id="globalSearchInput" autocomplete="off">
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+            </div>
             <div class="user-profile">
                 <span style="color: var(--text-muted)">Bienvenido, <strong>Admin</strong></span>
                 <div class="avatar">AD</div>
@@ -521,6 +1020,46 @@
             }
         }
 
+        function toggleCategory(categoryId) {
+            const categoryHeader = document.querySelector(`[onclick="toggleCategory('${categoryId}')"]`);
+            const group = document.getElementById(categoryId);
+
+            const isCollapsed = group.classList.toggle('collapsed');
+            categoryHeader.classList.toggle('collapsed', isCollapsed);
+
+            // Save state
+            const collapsedCategories = JSON.parse(localStorage.getItem('collapsedCategories') || '{}');
+            collapsedCategories[categoryId] = isCollapsed;
+            localStorage.setItem('collapsedCategories', JSON.stringify(collapsedCategories));
+        }
+
+        // Initialize collapsible categories
+        document.addEventListener('DOMContentLoaded', () => {
+            const collapsedCategories = JSON.parse(localStorage.getItem('collapsedCategories') || '{}');
+
+            Object.keys(collapsedCategories).forEach(catId => {
+                if (collapsedCategories[catId]) {
+                    const group = document.getElementById(catId);
+                    const header = document.querySelector(`[onclick="toggleCategory('${catId}')"]`);
+                    if (group && header) {
+                        group.classList.add('collapsed');
+                        header.classList.add('collapsed');
+                    }
+                }
+            });
+
+            // Ensure category with active link is expanded
+            const activeLink = document.querySelector('.nav-link.active');
+            if (activeLink) {
+                const activeGroup = activeLink.closest('.nav-links-group');
+                if (activeGroup) {
+                    activeGroup.classList.remove('collapsed');
+                    const header = document.querySelector(`[onclick="toggleCategory('${activeGroup.id}')"]`);
+                    if (header) header.classList.remove('collapsed');
+                }
+            }
+        });
+
         // Run on load to ensure JS state matches (if pre-render script missed or for cleanup)
         document.addEventListener('DOMContentLoaded', () => {
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
@@ -532,6 +1071,127 @@
                 mainContent.classList.add('collapsed');
             }
         });
+
+        // Global Search Logic
+        (function () {
+            const input = document.getElementById('globalSearchInput');
+            const results = document.getElementById('searchResults');
+            let debounceTimer;
+            let selectedIndex = -1;
+
+            input.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                const query = input.value.trim();
+
+                if (query.length < 2) {
+                    results.classList.remove('active');
+                    return;
+                }
+
+                debounceTimer = setTimeout(async () => {
+                    try {
+                        const res = await fetch(`/api/v1/master/search/?q=${encodeURIComponent(query)}`);
+                        const data = await res.json();
+                        renderResults(data);
+                    } catch (err) {
+                        console.error('Search error:', err);
+                    }
+                }, 300);
+            });
+
+            function renderResults(data) {
+                results.innerHTML = '';
+                if (data.length === 0) {
+                    results.innerHTML = '<div class="no-results">No se encontraron resultados</div>';
+                } else {
+                    data.forEach((item, index) => {
+                        const div = document.createElement('a');
+                        div.href = item.redirect_url;
+                        div.className = 'search-item';
+                        div.innerHTML = `
+                            <span class="label">${item.label}</span>
+                            <span class="category">${item.category}</span>
+                        `;
+                        results.appendChild(div);
+                    });
+                }
+                results.classList.add('active');
+                selectedIndex = -1;
+            }
+
+            // Close results when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !results.contains(e.target)) {
+                    results.classList.remove('active');
+                }
+            });
+
+            // Keyboard navigation
+            input.addEventListener('keydown', (e) => {
+                const items = results.querySelectorAll('.search-item');
+                if (!results.classList.contains('active') || items.length === 0) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex + 1) % items.length;
+                    updateSelection(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                    updateSelection(items);
+                } else if (e.key === 'Enter') {
+                    if (selectedIndex >= 0) {
+                        e.preventDefault();
+                        items[selectedIndex].click();
+                    }
+                }
+            });
+
+            function updateSelection(items) {
+                items.forEach((item, index) => {
+                    item.classList.toggle('selected', index === selectedIndex);
+                    if (index === selectedIndex) {
+                        item.scrollIntoView({ block: 'nearest' });
+                    }
+                });
+            }
+        })();
+
+        // Sidebar scroll persistence and auto-scroll to active
+        (function () {
+            document.addEventListener('DOMContentLoaded', function () {
+                const sidebarNav = document.querySelector('.sidebar nav');
+                if (!sidebarNav) return;
+
+                const activeLink = sidebarNav.querySelector('.nav-link.active');
+
+                // 1. Restore scroll position from session
+                const savedScroll = sessionStorage.getItem('sidebarScroll');
+                if (savedScroll) {
+                    sidebarNav.scrollTop = savedScroll;
+                }
+
+                // 2. If no saved scroll, OR if active link is not visible, scroll to it
+                if (activeLink) {
+                    const navRect = sidebarNav.getBoundingClientRect();
+                    const linkRect = activeLink.getBoundingClientRect();
+
+                    // Simple check if link is outside visible area
+                    if (linkRect.top < navRect.top || linkRect.bottom > navRect.bottom) {
+                        activeLink.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                    }
+                }
+
+                // 3. Save scroll position on scroll
+                let scrollTimeout;
+                sidebarNav.addEventListener('scroll', () => {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        sessionStorage.setItem('sidebarScroll', sidebarNav.scrollTop);
+                    }, 100);
+                });
+            });
+        })();
     </script>
 
     {% block extra_js %}{% endblock %}

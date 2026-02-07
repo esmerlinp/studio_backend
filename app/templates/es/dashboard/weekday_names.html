@@ -1,0 +1,38 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'dias' %}
+
+{% block title %}Días de la Semana| Akdmia Studio{% endblock %}
+
+{% block page_title %}Días de la Semana{% endblock %}
+{% block page_subtitle %}Catálogo maestro de días de la semana.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Num.</th>
+                    <th>Nombre</th>
+                    <th>Corto</th>
+                    <th style="width: 120px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in days %}
+                <tr>
+                    <td>{{ day.weekday_num }}</td>
+                    <td>{{ day.name }}</td>
+                    <td>{{ day.short_name }}</td>
+                    <td>
+                        <button class="badge"
+                            style="border: 1px solid var(--border); background: white; cursor: pointer;">Editar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

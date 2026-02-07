@@ -3,7 +3,10 @@ from ...extensions import db
 
 class UserRole(db.Model):
     __tablename__ = "usuariosroles"
-    __table_args__ = {"schema": "master"}
+    __table_args__ = (
+        db.UniqueConstraint("idusuario", "idrol", name="uq_usuariosroles_usuario_rol"),
+        {"schema": "master"}
+    )
 
     id = db.Column(
         "idusuariorol",
@@ -41,7 +44,7 @@ class UserRole(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "role_id": self.role_id,
-            "role_code": self.role.code if self.role else None
+            # "role_code": self.role.code if self.role else None
         }
 
     def __repr__(self):

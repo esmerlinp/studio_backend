@@ -1,0 +1,55 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% block title %}Procesadores de Pago - Admin Dashboard{% endblock %}
+
+{% set active_page = 'payment_processors' %}
+
+{% block content %}
+<div class="header-container">
+    <h1>Procesadores de Pago</h1>
+    <button class="btn btn-primary" onclick="openModal('add')"
+        style="padding: 10px 20px; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Nuevo Procesador
+    </button>
+</div>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for processor in processors %}
+            <tr>
+                <td>{{ processor.id }}</td>
+                <td>{{ processor.name }}</td>
+                <td>
+                    <span class="badge {{ 'badge-success' if processor.is_active else 'badge-danger' }}">
+                        {{ 'Activo' if processor.is_active else 'Inactivo' }}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn-icon" onclick="openModal('edit', {{ processor.to_dict() | tojson }})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="text-align: center;">No hay procesadores registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

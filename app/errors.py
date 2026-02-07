@@ -25,6 +25,14 @@ def register_error_handlers(app):
                 "msg": i18n._("error.too_many_requests"),
                 "description": str(e.description)
                 }, status_code=429)  
+    
+    @app.errorhandler(404)
+    def handle_not_found(e):
+        return error(message={
+            "status": "error",
+            "msg": i18n._("error.not_found") if hasattr(i18n, "_") else "Recurso no encontrado",
+            "description": str(e.description) if hasattr(e, "description") else "Ruta no registrada"
+        }, status_code=404)
         
     
     @app.errorhandler(AuditedError)
