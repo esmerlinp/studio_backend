@@ -255,10 +255,19 @@ import threading
 @require_role(ADMIN_ROLES)
 def handle_export_data():
     user_id = get_jwt_identity()
-    
+    data = request.get_json() or {}
+    client_id = data.get("client_id")
+
     # Asumimos que g.scheme contiene el esquema actual del cliente
     app = current_app._get_current_object()
     schema = getattr(g, "scheme", None)
+
+    # Si se provee client_id (caso Admin respaldando un cliente específico)
+    if client_id:
+        client = get_client_by_id(client_id)
+        if not client:
+            return error(message=i18n._("error.client.not_found"), status_code=404)
+        schema = client.schemaName
 
     if not schema:
         return error(message=i18n._("error.client.schema_not_determined"))
