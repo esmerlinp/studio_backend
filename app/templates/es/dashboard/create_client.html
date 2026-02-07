@@ -1,0 +1,308 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'clientes' %}
+
+{% block title %}Crear Cliente | Akdmia{% endblock %}
+
+{% block page_title %}Nuevo Cliente Onboard{% endblock %}
+
+{% block content %}
+<style>
+    .required-label::after {
+        content: " *";
+        color: #ef4444;
+        font-weight: bold;
+    }
+
+    .input-error {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+    }
+</style>
+<div class="data-card" style="max-width: 900px; margin: 0 auto;">
+    <div class="card-header">
+        <h3>Configuración de Institución</h3>
+    </div>
+    <div style="padding: 32px;">
+        <form id="onboard-form" class="space-y-8">
+            <!-- Sección 1: Información Básica -->
+            <div style="margin-bottom: 40px;">
+                <h4
+                    style="font-size: 1.1rem; font-weight: 700; color: var(--bg-side); margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 8px;">
+                    1. Datos de la Institución
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="grid-column: span 2;">
+                        <label class="required-label"
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Nombre
+                            / Razón Social</label>
+                        <input type="text" id="business_name" required placeholder="Ej. Colegio San Judas Tadeo"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none; transition: border-color 0.2s;">
+                    </div>
+                    <div>
+                        <label class="required-label"
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">WhatsApp
+                            / Teléfono</label>
+                        <input type="tel" id="contact_phone" required placeholder="809-000-0000"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+                    </div>
+                    <div>
+                        <label
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">RNC
+                            / Documento</label>
+                        <input type="text" id="document_number" placeholder="131-XXXXX-X"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Usuario Administrador -->
+            <div style="margin-bottom: 40px;">
+                <h4
+                    style="font-size: 1.1rem; font-weight: 700; color: var(--bg-side); margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 8px;">
+                    2. Usuario Administrador
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label class="required-label"
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Nombre</label>
+                        <input type="text" id="first_name" required placeholder="Ej. Juan"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+                    </div>
+                    <div>
+                        <label class="required-label"
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Apellido</label>
+                        <input type="text" id="last_name" required placeholder="Ej. Pérez"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label class="required-label"
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Email
+                            Corporativo</label>
+                        <input type="email" id="email" required placeholder="admin@institucion.com"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Este correo se usará
+                            para iniciar sesión y facturación.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 3: Facturacion y Detalles -->
+            <div style="margin-bottom: 40px;">
+                <h4
+                    style="font-size: 1.1rem; font-weight: 700; color: var(--bg-side); margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 8px;">
+                    3. Datos de Facturación
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label class="required-label"
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">País</label>
+                        <select id="country_id_select" required
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none; background: white;">
+                            <option value="">Cargando países...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Dirección
+                            Detallada</label>
+                        <input type="text" id="billing_address" placeholder="Calle, No., Referencia"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label class="required-label"
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Plan
+                            de Servicio</label>
+                        <select id="plan_id_select" required
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none; background: white;">
+                            <option value="">Cargando planes...</option>
+                        </select>
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <label
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Notas
+                            / Comentario</label>
+                        <textarea id="comment" rows="3"
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none; resize: none;"
+                            placeholder="Información adicional relevante..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 16px; margin-top: 40px; justify-content: flex-end;">
+                <a href="/dashboard/clients"
+                    style="padding: 12px 24px; border: 1px solid var(--border); border-radius: 8px; font-weight: 600; color: var(--text-muted); text-decoration: none;">
+                    Cancelar
+                </a>
+                <button type="submit" id="submit-btn"
+                    style="padding: 12px 48px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+                    Finalizar y Cobrar
+                </button>
+            </div>
+        </form>
+
+        <div id="success-msg" style="display: none; text-align: center; padding: 40px;">
+            <div
+                style="width: 64px; height: 64px; background: #d1fae5; color: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 32px;">
+                ✓
+            </div>
+            <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--bg-side); margin-bottom: 12px;">¡Cliente
+                Registrado!</h3>
+            <p style="color: var(--text-muted);">Estamos generando el enlace de pago seguro de Stripe. Redirigiendo...
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let plansData = [];
+
+    // Formateadores
+    const formatPhone = (val) => {
+        let x = val.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+        return !x[2] ? x[1] : `(${x[1]}) ${x[2]}${x[3] ? '-' + x[3] : ''}`;
+    };
+
+    const formatRNC = (val) => {
+        let x = val.replace(/\D/g, '').match(/(\d{0,3})(\d{0,5})(\d{0,1})/);
+        if (!x) return val;
+        return !x[2] ? x[1] : `${x[1]}-${x[2]}${x[3] ? '-' + x[3] : ''}`;
+    };
+
+    document.getElementById('contact_phone').addEventListener('input', (e) => {
+        e.target.value = formatPhone(e.target.value);
+    });
+
+    document.getElementById('document_number').addEventListener('input', (e) => {
+        e.target.value = formatRNC(e.target.value);
+    });
+
+    async function init() {
+        try {
+            // Cargar Países
+            const resCountries = await fetch("/api/v1/master/countries");
+            const jsonCountries = await resCountries.json();
+            if (jsonCountries.success) {
+                const countrySelect = document.getElementById('country_id_select');
+                countrySelect.innerHTML = '<option value="">Selecciona un país</option>';
+                jsonCountries.data.forEach(c => {
+                    countrySelect.add(new Option(c.name, c.id));
+                });
+            }
+
+            // Cargar Planes
+            const resPlans = await fetch("/api/v1/master/plans");
+            const jsonPlans = await resPlans.json();
+            if (jsonPlans.success) {
+                plansData = jsonPlans.data;
+                const planSelect = document.getElementById('plan_id_select');
+                planSelect.innerHTML = '<option value="">Selecciona un plan</option>';
+
+                plansData.forEach(plan => {
+                    plan.price_info.forEach(price => {
+                        if (price.is_active) {
+                            const cycleLabel = price.billing_cycle === 'ANNUAL' ? 'Anual' : 'Mensual';
+                            const label = `${plan.name} (${cycleLabel}) - ${price.price} ${price.currency}`;
+                            const opt = new Option(label, plan.id);
+                            opt.setAttribute('data-price-id', price.id);
+                            planSelect.add(opt);
+                        }
+                    });
+                });
+            }
+        } catch (e) {
+            console.error("Error cargando datos:", e);
+        }
+    }
+
+    document.getElementById('onboard-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const btn = document.getElementById('submit-btn');
+        const planSelect = document.getElementById('plan_id_select');
+        const priceId = planSelect.options[planSelect.selectedIndex]?.getAttribute('data-price-id');
+
+        if (!priceId) {
+            alert("Por favor selecciona un plan.");
+            planSelect.classList.add('input-error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = 'Procesando...';
+
+        // Limpiar errores previos
+        form.querySelectorAll('input, select').forEach(el => el.classList.remove('input-error'));
+
+        const payload = {
+            client_data: {
+                business_name: document.getElementById('business_name').value,
+                contact_phone: document.getElementById('contact_phone').value,
+                document_number: document.getElementById('document_number').value,
+                country_id: parseInt(document.getElementById('country_id_select').value),
+                billing_address: document.getElementById('billing_address').value,
+                comment: document.getElementById('comment').value,
+                document_type_id: 1 // Default RNC for now
+            },
+            user_data: {
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                email: document.getElementById('email').value
+            },
+            plan_data: {
+                plan_id: parseInt(planSelect.value),
+                price_list_id: parseInt(priceId)
+            }
+        };
+
+        try {
+            const res = await fetch('/api/v1/master/clients/onboard', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                document.getElementById('onboard-form').style.display = 'none';
+                document.getElementById('success-msg').style.display = 'block';
+                if (data.checkout_url) {
+                    setTimeout(() => window.location.href = data.checkout_url, 1500);
+                }
+            } else {
+                const errorMsg = data.error || data.msg || "Verifica los datos";
+                alert("Error: " + errorMsg);
+
+                // Intento simple de resaltar el campo si el mensaje de error contiene el nombre del campo
+                const fieldMap = {
+                    'email': 'email',
+                    'business': 'business_name',
+                    'phone': 'contact_phone',
+                    'plan': 'plan_id_select',
+                    'rnc': 'document_number',
+                    'schema': 'business_name'
+                };
+
+                const lowerError = errorMsg.toLowerCase();
+                Object.keys(fieldMap).forEach(key => {
+                    if (lowerError.includes(key)) {
+                        document.getElementById(fieldMap[key])?.classList.add('input-error');
+                    }
+                });
+
+                btn.disabled = false;
+                btn.innerText = 'Finalizar y Cobrar';
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error de conexión");
+            btn.disabled = false;
+            btn.innerText = 'Finalizar y Cobrar';
+        }
+    });
+
+    window.onload = init;
+</script>
+{% endblock %}

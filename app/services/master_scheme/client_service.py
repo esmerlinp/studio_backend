@@ -57,7 +57,13 @@ def onboard_client_service(client_data, admin_user_data, plan_data):
                 business_name=client_data["business_name"],
                 billing_email=email,
                 schema_name=schema_name,
-                country_id=client_data['country_id']
+                country_id=client_data.get('country_id'),
+                document_type_id=client_data.get('document_type_id'),
+                document_number=client_data.get('document_number'),
+                city_id=client_data.get('city_id'),
+                sector_id=client_data.get('sector_id'),
+                billing_address=client_data.get('billing_address'),
+                comment=client_data.get('comment')
             )
             db.session.flush() # Obtenemos ID sin confirmar transacción completa
         
@@ -178,31 +184,42 @@ def create_client_onboard(
     schema_name: str,
     billing_email: str | None = None,
     country_id: int | None = None,
+    document_type_id: int | None = None,
+    document_number: str | None = None,
+    city_id: int | None = None,
+    sector_id: int | None = None,
+    billing_address: str | None = None,
+    comment: str | None = None,
 ) -> Client:
     """
     Crea un cliente en master.clientes y su esquema de base de datos
     """
-    uuid = str(uuid.uuid4())
+    client_uuid = str(uuid.uuid4())
     new_client = Client(
-        uuid=uuid,
+        uuid=client_uuid,
         name=business_name,
         contactName=contact_name,
         phoneTypeId=phone_type_id,
         contactPhone=contact_phone,
         businessName=business_name,
         billingEmail=billing_email,
+        documentTypeId=document_type_id,
+        documentNumber=document_number,
+        billingCountryId=country_id,
+        billingCityId=city_id,
+        billingSectorId=sector_id,
+        billingAddress=billing_address,
+        comment=comment,
         serviceStartDate=date.today(),
         isActive=False,
         schemaName=schema_name,
-        billingCountryId=country_id
     )
   
 
     validate_schema_name(schema=schema_name)
     # 1️⃣ Crear cliente en MASTER
     db.session.add(new_client)
-    client = get_client_by_uuid(uuid)
-    return client
+    return new_client
 
 
 @audit_log(action=ActionType.CREATE, 
