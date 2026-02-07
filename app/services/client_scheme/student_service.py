@@ -1,140 +1,173 @@
-from typing import List, Optional, Dict, Any
-from ...extensions import db
-from app.models.client_scheme.student_model import Student # Ajusta el import según tu estructura
-from sqlalchemy.exc import SQLAlchemyError
+from app.models.client_scheme.student_model import Student
+from app.models.client_scheme.student_details_models import (
+    StudentFamily, StudentFamilyPhone, StudentFamilyEmail, 
+    StudentAllergy, StudentMedicalPhone
+)
+from app.models.master_scheme.allergy_model import Allergy
+from app import db
 from datetime import datetime
-from app.utils.helpers import generate_download_url, paginate_query
-from flask import g
 
-
-def get_all_students() -> dict:
-    """Retorna todos los estudiantes del esquema actual."""
-    
-    query = Student.query\
-        .order_by(Student.id)
-    data_dict, data_model = paginate_query(query=query)
-    return data_dict
-
-def get_student_by_id(student_id: int) -> Optional[Student]:
+def get_full_student_detail(student_id):
+    """
+    Retrieve full student details including family and medical info.
+    """
     student = Student.query.get(student_id)
     if not student:
         return None
-
-    # Generamos la URL firmada usando la ruta guardada en la DB
-    if student.photoUrl:
-        # Usamos setattr para crear un atributo que NO sea una columna de la DB
-        # o simplemente lo asignamos a una propiedad nueva:
-        student.temporary_url = generate_download_url(student.photoUrl)
     
-    return student
-
-def get_student_by_code(code: str) -> Optional[Student]:
-    """Busca un estudiante por su código institucional."""
-    return Student.query.filter_by(student_code=code).first()
-
-def create_student(data: Dict[str, Any]) -> Student:
-    """
-    Crea un nuevo estudiante.
-    'data' puede contener tanto campos fijos como el diccionario 'custom_attributes'.
-    """
+    # Base student info
+    student_data = student.to_dict(include_sensitive=True)
     
+    # Family info
+    if student.familyId:
+        family = StudentFamily.query.get(student.familyId)
+        if family:
+            family_data = family.to_dict()
+            
+            # Phones and Emails
+            phones = StudentFamilyPhone.query.filter_by(familyId=family.id).all()
+            emails = StudentFamilyEmail.query.filter_by(familyId=family.id).all()
+            
+            family_data['phones'] = [p.to_dict() for p in phones]
+            family_data['emails'] = [e.to_dict() for e in emails]
+            
+            student_data['family'] = family_data
+    
+    # Allergies
+    allergies = db.session.query(StudentAllergy, Allergy.name)\
+        .join(Allergy, StudentAllergy.allergyId == Allergy.id)\
+        .filter(StudentAllergy.studentId == student_id).all()
+    
+    student_data['allergies'] = [
+        {"id": a.StudentAllergy.id, "allergyId": a.StudentAllergy.allergyId, "name": a.name}
+        for a in allergies
+    ]
+    
+    # Medical Phones
+    med_phones = StudentMedicalPhone.query.filter_by(studentId=student_id).all()
+    student_data['medicalPhones'] = [
+        {"id": p.id, "phoneTypeId": p.phoneTypeId, "phoneNumber": p.phoneNumber}
+        for p in med_phones
+    ]
+    
+    return student_data
 
+def save_student_detail(student_id, data):
+    """
+    Save/Update student details.
+    """
+    if student_id:
+        student = Student.query.get(student_id)
+        if not student:
+            return None, "Estudiante no encontrado"
+    else:
+        student = Student()
+        db.session.add(student)
 
-    # Función auxiliar para convertir strings a objetos date si es necesario
-    def parse_date(date_str):
-        if not date_str:
-            return None
+    # Helper function for int conversion
+    def to_int(val):
+        if val is None or val == '': return None
+        try: return int(val)
+        except: return val
+
+    # 1. Base Information
+    student.firstName = data.get('firstName')
+    student.middleName = data.get('middleName')
+    student.lastName = data.get('lastName')
+    student.secondLastName = data.get('secondLastName')
+    
+    # Dates handling
+    if data.get('birthDate'):
         try:
-            # Ajusta el formato '%Y-%m-%d' según cómo envíes la fecha desde el frontend
-            return datetime.strptime(date_str, '%Y-%m-%d').date()
-        except (ValueError, TypeError):
-            return None
-    try:
-        new_student = Student(
-            requestId=data.get('requestId'),
-            studentCode=data.get('studentCode'),
-            # Convertimos strings a objetos date
-            enrollmentDate=parse_date(data.get('enrollmentDate')) or datetime.utcnow().date(),
-            birthDate=parse_date(data.get('birthDate')),
-            
-            # Nombres corregidos
-            firstName=data.get('firstName'),
-            middleName=data.get('middleName'),
-            lastName=data.get('lastName'),
-            secondLastName=data.get('secondLastName'),
-            
-            genderId=data.get('genderId'),
-            livingSituation=data.get('livingSituation'),
-            countryId=data.get('countryId'),
-            cityId=data.get('cityId'),
-            sectorId=data.get('sectorId'),
-            address=data.get('address'),
-            previousSchoolId=data.get('previousSchoolId'),
-            entryReason=data.get('entryReason'),
-            status=data.get('status', 1),
-            familyId=data.get('familyId'),
-            bloodTypeId=data.get('bloodTypeId'),
-            
-            # El campo dinámico que mantuvimos en snake_case
-            custom_attributes=data.get('custom_attributes', {})
-        )
-        db.session.add(new_student)
-        g.audit_new_values = new_student
-                
-        db.session.commit()
-        return new_student
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        raise e
+            student.birthDate = datetime.fromisoformat(data['birthDate'].split('T')[0])
+        except: pass
+    if data.get('enrollmentDate'):
+        try:
+            student.enrollmentDate = datetime.fromisoformat(data['enrollmentDate'].split('T')[0])
+        except: pass
 
-def update_student(student_id: int, data: Dict[str, Any]) -> Optional[Student]:
-    """
-    Actualiza un estudiante existente.
-    Permite actualización parcial (patch) de campos fijos y dinámicos.
-    """
-    student = Student.query.get(student_id)
-    if not student:
-        return None
-
-    try:
-        
-        # 1. Guardar valores viejos (antes del cambio)
-        g.audit_old_values = student.to_dict()
+    student.genderId = to_int(data.get('genderId'))
+    student.courseId = to_int(data.get('courseId'))
+    student.livingSituation = data.get('livingSituation')
     
-        # Actualización de campos fijos
-        for key, value in data.items():
-            if hasattr(student, key) and key != 'custom_attributes':
-                setattr(student, key, value)
-        
-        # Actualización inteligente de campos dinámicos (Merge)
-        if 'custom_attributes' in data:
-            # Combinamos lo que ya existe con lo nuevo para no borrar datos previos
-            current_attrs = dict(student.custom_attributes) if student.custom_attributes else {}
-            current_attrs.update(data['custom_attributes'])
-            student.custom_attributes = current_attrs
-
-        
-        # 3. Guardar valores nuevos (después del cambio)
-        g.audit_new_values = data
+    # Location
+    student.countryId = to_int(data.get('countryId'))
+    student.cityId = to_int(data.get('cityId'))
+    student.sectorId = to_int(data.get('sectorId'))
+    student.address = data.get('address')
     
-        db.session.commit()
-        return student
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        raise e
-
-def delete_student(student_id: int) -> bool:
-    """Elimina un estudiante por ID."""
-    student = Student.query.get(student_id)
-    if not student:
-        return False
+    # Medical
+    student.doctorName = data.get('doctorName')
+    student.insuranceNumber = data.get('insuranceNumber')
+    student.medicalInstitutionId = to_int(data.get('medicalInstitutionId'))
+    student.insuranceInstitutionId = to_int(data.get('insuranceInstitutionId'))
+    student.bloodTypeId = to_int(data.get('bloodTypeId'))
     
-    try:
-        db.session.delete(student)
-        g.audit_old_values = student.to_dict()
+    # Academic/Others
+    student.previousSchoolId = to_int(data.get('previousSchoolId'))
+    student.entryReason = data.get('entryReason')
+    student.exitReason = data.get('exitReason')
+
+    # 2. Family Info
+    family_data = data.get('family', {})
+    if family_data:
+        if not student.familyId:
+            family = StudentFamily()
+            db.session.add(family)
+            db.session.flush() 
+            student.familyId = family.id
+        else:
+            family = StudentFamily.query.get(student.familyId)
         
-        db.session.commit()
-        return True
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        raise e
+        family.responsibleType = to_int(family_data.get('responsibleType'))
+        family.paymentFrequencyId = to_int(family_data.get('paymentFrequencyId'))
+        
+        # Father
+        father = family_data.get('father', {})
+        family.fatherFirstName1 = father.get('firstName1')
+        family.fatherFirstName2 = father.get('firstName2')
+        family.fatherLastName1 = father.get('lastName1')
+        family.fatherLastName2 = father.get('lastName2')
+        family.fatherDocument = father.get('document')
+        family.fatherDocumentTypeId = to_int(father.get('documentTypeId'))
+        family.fatherProfessionId = to_int(father.get('professionId'))
+        family.fatherMaritalStatusId = to_int(father.get('maritalStatusId'))
+        
+        # Mother
+        mother = family_data.get('mother', {})
+        family.motherFirstName1 = mother.get('firstName1')
+        family.motherFirstName2 = mother.get('firstName2')
+        family.motherLastName1 = mother.get('lastName1')
+        family.motherLastName2 = mother.get('lastName2')
+        family.motherDocument = mother.get('document')
+        family.motherDocumentTypeId = to_int(mother.get('documentTypeId'))
+        family.motherProfessionId = to_int(mother.get('professionId'))
+        family.motherMaritalStatusId = to_int(mother.get('maritalStatusId'))
+
+        # Sync Phones
+        phones = family_data.get('phones', [])
+        StudentFamilyPhone.query.filter_by(familyId=family.id).delete()
+        for p in phones:
+            if p.get('phoneNumber'):
+                new_phone = StudentFamilyPhone(
+                    familyId=family.id,
+                    phoneTypeId=to_int(p.get('phoneTypeId')),
+                    phoneNumber=p.get('phoneNumber'),
+                    isPrincipal=p.get('isPrincipal', False)
+                )
+                db.session.add(new_phone)
+
+        # Sync Emails
+        emails = family_data.get('emails', [])
+        StudentFamilyEmail.query.filter_by(familyId=family.id).delete()
+        for e in emails:
+            if e.get('email'):
+                new_email = StudentFamilyEmail(
+                    familyId=family.id,
+                    email=e.get('email'),
+                    isPrincipal=e.get('isPrincipal', False)
+                )
+                db.session.add(new_email)
+
+    db.session.commit()
+    return student.id, None

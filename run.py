@@ -4,7 +4,6 @@ from app.api.v1.master.auth.routes import auth_bp
 from app.api.v1.master.clients.routes import client_bp
 from app.api.v1.master.plan.routes import plans_bp
 from app.api.v1.master.payments.routes import payment_bp, billing_bp
-from app.api.v1.base.student.routes import students_bp
 from app.api.v1.master.dynamics.routes import dynamic_fields_bp
 from app.api.v1.master.notifications.routes import notification_bp
 from app.api.v1.master.log.routes import admin_bp
@@ -104,7 +103,6 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(client_bp)
 app.register_blueprint(notification_bp)
 app.register_blueprint(plans_bp)
-app.register_blueprint(students_bp)
 app.register_blueprint(dynamic_fields_bp)
 app.register_blueprint(payment_bp)
 app.register_blueprint(billing_bp)
@@ -157,6 +155,22 @@ app.register_blueprint(courses_bp)
 app.register_blueprint(child_discounts_bp)
 app.register_blueprint(students_bp)
 app.register_blueprint(payments_bp)
+app.register_blueprint(requests_bp)
+app.register_blueprint(evaluation_requests_bp)
+app.register_blueprint(formulas_bp)
+app.register_blueprint(payment_frequencies_bp)
+app.register_blueprint(taxes_bp)
+app.register_blueprint(inscriptions_bp)
+app.register_blueprint(levels_bp)
+app.register_blueprint(grade_corrections_bp)
+app.register_blueprint(partials_bp)
+app.register_blueprint(cycle_partials_bp)
+app.register_blueprint(surcharges_per_day_bp)
+app.register_blueprint(sub_cycles_bp)
+app.register_blueprint(active_cycle_grade_corrections_bp)
+app.register_blueprint(active_cycle_student_grades_bp)
+app.register_blueprint(school_payments_bp)
+app.register_blueprint(sub_cycle_course_competencies_bp)
 
 # ------------------------------
 # Configuración de idioma
@@ -425,6 +439,55 @@ def dashboard_client_details(clientId):
 @require_permission("SC_CLIENTES", "CREAR")
 def dashboard_create_client():
     return render_template("es/dashboard/create_client.html")
+
+# ------------------------------
+# Client Environment Routes
+# ------------------------------
+
+@app.route("/client/dashboard")
+@jwt_required()
+def client_dashboard():
+    return render_template("es/client/dashboard.html", active_page='dashboard')
+
+@app.route("/client/configuration")
+@jwt_required()
+def client_configuration():
+    return render_template("es/client/configuration/index.html")
+
+@app.route("/client/configuration/payments")
+@jwt_required()
+def client_payments():
+    return render_template("es/client/configuration/payments.html")
+
+@app.route("/client/admissions/inscriptions")
+@jwt_required()
+def client_inscriptions():
+    return render_template("es/client/admissions/inscriptions.html")
+
+@app.route("/client/students")
+@jwt_required()
+def client_students():
+    return render_template("es/client/students/list.html")
+
+@app.route("/client/students/<int:id>")
+@jwt_required()
+def client_student_detail(id):
+    return render_template("es/client/students/detail.html", student_id=id)
+
+@app.route("/client/students/create")
+@jwt_required()
+def client_student_create():
+    return render_template("es/client/students/detail.html", student_id=None)
+
+@app.route("/client/admissions")
+@jwt_required()
+def client_admissions():
+    return render_template("es/client/admissions.html", active_page='admissions')
+
+@app.route("/client/attendance")
+@jwt_required()
+def client_attendance():
+    return render_template("es/client/attendance.html", active_page='attendance')
 
 @app.route("/dashboard/plans")
 @jwt_required()
@@ -824,40 +887,6 @@ def dashboard_users():
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     return render_template("es/dashboard/users.html", users=pagination.items, pagination=pagination)
-
-# ------------------------------
-# Client Environment Routes
-# ------------------------------
-
-@app.route("/client/dashboard")
-@jwt_required()
-def client_dashboard():
-    return render_template("es/client/dashboard.html", active_page='dashboard')
-
-@app.route("/client/admissions")
-@jwt_required()
-def client_admissions():
-    return render_template("es/client/admissions.html", active_page='admissions')
-
-@app.route("/client/students")
-@jwt_required()
-def client_students():
-    return render_template("es/client/students.html", active_page='students')
-
-@app.route("/client/config/cycles")
-@jwt_required()
-def client_config_cycles():
-    return render_template("es/client/cycles.html", active_page='config_cycles')
-
-@app.route("/client/attendance")
-@jwt_required()
-def client_attendance():
-    return render_template("es/client/attendance.html", active_page='attendance')
-
-@app.route("/client/config/courses")
-@jwt_required()
-def client_config_courses():
-    return render_template("es/client/courses.html", active_page='config_courses')
 
 @app.route("/reset-password")
 def reset_password_page():

@@ -1,0 +1,890 @@
+{% extends "es/client/layout.html" %}
+
+{% block title %}Expediente del Estudiante - AKDMIA{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --stripe-indigo: #635bff;
+        --stripe-dark: #0a2540;
+        --stripe-slate: #425466;
+        --stripe-light: #727f96;
+        --section-header-bg: #f8fafc;
+        --section-border: #e2e8f0;
+    }
+
+    .detail-container {
+        padding: 32px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+
+    .btn {
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+
+
+    .btn-save {
+        background: var(--stripe-indigo);
+        color: white;
+    }
+
+    .btn-save:hover {
+        background: #5851f2;
+        box-shadow: 0 4px 12px rgba(99, 91, 255, 0.2);
+    }
+
+    .btn-cancel {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fee2e2;
+    }
+
+    .btn-cancel:hover {
+        background: #fee2e2;
+    }
+
+    /* Form Card Styles */
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--section-border);
+        margin-bottom: 24px;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .section-card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-header {
+        padding: 16px 24px;
+        background: var(--section-header-bg);
+        border-bottom: 1px solid var(--section-border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .section-header i {
+        font-size: 18px;
+    }
+
+    .section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--stripe-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .section-body {
+        padding: 24px;
+    }
+
+    /* Grid Layouts */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--stripe-slate);
+    }
+
+    input,
+    select,
+    textarea {
+        padding: 10px 14px;
+        border: 1px solid #e6ebf1;
+        border-radius: 8px;
+        font-size: 14px;
+        color: var(--stripe-dark);
+        background: #fafbff;
+        transition: border-color 0.2s;
+    }
+
+    input:focus,
+    select:focus {
+        outline: none;
+        border-color: var(--stripe-indigo);
+        background: white;
+    }
+
+    /* Profile Header */
+    .profile-header {
+        display: flex;
+        gap: 32px;
+        align-items: flex-start;
+        margin-bottom: 32px;
+    }
+
+    .avatar-upload {
+        position: relative;
+        width: 140px;
+        height: 140px;
+    }
+
+    .avatar-preview {
+        width: 140px;
+        height: 140px;
+        border-radius: 20px;
+        background: #f1f4f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed #d1d9e6;
+        overflow: hidden;
+    }
+
+    .avatar-preview i {
+        font-size: 64px;
+        color: #adb5bd;
+    }
+
+    .avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-actions {
+        position: absolute;
+        bottom: -10px;
+        right: -10px;
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: white;
+        border: 1px solid #e6ebf1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Horizontal Sections (Separator lines) */
+    .section-separator {
+        display: flex;
+        align-items: center;
+        margin: 40px 0 24px 0;
+    }
+
+    .section-separator span {
+        white-space: nowrap;
+        padding-right: 16px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--stripe-dark);
+    }
+
+    .section-separator .line {
+        height: 1px;
+        background: #e2e8f0;
+        flex-grow: 1;
+    }
+
+    /* Sub-tables */
+    .sub-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+    }
+
+    .sub-table th {
+        text-align: left;
+        padding: 10px;
+        font-size: 11px;
+        text-transform: uppercase;
+        color: var(--stripe-light);
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .sub-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .btn-add-row {
+        float: right;
+        margin-top: -30px;
+        color: var(--stripe-indigo);
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+
+    <!-- Section: Header (Avatar & Main Info) -->
+    <div class="section-card">
+        <div class="section-header">
+            <i class="fas fa-user-graduate" style="color: var(--stripe-indigo);"></i>
+            <span class="section-title">Datos Primarios</span>
+        </div>
+        <div class="section-body">
+            <div class="profile-header" style="border-bottom: none; border: none; padding: 0;">
+                <div class="avatar-upload">
+                    <div class="avatar-preview" id="photoPreview">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div id="studentDisplayName"
+                        style="margin-top: 12px; font-weight: 700; color: var(--stripe-dark); font-size: 16px; text-align: center;">
+                    </div>
+                    <div class="avatar-actions">
+                        <div class="btn-circle" onclick="document.getElementById('photoInput').click()">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <input type="file" id="photoInput" style="display: none;" accept="image/*">
+                </div>
+
+                <div style="flex-grow: 1;">
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label>Código No.</label>
+                            <input type="text" id="studentCode" readonly
+                                style="background: #f8fafc; font-weight: 700; color: var(--stripe-indigo);">
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Inscripción</label>
+                            <input type="date" id="enrollmentDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Primer Apellido</label>
+                            <input type="text" id="lastName">
+                        </div>
+                        <div class="form-group">
+                            <label>Segundo Apellido</label>
+                            <input type="text" id="secondLastName">
+                        </div>
+                        <div class="form-group">
+                            <label>Primer Nombre</label>
+                            <input type="text" id="firstName">
+                        </div>
+                        <div class="form-group">
+                            <label>Segundo Nombre</label>
+                            <input type="text" id="middleName">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Personal & Location info -->
+    <div class="section-card">
+        <div class="section-header">
+            <i class="fas fa-info-circle" style="color: var(--stripe-indigo);"></i>
+            <span class="section-title">Información Personal y Ubicación</span>
+        </div>
+        <div class="section-body">
+            <div class="form-grid" style="margin-bottom: 24px;">
+                <div class="form-group">
+                    <label>Fecha de Nacimiento</label>
+                    <input type="date" id="birthDate" onchange="updateAge()">
+                </div>
+                <div class="form-group">
+                    <label>Edad</label>
+                    <input type="text" id="age" readonly style="background: #f8fafc;">
+                </div>
+                <div class="form-group">
+                    <label>Curso</label>
+                    <select id="courseId">
+                        <option value="">Seleccione un curso...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sexo</label>
+                    <select id="genderId">
+                        <option value="">Seleccione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Vive con</label>
+                    <select id="livingSituation">
+                        <option value="">Seleccione...</option>
+                        <option value="1">Padre</option>
+                        <option value="2">Madre</option>
+                        <option value="4">Padre y Madre</option>
+                        <option value="3">Tutor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Responsable</label>
+                    <select id="responsibleType">
+                        <option value="">Seleccione...</option>
+                        <option value="1">Padre</option>
+                        <option value="2">Madre</option>
+                        <option value="3">Tutor Legal</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>País</label>
+                    <select id="countryId"></select>
+                </div>
+                <div class="form-group">
+                    <label>Ciudad</label>
+                    <select id="cityId"></select>
+                </div>
+                <div class="form-group">
+                    <label>Sector</label>
+                    <select id="sectorId"></select>
+                </div>
+                <div class="form-group" style="grid-column: span 3;">
+                    <label>Dirección</label>
+                    <input type="text" id="address">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Father & Mother Info -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+        <!-- Father Card -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-male" style="color: var(--stripe-indigo);"></i>
+                <span class="section-title">Datos del Padre</span>
+            </div>
+            <div class="section-body">
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group"><label>Apellidos</label><input type="text" id="fatherLastName1"></div>
+                    <div class="form-group"><label>&nbsp;</label><input type="text" id="fatherLastName2"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Nombres</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <input type="text" id="fatherFirstName1">
+                            <input type="text" id="fatherFirstName2">
+                        </div>
+                    </div>
+                    <div class="form-group"><label>Tipo de Documento</label><select id="fatherDocumentTypeId"></select>
+                    </div>
+                    <div class="form-group"><label>Documento</label><input type="text" id="fatherDocument"></div>
+                    <div class="form-group"><label>Profesión</label><select id="fatherProfessionId"></select></div>
+                    <div class="form-group"><label>Estado Civil</label><select id="fatherMaritalStatusId"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mother Card -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-female" style="color: var(--stripe-indigo);"></i>
+                <span class="section-title">Datos de la Madre</span>
+            </div>
+            <div class="section-body">
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group"><label>Apellidos</label><input type="text" id="motherLastName1"></div>
+                    <div class="form-group"><label>&nbsp;</label><input type="text" id="motherLastName2"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Nombres</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <input type="text" id="motherFirstName1">
+                            <input type="text" id="motherFirstName2">
+                        </div>
+                    </div>
+                    <div class="form-group"><label>Tipo de Documento</label><select id="motherDocumentTypeId"></select>
+                    </div>
+                    <div class="form-group"><label>Documento</label><input type="text" id="motherDocument"></div>
+                    <div class="form-group"><label>Profesión</label><select id="motherProfessionId"></select></div>
+                    <div class="form-group"><label>Estado Civil</label><select id="motherMaritalStatusId"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-grid" style="margin-top: 32px;">
+        <div class="section-card">
+            <div class="section-header">
+                <span class="section-title">Teléfonos</span>
+                <i class="fas fa-plus btn-add-row" onclick="addRow('phonesTable')"></i>
+            </div>
+            <div class="section-body">
+                <table class="sub-table" id="phonesTable">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Teléfono</th>
+                            <th>P.</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="section-card">
+            <div class="section-header">
+                <span class="section-title">Correos Electrónicos</span>
+                <i class="fas fa-plus btn-add-row" onclick="addRow('emailsTable')"></i>
+            </div>
+            <div class="section-body">
+                <table class="sub-table" id="emailsTable">
+                    <thead>
+                        <tr>
+                            <th>Correo Electrónico</th>
+                            <th>P.</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Medical Info -->
+    <div class="section-card">
+        <div class="section-header">
+            <i class="fas fa-heartbeat" style="color: var(--stripe-indigo);"></i>
+            <span class="section-title">Información Médica</span>
+        </div>
+        <div class="section-body">
+            <div class="form-grid">
+                <div class="form-group"><label>Nombre del Médico</label><input type="text" id="doctorName"></div>
+                <div class="form-group"><label>No. del Seguro Médico</label><input type="text" id="insuranceNumber">
+                </div>
+                <div class="form-group"><label>Institución Médica</label><select id="medicalInstitutionId"></select>
+                </div>
+                <div class="form-group"><label>Institucion del Seguro Médico</label><select
+                        id="insuranceInstitutionId"></select></div>
+                <div class="form-group"><label>Tipo de Sangre</label><select id="bloodTypeId"></select></div>
+            </div>
+
+            <div style="margin-top: 32px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span
+                        style="font-size: 13px; font-weight: 700; color: var(--stripe-slate); text-transform: uppercase;">Teléfonos
+                        Médicos</span>
+                    <button class="btn btn-sm" onclick="addRow('medicalPhonesTable')"
+                        style="padding: 4px 12px; font-size: 12px;">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+                <table class="sub-table" id="medicalPhonesTable">
+                    <thead>
+                        <tr>
+                            <th>Teléfono</th>
+                            <th>Principal</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 32px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span
+                        style="font-size: 13px; font-weight: 700; color: var(--stripe-slate); text-transform: uppercase;">Alergias</span>
+                    <button class="btn btn-sm" onclick="addRow('allergiesTable')"
+                        style="padding: 4px 12px; font-size: 12px;">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+                <table class="sub-table" id="allergiesTable">
+                    <thead>
+                        <tr>
+                            <th>Alergia</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Financial & Others -->
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px;">
+        <!-- Financial Card -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-credit-card" style="color: var(--stripe-indigo);"></i>
+                <span class="section-title">Datos Financieros</span>
+            </div>
+            <div class="section-body">
+                <div class="form-group">
+                    <label>Frecuencia de Pago</label>
+                    <select id="paymentFrequencyId"></select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Others Card -->
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-ellipsis-h" style="color: var(--stripe-indigo);"></i>
+                <span class="section-title">Otros Datos</span>
+            </div>
+            <div class="section-body">
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label>Institución de Procedencia</label>
+                    <select id="previousSchoolId"></select>
+                </div>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="form-group">
+                        <label>Motivo de Entrada</label>
+                        <textarea id="entryReason" rows="3"
+                            style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Motivo de Salida Inst. Procedencia</label>
+                        <textarea id="exitReason" rows="3"
+                            style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer"
+        style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 40px; padding-top: 24px; border-top: 1px solid #e6ebf1;">
+        <button class="btn btn-secondary" onclick="window.location.href='/client/students'">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveRecord()">Guardar Expediente</button>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const studentId = JSON.parse('{{ student_id | tojson if student_id else "null" }}');
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            // Load catalogs in parallel
+            await Promise.all([
+                loadCatalog('genderId', '/api/v1/master/genders/'),
+                loadCatalog('courseId', '/api/v1/client/courses-list/'),
+                loadCatalog('countryId', '/countries'),
+                loadCatalog('bloodTypeId', '/api/v1/master/blood-types/'),
+                loadCatalog('fatherDocumentTypeId', '/api/v1/master/document-types/'),
+                loadCatalog('motherDocumentTypeId', '/api/v1/master/document-types/'),
+                loadCatalog('tutorDocumentTypeId', '/api/v1/master/document-types/'),
+                loadCatalog('fatherProfessionId', '/api/v1/master/professions/'),
+                loadCatalog('motherProfessionId', '/api/v1/master/professions/'),
+                loadCatalog('tutorProfessionId', '/api/v1/master/professions/'),
+                loadCatalog('fatherMaritalStatusId', '/api/v1/master/marital_status/'),
+                loadCatalog('motherMaritalStatusId', '/api/v1/master/marital_status/'),
+                loadCatalog('tutorMaritalStatusId', '/api/v1/master/marital_status/'),
+                loadCatalog('medicalInstitutionId', '/api/v1/master/medical-institutions/'),
+                loadCatalog('insuranceInstitutionId', '/api/v1/master/health-insurance-institutions/'),
+                loadCatalog('paymentFrequencyId', '/api/v1/client/payment-frequencies-list/'),
+                loadCatalog('previousSchoolId', '/api/v1/master/other-schools/'),
+            ]);
+
+            if (studentId) {
+                await loadStudentData();
+            } else {
+                document.getElementById('enrollmentDate').valueAsDate = new Date();
+            }
+        } catch (err) {
+            console.error('Error in initialization:', err);
+        }
+
+        // Dependent dropdowns
+        document.getElementById('countryId').onchange = (e) => loadCities(e.target.value);
+        document.getElementById('cityId').onchange = (e) => loadSectors(e.target.value);
+    });
+
+    async function fetchData(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const result = await response.json();
+            return result.data || result;
+        } catch (err) {
+            console.error(`Fetch error for ${url}:`, err);
+            return [];
+        }
+    }
+
+    async function loadCatalog(selectId, url, textKey = 'name') {
+        try {
+            const data = await fetchData(url);
+            const select = document.getElementById(selectId);
+            if (!select) return;
+
+            select.innerHTML = `<option value="">Seleccione...</option>`;
+            data.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.name || item.snombre || item.sdescripcion;
+                select.appendChild(opt);
+            });
+        } catch (err) {
+            console.warn(`Could not load catalog ${selectId}:`, err);
+        }
+    }
+
+    async function loadCities(countryId) {
+        if (!countryId) return;
+        await loadCatalog('cityId', `/api/v1/master/cities/?country_id=${countryId}`);
+    }
+
+    async function loadSectors(cityId) {
+        if (!cityId) return;
+        await loadCatalog('sectorId', `/api/v1/master/sectors/?city_id=${cityId}`);
+    }
+
+    async function loadStudentData() {
+        try {
+            const data = await fetchData(`/api/v1/client/students-list/${studentId}`);
+
+            setVal('studentCode', data.studentCode);
+            setVal('firstName', data.firstName);
+            setVal('middleName', data.middleName);
+            setVal('lastName', data.lastName);
+            setVal('secondLastName', data.secondLastName);
+
+            // Set display name below photo
+            const fullName = [data.firstName, data.middleName, data.lastName, data.secondLastName].filter(Boolean).join(' ');
+            document.getElementById('studentDisplayName').innerText = fullName;
+
+            setVal('birthDate', data.birthDate?.split('T')[0]);
+            updateAge(); // Calculate age after setting birthDate
+            setVal('enrollmentDate', data.enrollmentDate?.split('T')[0]);
+            setVal('genderId', data.genderId);
+            setVal('courseId', data.courseId);
+            setVal('livingSituation', data.livingSituation);
+
+            if (data.countryId) {
+                setVal('countryId', data.countryId);
+                await loadCities(data.countryId);
+                if (data.cityId) {
+                    setVal('cityId', data.cityId);
+                    await loadSectors(data.cityId);
+                    if (data.sectorId) setVal('sectorId', data.sectorId);
+                }
+            }
+            setVal('address', data.address);
+
+            setVal('doctorName', data.doctorName);
+            setVal('insuranceNumber', data.insuranceNumber);
+            setVal('medicalInstitutionId', data.medicalInstitutionId);
+            setVal('insuranceInstitutionId', data.insuranceInstitutionId);
+            setVal('bloodTypeId', data.bloodTypeId);
+
+            setVal('previousSchoolId', data.previousSchoolId);
+            setVal('entryReason', data.entryReason);
+            setVal('exitReason', data.exitReason);
+
+            if (data.family) {
+                const f = data.family;
+                setVal('responsibleType', f.responsibleType);
+                setVal('paymentFrequencyId', f.paymentFrequencyId);
+
+                setVal('fatherFirstName1', f.father.firstName1);
+                setVal('fatherFirstName2', f.father.firstName2);
+                setVal('fatherLastName1', f.father.lastName1);
+                setVal('fatherLastName2', f.father.lastName2);
+                setVal('fatherDocument', f.father.document);
+                setVal('fatherDocumentTypeId', f.father.documentTypeId);
+                setVal('fatherProfessionId', f.father.professionId);
+                setVal('fatherMaritalStatusId', f.father.maritalStatusId);
+
+                setVal('motherFirstName1', f.mother.firstName1);
+                setVal('motherFirstName2', f.mother.firstName2);
+                setVal('motherLastName1', f.mother.lastName1);
+                setVal('motherLastName2', f.mother.lastName2);
+                setVal('motherDocument', f.mother.document);
+                setVal('motherDocumentTypeId', f.mother.documentTypeId);
+                setVal('motherProfessionId', f.mother.professionId);
+                setVal('motherMaritalStatusId', f.mother.maritalStatusId);
+
+                renderPhones(f.phones);
+                renderEmails(f.emails);
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert('Error al cargar los datos del estudiante');
+        }
+    }
+
+    function setVal(id, val) {
+        const el = document.getElementById(id);
+        if (el) el.value = val || '';
+    }
+
+    function renderPhones(phones) {
+        const tbody = document.querySelector('#phonesTable tbody');
+        tbody.innerHTML = '';
+        if (!phones) return;
+        phones.forEach(p => addPhoneRow(p));
+    }
+
+    function addPhoneRow(p = {}) {
+        const tbody = document.querySelector('#phonesTable tbody');
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><select class="phone-type-select"></select></td>
+            <td><input type="text" value="${p.phoneNumber || ''}" placeholder="809-000-0000" style="width: 100%"></td>
+            <td><input type="checkbox" ${p.isPrincipal ? 'checked' : ''}></td>
+            <td><i class="fas fa-trash text-red" style="cursor: pointer" onclick="this.closest('tr').remove()"></i></td>
+        `;
+        loadCatalogInRow(row.querySelector('select'), '/api/v1/master/phone-types/', p.phoneTypeId);
+    }
+
+    async function loadCatalogInRow(select, url, selectedValue) {
+        const data = await fetchData(url);
+        select.innerHTML = `<option value="">...</option>`;
+        data.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name || item.snombre;
+            if (item.id == selectedValue) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
+    function renderEmails(emails) {
+        const tbody = document.querySelector('#emailsTable tbody');
+        tbody.innerHTML = '';
+        if (!emails) return;
+        emails.forEach(e => addEmailRow(e));
+    }
+
+    function addEmailRow(e = {}) {
+        const tbody = document.querySelector('#emailsTable tbody');
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><input type="email" value="${e.email || ''}" placeholder="correo@ejemplo.com" style="width: 100%"></td>
+            <td><input type="checkbox" ${e.isPrincipal ? 'checked' : ''}></td>
+            <td><i class="fas fa-trash text-red" style="cursor: pointer" onclick="this.closest('tr').remove()"></i></td>
+        `;
+    }
+
+    function addRow(tableId) {
+        if (tableId === 'phonesTable') addPhoneRow();
+        if (tableId === 'emailsTable') addEmailRow();
+    }
+
+    async function saveRecord() {
+        const data = {
+            firstName: getVal('firstName'),
+            middleName: getVal('middleName'),
+            lastName: getVal('lastName'),
+            secondLastName: getVal('secondLastName'),
+            birthDate: getVal('birthDate'),
+            enrollmentDate: getVal('enrollmentDate'),
+            genderId: getVal('genderId'),
+            courseId: getVal('courseId'),
+            livingSituation: getVal('livingSituation'),
+            address: getVal('address'),
+            countryId: getVal('countryId'),
+            cityId: getVal('cityId'),
+            sectorId: getVal('sectorId'),
+            doctorName: getVal('doctorName'),
+            insuranceNumber: getVal('insuranceNumber'),
+            medicalInstitutionId: getVal('medicalInstitutionId'),
+            insuranceInstitutionId: getVal('insuranceInstitutionId'),
+            bloodTypeId: getVal('bloodTypeId'),
+            previousSchoolId: getVal('previousSchoolId'),
+            entryReason: getVal('entryReason'),
+            exitReason: getVal('exitReason'),
+            family: {
+                responsibleType: getVal('responsibleType'),
+                paymentFrequencyId: getVal('paymentFrequencyId'),
+                father: {
+                    firstName1: getVal('fatherFirstName1'),
+                    firstName2: getVal('fatherFirstName2'),
+                    lastName1: getVal('fatherLastName1'),
+                    lastName2: getVal('fatherLastName2'),
+                    document: getVal('fatherDocument'),
+                    documentTypeId: getVal('fatherDocumentTypeId'),
+                    professionId: getVal('fatherProfessionId'),
+                    maritalStatusId: getVal('fatherMaritalStatusId'),
+                },
+                mother: {
+                    firstName1: getVal('motherFirstName1'),
+                    firstName2: getVal('motherFirstName2'),
+                    lastName1: getVal('motherLastName1'),
+                    lastName2: getVal('motherLastName2'),
+                    document: getVal('motherDocument'),
+                    documentTypeId: getVal('motherDocumentTypeId'),
+                    professionId: getVal('motherProfessionId'),
+                    maritalStatusId: getVal('motherMaritalStatusId'),
+                },
+                phones: Array.from(document.querySelectorAll('#phonesTable tbody tr')).map(row => ({
+                    phoneTypeId: row.querySelector('select').value,
+                    phoneNumber: row.querySelector('input[type="text"]').value,
+                    isPrincipal: row.querySelector('input[type="checkbox"]').checked
+                })),
+                emails: Array.from(document.querySelectorAll('#emailsTable tbody tr')).map(row => ({
+                    email: row.querySelector('input[type="email"]').value,
+                    isPrincipal: row.querySelector('input[type="checkbox"]').checked
+                }))
+            }
+        };
+
+        const method = studentId ? 'PUT' : 'POST';
+        const url = studentId ? `/api/v1/client/students-list/${studentId}` : '/api/v1/client/students-list/';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Error al guardar');
+
+            alert('Expediente guardado correctamente');
+            window.location.href = '/client/students';
+        } catch (error) {
+            console.error('Save error:', error);
+            alert('Error al guardar el expediente: ' + error.message);
+        }
+    }
+
+    function getVal(id) {
+        const el = document.getElementById(id);
+        return el ? el.value : null;
+    }
+
+    function updateAge() {
+        const dob = document.getElementById('birthDate').value;
+        if (!dob) return;
+
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        document.getElementById('age').value = age + (age === 1 ? ' año' : ' años');
+    }
+</script>
+{% endblock %}

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Akdmia Studio{% endblock %}</title>
+    <title>{% block title %}Akdmia{% endblock %}</title>
     <!-- Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
@@ -249,15 +249,8 @@
                 margin-left: 0 !important;
             }
         }
-
-            {
-            % block extra_css %
-        }
-
-            {
-            % endblock %
-        }
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body>
@@ -269,7 +262,7 @@
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z" />
                 </svg>
             </div>
-            <span class="logo-text">Akdmia Studio</span>
+            <span class="logo-text">Akdmia</span>
         </div>
 
         <nav class="sidebar-nav">
@@ -379,6 +372,7 @@
             sidebar.classList.add('collapsed');
         }
     </script>
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

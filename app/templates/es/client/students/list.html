@@ -1,0 +1,389 @@
+{% extends "es/client/layout.html" %}
+
+{% set active_page = 'students' %}
+
+{% block title %}Expedientes | Akdmia{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+
+    .cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 24px;
+        margin-top: 24px;
+    }
+
+    .student-card {
+        background: #ffffff;
+        border: 1px solid #e6ebf1;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+
+    .student-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-color: var(--stripe-indigo);
+    }
+
+    .card-body {
+        padding: 24px;
+        flex: 1;
+    }
+
+    .card-header-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .student-code-label {
+        color: #dc2626;
+        font-weight: 700;
+        font-size: 11px;
+        font-family: 'Outfit', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-badge {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+    }
+
+    .status-active {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .status-inactive {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .student-name {
+        font-family: 'Outfit', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--stripe-dark);
+        margin-bottom: 4px;
+    }
+
+    .student-course {
+        font-size: 14px;
+        color: var(--stripe-slate);
+        font-weight: 500;
+    }
+
+    .card-footer {
+        padding: 16px 24px;
+        background: #fafbff;
+        border-top: 1px solid #f6f9fc;
+    }
+
+    .footer-label {
+        font-size: 10px;
+        color: var(--stripe-light);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .responsible-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--stripe-dark);
+    }
+
+    .responsible-phone {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--stripe-indigo);
+    }
+
+    /* Filters */
+    .filters-bar {
+        background: #ffffff;
+        padding: 16px 24px;
+        border-radius: 12px;
+        border: 1px solid #e6ebf1;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .search-input-group {
+        position: relative;
+        flex: 1;
+    }
+
+    .search-input-group svg {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--stripe-light);
+    }
+
+    .search-input-group input {
+        width: 100%;
+        padding: 10px 12px 10px 40px;
+        border: 1px solid #e6ebf1;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: inherit;
+        transition: var(--transition);
+    }
+
+    .search-input-group input:focus {
+        outline: none;
+        border-color: var(--stripe-indigo);
+        box-shadow: 0 0 0 4px var(--stripe-indigo-soft);
+    }
+
+    .loading-container {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 48px;
+        color: var(--stripe-light);
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 64px;
+        background: white;
+        border-radius: 12px;
+        border: 1px dashed #e6ebf1;
+    }
+
+    .pagination-nav {
+        margin-top: 32px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .pagination-list {
+        display: flex;
+        gap: 8px;
+        list-style: none;
+    }
+
+    .btn-page {
+        padding: 8px 16px;
+        border: 1px solid #e6ebf1;
+        background: white;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--stripe-slate);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-page:hover:not(:disabled) {
+        border-color: var(--stripe-indigo);
+        color: var(--stripe-indigo);
+        background: var(--stripe-indigo-soft);
+    }
+
+    .btn-page:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header"
+    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+        <h1 style="font-family: 'Outfit', sans-serif; font-size: 28px; color: var(--stripe-dark); margin-bottom: 4px;">
+            Expedientes de Estudiantes</h1>
+        <p style="font-size: 14px; color: var(--stripe-slate);">
+            Gestiona la información académica y familiar de los alumnos.
+        </p>
+    </div>
+    <button onclick="window.location.href='/client/students/create'"
+        style="background: var(--stripe-indigo); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-plus"></i> Nuevo Expediente
+    </button>
+</div>
+
+<div class="filters-bar"
+    style="background: white; padding: 16px 24px; border-radius: 12px; border: 1px solid #e6ebf1; margin-bottom: 32px; display: flex; align-items: center; gap: 24px;">
+    <div style="position: relative; flex: 1;">
+        <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--stripe-light);"
+            width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input type="text" id="studentSearch" placeholder="Buscar por nombre o código..." onkeyup="handleSearch(event)"
+            style="width: 100%; padding: 10px 12px 10px 40px; border: 1px solid #e6ebf1; border-radius: 8px; font-size: 14px;">
+    </div>
+    <button onclick="loadStudents(1)"
+        style="background: #f1f4f9; color: var(--stripe-dark); border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; height: 40px;">
+        Buscar
+    </button>
+</div>
+
+<div class="cards-container" id="cardsContainer"
+    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+</div>
+
+<div class="pagination-nav">
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentSearch = "";
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadStudents(1);
+    });
+
+    function handleSearch(e) {
+        if (e.key === 'Enter') {
+            loadStudents(1);
+        }
+    }
+
+    async function loadStudents(page) {
+        const container = document.getElementById('cardsContainer');
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 48px; color: var(--stripe-light);">Cargando expedientes...</div>';
+
+        const search = document.getElementById('studentSearch').value;
+        const url = `/api/v1/client/active-cycle-students/?page=${page}&per_page=9&search=${encodeURIComponent(search)}`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error en la comunicación con el servidor');
+            const data = await response.json();
+
+            renderCards(data.items);
+            renderPagination(data.pages, data.page);
+        } catch (error) {
+            console.error('Error:', error);
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 48px; color: #dc2626;">Error al cargar datos</div>';
+        }
+    }
+
+    function renderCards(items) {
+        const container = document.getElementById('cardsContainer');
+        container.innerHTML = '';
+
+        if (!items || items.length === 0) {
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 64px; background: white; border-radius: 12px; border: 1px dashed #e6ebf1; color: var(--stripe-slate);">No se encontraron estudiantes</div>';
+            return;
+        }
+
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'student-card';
+            card.style.cursor = 'pointer';
+            card.onclick = () => window.location.href = `/client/students/${item.id}`;
+
+            const statusClass = item.studentStatus === 1 ? 'status-active' : 'status-inactive';
+            const statusText = item.studentStatus === 1 ? 'ACTIVO' : 'INACTIVO';
+
+            card.innerHTML = `
+                <div class="card-body">
+                    <div class="card-header-info">
+                        <span class="student-code-label">EXPEDIENTE No. ${item.studentCode || '---'}</span>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <h3 class="student-name">${item.studentName}</h3>
+                    <p class="student-course">${item.courseName || ''} - ${item.classroomName || ''}</p>
+                </div>
+                <div class="card-footer">
+                    <span class="footer-label">Responsable</span>
+                    <div class="footer-content">
+                        <span class="responsible-name">${item.responsibleName || 'Sin asignar'}</span>
+                        <span class="responsible-phone">${item.responsiblePhone || ''}</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function renderPagination(totalPages, currentPage) {
+        const nav = document.querySelector('.pagination-nav');
+        nav.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        const ul = document.createElement('ul');
+        ul.className = 'pagination-list';
+        ul.id = 'paginationControls';
+
+        // Anterior
+        const prevLi = document.createElement('li');
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'btn-page';
+        prevBtn.innerText = 'Anterior';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => loadStudents(currentPage - 1);
+        prevLi.appendChild(prevBtn);
+        ul.appendChild(prevLi);
+
+        // Páginas
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                const li = document.createElement('li');
+                const btn = document.createElement('button');
+                btn.className = 'btn-page';
+                if (i === currentPage) {
+                    btn.style.background = 'var(--stripe-indigo)';
+                    btn.style.color = 'white';
+                    btn.style.borderColor = 'var(--stripe-indigo)';
+                }
+                btn.innerText = i;
+                btn.onclick = () => loadStudents(i);
+                li.appendChild(btn);
+                ul.appendChild(li);
+            } else if (i === currentPage - 3 || i === currentPage + 3) {
+                const li = document.createElement('li');
+                li.style.padding = '8px';
+                li.innerText = '...';
+                ul.appendChild(li);
+            }
+        }
+
+        // Siguiente
+        const nextLi = document.createElement('li');
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'btn-page';
+        nextBtn.innerText = 'Siguiente';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => loadStudents(currentPage + 1);
+        nextLi.appendChild(nextBtn);
+        ul.appendChild(nextLi);
+
+        nav.appendChild(ul);
+    }
+</script>
+{% endblock %}

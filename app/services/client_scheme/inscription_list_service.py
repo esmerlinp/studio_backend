@@ -13,4 +13,4 @@ def get_inscriptions(filters=None):
         if filters.get('courseId'):
             query = query.filter_by(courseId=filters['courseId'])
             
-    return query.order_by(InscriptionListView.studentName).all()
+    return query.order_by(InscriptionListView.studentName)

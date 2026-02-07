@@ -2,7 +2,7 @@ from app.models.client_scheme.request_list_view import RequestListView
 
 def get_requests(filters=None):
     """
-    Retrieve requests.
+    Retrieve requests with support for filtering, search, and sorting.
     """
     query = RequestListView.query
     
@@ -13,4 +13,13 @@ def get_requests(filters=None):
         if filters.get('evaluationState'):
             query = query.filter_by(evaluationState=filters['evaluationState'])
             
-    return query.order_by(RequestListView.applicantName).all()
+        if filters.get('search'):
+            search_term = f"%{filters['search']}%"
+            query = query.filter(RequestListView.applicantName.ilike(search_term))
+            
+        if filters.get('onlyPending'):
+            # Assuming 'PENDIENTE' is a state or based on isInscribed
+            # We use requestProcessState or evaluationState
+            query = query.filter(RequestListView.isInscribed == False)
+            
+    return query.order_by(RequestListView.id.desc())

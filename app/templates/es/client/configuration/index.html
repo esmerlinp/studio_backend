@@ -1,0 +1,132 @@
+{% extends "es/client/layout.html" %}
+
+{% set active_page = 'config_cycles' %}
+
+{% block title %}Configuración | Akdmia{% endblock %}
+{% block page_title %}Configuración{% endblock %}
+
+{% block content %}
+<div class="row" style="margin-top: 2rem;">
+    <!-- Sidebar / Submenu -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Menú de Configuración</h5>
+                <div class="list-group">
+                    <a href="/client/configuration" class="list-group-item list-group-item-action active">Ciclos
+                        Académicos</a>
+                    <a href="/client/configuration/payments" class="list-group-item list-group-item-action">Calculadora
+                        de Pagos</a>
+                    <!-- Add more links here as needed -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Ciclos Académicos</span>
+                <button class="btn btn-primary btn-sm" onclick="showCreateCycleModal()">Nuevo Ciclo</button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="cyclesTable">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        loadCycles();
+    });
+
+    async function loadCycles() {
+        const tableBody = document.querySelector('#cyclesTable tbody');
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
+
+        try {
+            const response = await fetch('/api/v1/client/cycles/');
+            if (!response.ok) throw new Error('Error al cargar ciclos');
+            const cycles = await response.json();
+
+            tableBody.innerHTML = '';
+
+            if (cycles.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay ciclos registrados</td></tr>';
+                return;
+            }
+
+            cycles.forEach(cycle => {
+                const row = document.createElement('tr');
+                const activeBadge = cycle.bactivo
+                    ? '<span class="badge bg-success">Activo</span>'
+                    : '<span class="badge bg-secondary">Inactivo</span>';
+
+                const activateBtn = !cycle.bactivo
+                    ? `<button class="btn btn-sm btn-outline-success" onclick="activateCycle(${cycle.idciclo})">Activar</button>`
+                    : '';
+
+                row.innerHTML = `
+                    <td>${cycle.sciclo}</td>
+                    <td>${new Date(cycle.dfechainicio).toLocaleDateString()}</td>
+                    <td>${new Date(cycle.dfechafin).toLocaleDateString()}</td>
+                    <td>${activeBadge}</td>
+                    <td>${activateBtn}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error(error);
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar datos</td></tr>';
+        }
+    }
+
+    async function activateCycle(id) {
+        if (!confirm('¿Está seguro de activar este ciclo? Los demás ciclos se desactivarán automáticamente.')) return;
+
+        try {
+            const response = await fetch(`/api/v1/client/cycles/${id}/activate`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token_cookie') // Adjust if token stored differently
+                }
+            });
+
+            if (response.ok) {
+                alert('Ciclo activado correctamente');
+                loadCycles();
+            } else {
+                const err = await response.json();
+                alert('Error: ' + (err.message || 'No se pudo activar'));
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error de conexión');
+        }
+    }
+
+    function showCreateCycleModal() {
+        alert("Funcionalidad de crear ciclo pendiente de implementación");
+    }
+</script>
+{% endblock %}

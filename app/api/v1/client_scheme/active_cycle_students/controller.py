@@ -22,6 +22,33 @@ def get_all():
     if request.args.get('cycleId'):
         filters['cycleId'] = request.args.get('cycleId', type=int)
         
-    data = get_active_cycle_students_filtered(filters)
+    if request.args.get('search'):
+        filters['search'] = request.args.get('search')
         
-    return jsonify([item.to_dict() for item in data]), 200
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    query = get_active_cycle_students_filtered(filters)
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    items = []
+    for row in pagination.items:
+        # row is a tuple containing the columns added in the service via .add_columns()
+        items.append({
+            "studentCycleClassroomId": row[0],
+            "studentCode": row[1],
+            "studentName": row[2],
+            "courseName": row[3],
+            "classroomName": row[4],
+            "studentStatus": row[5],
+            "responsibleName": row[6],
+            "responsiblePhone": row[7],
+            "id": row[8]
+        })
+        
+    return jsonify({
+        "items": items,
+        "total": pagination.total,
+        "pages": pagination.pages,
+        "page": pagination.page
+    }), 200
