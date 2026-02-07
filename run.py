@@ -46,7 +46,7 @@ from app.utils.responses import error
 import os
 from dotenv import load_dotenv
 from app.extensions import db
-from sqlalchemy import text
+from sqlalchemy import text, or_
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request, JWTManager, get_jwt, jwt_required
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -319,9 +319,40 @@ def dashboard():
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_clients():
     from app.models.master_scheme.client_model import Client
+    from app.models.master_scheme.client_model import Client
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
-    pagination = Client.query.order_by(Client.clientId.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'clientId')
+    order = request.args.get('order', 'desc')
+
+    query = Client.query
+
+    if search_query:
+        query = query.filter(or_(
+            Client.name.ilike(f'%{search_query}%'),
+            Client.businessName.ilike(f'%{search_query}%'),
+            Client.documentNumber.ilike(f'%{search_query}%'),
+            Client.contactName.ilike(f'%{search_query}%')
+        ))
+
+    # Validate sort column to prevent injection/errors
+    valid_sort_cols = {
+        'clientId': Client.clientId,
+        'name': Client.name,
+        'businessName': Client.businessName,
+        'createdAt': Client.createdAt,
+        'isActive': Client.isActive
+    }
+    
+    sort_col = valid_sort_cols.get(sort_by, Client.clientId)
+    
+    if order == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     return render_template("es/dashboard/clients.html", clients=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/clients/<int:clientId>")
@@ -346,8 +377,33 @@ def dashboard_plans():
     
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'created_at')
+    order = request.args.get('order', 'desc')
+
+    query = Plan.query
+
+    if search_query:
+        query = query.filter(or_(
+            Plan.name.ilike(f'%{search_query}%'),
+            Plan.code.ilike(f'%{search_query}%')
+        ))
     
-    pagination = Plan.query.order_by(Plan.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    valid_sort_cols = {
+        'name': Plan.name,
+        'code': Plan.code,
+        'created_at': Plan.created_at,
+        'status': Plan.is_active
+    }
+    
+    sort_col = valid_sort_cols.get(sort_by, Plan.created_at)
+
+    if order == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     return render_template("es/dashboard/plans.html", plans=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/price-lists")
@@ -355,6 +411,7 @@ def dashboard_plans():
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_price_lists():
     from app.models.master_scheme.price_list_model import PriceList
+    from app.models.master_scheme.plans_model import Plan  # Ensure relationship loading
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     pagination = PriceList.query.order_by(PriceList.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
@@ -367,18 +424,71 @@ def dashboard_payments():
     from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
-    pagination = PaymentTransaction.query.order_by(PaymentTransaction.createdAt.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'createdAt')
+    order = request.args.get('order', 'desc')
+
+    query = PaymentTransaction.query
+
+    if search_query:
+        query = query.filter(or_(
+            PaymentTransaction.internalReference.ilike(f'%{search_query}%'),
+            PaymentTransaction.externalReference.ilike(f'%{search_query}%')
+        ))
+
+    valid_sort_cols = {
+        'createdAt': PaymentTransaction.createdAt,
+        'amount': PaymentTransaction.amount,
+        'status': PaymentTransaction.status,
+        'paymentDate': PaymentTransaction.paymentDate
+    }
+
+    sort_col = valid_sort_cols.get(sort_by, PaymentTransaction.createdAt)
+
+    if order == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     return render_template("es/dashboard/payments.html", payments=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/invoices")
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_invoices():
-    # Asumiendo que las facturas se manejan de alguna forma, por ahora lista vacía o fetch si existe el modelo
-    # Si no hay modelo de facturas aún, podrías usar PaymentTransaction como base
+    # Invoices (PaymentTransactions with SUCCESS/APPROVED status)
     from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
-    invoices = PaymentTransaction.query.filter(PaymentTransaction.status.in_(['SUCCESS', 'APPROVED'])).order_by(PaymentTransaction.createdAt.desc()).all()
-    return render_template("es/dashboard/invoices.html", invoices=[i.to_dict() for i in invoices])
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'createdAt')
+    order = request.args.get('order', 'desc')
+
+    query = PaymentTransaction.query.filter(PaymentTransaction.status.in_(['SUCCESS', 'APPROVED']))
+
+    if search_query:
+        query = query.filter(or_(
+            PaymentTransaction.internalReference.ilike(f'%{search_query}%'),
+            PaymentTransaction.externalReference.ilike(f'%{search_query}%')
+        ))
+
+    valid_sort_cols = {
+        'createdAt': PaymentTransaction.createdAt,
+        'amount': PaymentTransaction.amount,
+        'paymentDate': PaymentTransaction.paymentDate
+    }
+    
+    sort_col = valid_sort_cols.get(sort_by, PaymentTransaction.createdAt)
+    
+    if order == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/invoices.html", invoices=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/ncf")
 @jwt_required()
@@ -396,9 +506,34 @@ def dashboard_ncf_logs():
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_allergies():
-    from app.services.master_scheme.allergy_service import get_allergies
-    allergies = get_allergies()
-    return render_template("es/dashboard/allergies.html", allergies=[a.to_dict() for a in allergies])
+    from app.models.master_scheme.allergy_model import Allergy
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'name')
+    order = request.args.get('order', 'asc')
+
+    query = Allergy.query
+
+    if search_query:
+        query = query.filter(Allergy.name.ilike(f'%{search_query}%'))
+
+    valid_sort_cols = {
+        'name': Allergy.name,
+        'id': Allergy.id,
+        'is_active': Allergy.is_active
+    }
+    
+    sort_col = valid_sort_cols.get(sort_by, Allergy.name)
+    
+    if order == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/allergies.html", allergies=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/banks")
 @jwt_required()
@@ -412,11 +547,28 @@ def dashboard_banks():
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_cities():
-    from app.services.master_scheme.city_service import get_cities
-    from app.api.v1.master.country.service import get_countries
-    cities = get_cities()
-    countries = get_countries()
-    return render_template("es/dashboard/cities.html", cities=[c.to_dict() for c in cities], countries=[c.to_dict() for c in countries])
+    from app.models.master_scheme.city_model import City
+    from app.models.master_scheme.country_model import Country
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search_query = request.args.get('search', '').strip()
+    
+    query = City.query.join(Country) # Ensure Country can be joined if needed
+
+    if search_query:
+        query = query.filter(or_(
+            City.name.ilike(f'%{search_query}%'),
+            Country.name.ilike(f'%{search_query}%')
+        ))
+        
+    pagination = query.order_by(City.name.asc()).paginate(page=page, per_page=per_page, error_out=False)
+    
+    # Also fetch countries for the modal if needed, but usually APIs handle that.
+    # If the template needs `countries` list for a dropdown:
+    countries = Country.query.filter_by(is_active=True).order_by(Country.name.asc()).all()
+    
+    return render_template("es/dashboard/cities.html", cities=pagination.items, pagination=pagination, countries=countries)
 
 @app.route("/dashboard/marital-status")
 @jwt_required()
@@ -430,9 +582,37 @@ def dashboard_marital_status():
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_functionalities():
-    from app.services.master_scheme.functionality_service import get_functionalities
-    funcs = get_functionalities()
-    return render_template("es/dashboard/functionalities.html", functionalities=[f.to_dict() for f in funcs])
+    from app.models.master_scheme.functionality_model import Functionality
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'name')
+    order = request.args.get('order', 'asc')
+
+    query = Functionality.query
+
+    if search_query:
+        query = query.filter(or_(
+            Functionality.name.ilike(f'%{search_query}%'),
+            Functionality.code.ilike(f'%{search_query}%')
+        ))
+
+    valid_sort_cols = {
+        'name': Functionality.name,
+        'code': Functionality.code,
+        'is_active': Functionality.is_active
+    }
+    
+    sort_col = valid_sort_cols.get(sort_by, Functionality.name)
+    
+    if order == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/functionalities.html", functionalities=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/functions")
 @jwt_required()
@@ -510,9 +690,37 @@ def dashboard_other_schools():
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_countries():
-    from app.services.master_scheme.country_service import get_countries
-    countries = get_countries()
-    return render_template("es/dashboard/countries.html", countries=[c.to_dict() for c in countries])
+    from app.models.master_scheme.country_model import Country
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'name')
+    order = request.args.get('order', 'asc')
+
+    query = Country.query
+
+    if search_query:
+        query = query.filter(or_(
+            Country.name.ilike(f'%{search_query}%'),
+            Country.iso_code.ilike(f'%{search_query}%')
+        ))
+
+    valid_sort_cols = {
+        'name': Country.name,
+        'iso_code': Country.iso_code,
+        'is_active': Country.is_active
+    }
+    
+    sort_col = valid_sort_cols.get(sort_by, Country.name)
+    
+    if order == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/countries.html", countries=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/users")
 @jwt_required()
@@ -524,11 +732,39 @@ def dashboard_users():
     
     # Optional: filter by ID if provided in query (for search redirection)
     user_id = request.args.get('id', type=int)
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'userId')
+    order = request.args.get('order', 'desc')
+
     query = User.query
     if user_id:
         query = query.filter_by(userId=user_id)
+    
+    if search_query:
+        query = query.filter(or_(
+            User.username.ilike(f'%{search_query}%'),
+            User.firstName.ilike(f'%{search_query}%'),
+            User.lastName.ilike(f'%{search_query}%'),
+            User.email.ilike(f'%{search_query}%')
+        ))
         
-    pagination = query.order_by(User.userId.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    valid_sort_cols = {
+        'userId': User.userId,
+        'username': User.username,
+        'firstName': User.firstName,
+        'email': User.email,
+        'rol': User.rol,
+        'isActive': User.isActive
+    }
+    
+    sort_col = valid_sort_cols.get(sort_by, User.userId)
+    
+    if order == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     return render_template("es/dashboard/users.html", users=pagination.items, pagination=pagination)
 
 # ------------------------------
@@ -639,11 +875,37 @@ def dashboard_screens():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
-    pagination = db.session.query(
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'order')
+    order_mode = request.args.get('order', 'asc')
+
+    query = db.session.query(
         Screen, Module
-    ).join(Module, Screen.module_id == Module.id
-    ).order_by(Module.name.asc(), Screen.order.asc()
-    ).paginate(page=page, per_page=per_page, error_out=False)
+    ).join(Module, Screen.module_id == Module.id)
+
+    if search_query:
+        query = query.filter(or_(
+            Screen.name.ilike(f'%{search_query}%'),
+            Screen.route.ilike(f'%{search_query}%'),
+            Module.name.ilike(f'%{search_query}%')
+        ))
+
+    # Sort logic
+    valid_sort_cols = {
+        'order': Screen.order,
+        'name': Screen.name,
+        'module': Module.name,
+        'route': Screen.route,
+        'is_active': Screen.is_active
+    }
+    sort_col = valid_sort_cols.get(sort_by, Screen.order)
+    
+    if order_mode == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     
     return render_template("es/dashboard/screens.html", pagination=pagination)
 
@@ -679,9 +941,33 @@ def dashboard_payment_processors():
 @jwt_required()
 @require_role(["ROOT", "SYS_ADMIN", "OWNER"])
 def dashboard_professions():
-    from app.services.master_scheme.profession_service import get_professions
-    professions = get_professions()
-    return render_template("es/dashboard/professions.html", professions=professions)
+    from app.models.master_scheme.profession_model import Profession
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'name')
+    order = request.args.get('order', 'asc')
+
+    query = Profession.query
+
+    if search_query:
+        query = query.filter(Profession.name.ilike(f'%{search_query}%'))
+
+    valid_sort_cols = {
+        'name': Profession.name,
+        'is_active': Profession.is_active
+    }
+    
+    sort_col = valid_sort_cols.get(sort_by, Profession.name)
+    
+    if order == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    return render_template("es/dashboard/professions.html", professions=pagination.items, pagination=pagination)
 
 @app.route("/dashboard/role-permissions")
 @jwt_required()
@@ -795,11 +1081,34 @@ def dashboard_user_sessions():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
-    pagination = db.session.query(
+    search_query = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'createAt')
+    order = request.args.get('order', 'desc')
+    
+    query = db.session.query(
         Session, User
-    ).join(User, Session.userId == User.userId
-    ).order_by(Session.createAt.desc()
-    ).paginate(page=page, per_page=per_page, error_out=False)
+    ).join(User, Session.userId == User.userId)
+    
+    if search_query:
+        query = query.filter(or_(
+            User.username.ilike(f'%{search_query}%'),
+            User.email.ilike(f'%{search_query}%'),
+            Session.ipAddress.ilike(f'%{search_query}%')
+        ))
+        
+    valid_sort_cols = {
+        'createAt': Session.createAt,
+        'ipAddress': Session.ipAddress,
+        'username': User.username
+    }
+    sort_col = valid_sort_cols.get(sort_by, Session.createAt)
+    
+    if order == 'asc':
+        query = query.order_by(sort_col.asc())
+    else:
+        query = query.order_by(sort_col.desc())
+        
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     
     return render_template("es/dashboard/user_sessions.html", pagination=pagination)
 

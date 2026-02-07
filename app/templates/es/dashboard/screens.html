@@ -12,6 +12,15 @@
 <div class="data-card">
     <div class="card-header">
         <h3>Listado de Pantallas</h3>
+        <form method="GET" action="{{ url_for('dashboard_screens') }}" class="search-container">
+            <input type="text" name="search" placeholder="Buscar Pantalla..."
+                value="{{ request.args.get('search', '') }}" class="search-input">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </form>
         <button class="btn btn-primary" onclick="openModal('add')"
             style="padding: 10px 20px; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -26,11 +35,50 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Nombre / Ruta</th>
-                    <th>Módulo</th>
+                    <th>
+                        <a href="{{ url_for('dashboard_screens', sort_by='order', order='asc' if request.args.get('sort_by') == 'order' and request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                            Orden
+                            {% if request.args.get('sort_by') == 'order' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                {% if request.args.get('order') == 'asc' %}
+                                <path d="M12 19V5M5 12l7-7 7 7" />{% else %}
+                                <path d="M12 5v14M5 12l7 7 7-7" />{% endif %}
+                            </svg>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('dashboard_screens', sort_by='name', order='asc' if request.args.get('sort_by') == 'name' and request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                            Nombre / Ruta
+                            {% if request.args.get('sort_by') == 'name' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                {% if request.args.get('order') == 'asc' %}
+                                <path d="M12 19V5M5 12l7-7 7 7" />{% else %}
+                                <path d="M12 5v14M5 12l7 7 7-7" />{% endif %}
+                            </svg>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('dashboard_screens', sort_by='module', order='asc' if request.args.get('sort_by') == 'module' and request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                            Módulo
+                            {% if request.args.get('sort_by') == 'module' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                {% if request.args.get('order') == 'asc' %}
+                                <path d="M12 19V5M5 12l7-7 7 7" />{% else %}
+                                <path d="M12 5v14M5 12l7 7 7-7" />{% endif %}
+                            </svg>
+                            {% endif %}
+                        </a>
+                    </th>
                     <th>Icono</th>
-                    <th>Orden</th>
+                    <th>ID</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
@@ -38,7 +86,8 @@
             <tbody>
                 {% for screen, module in pagination.items %}
                 <tr>
-                    <td style="color: var(--text-muted); font-size: 0.8rem;">#{{ screen.id }}</td>
+
+                    <td>{{ screen.order }}</td>
                     <td>
                         <div style="font-weight: 600;">{{ screen.name }}</div>
                         <div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">{{
@@ -56,7 +105,7 @@
                             <span style="font-size: 0.75rem;">{{ screen.icon }}</span>
                         </div>
                     </td>
-                    <td>{{ screen.order }}</td>
+                    <td style="color: var(--text-muted); font-size: 0.8rem;">#{{ screen.id }}</td>
                     <td>
                         {% if screen.is_active %}
                         <span class="badge badge-success">Activo</span>

@@ -12,15 +12,63 @@
 <div class="data-card">
     <div class="card-header">
         <h3>Registro de Sesiones</h3>
+        <form method="GET" action="{{ url_for('dashboard_user_sessions') }}" class="search-container">
+            <input type="text" name="search" placeholder="Buscar Usuario/IP..."
+                value="{{ request.args.get('search', '') }}" class="search-input">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </form>
     </div>
     <div class="table-responsive">
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Usuario</th>
-                    <th>IP / Dispositivo</th>
-                    <th>Inicio / Último Acceso</th>
+                    <th>
+                        <a href="{{ url_for('dashboard_user_sessions', sort_by='username', order='asc' if request.args.get('sort_by') == 'username' and request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                            Usuario
+                            {% if request.args.get('sort_by') == 'username' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                {% if request.args.get('order') == 'asc' %}
+                                <path d="M12 19V5M5 12l7-7 7 7" />{% else %}
+                                <path d="M12 5v14M5 12l7 7 7-7" />{% endif %}
+                            </svg>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('dashboard_user_sessions', sort_by='ipAddress', order='asc' if request.args.get('sort_by') == 'ipAddress' and request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                            IP / Dispositivo
+                            {% if request.args.get('sort_by') == 'ipAddress' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                {% if request.args.get('order') == 'asc' %}
+                                <path d="M12 19V5M5 12l7-7 7 7" />{% else %}
+                                <path d="M12 5v14M5 12l7 7 7-7" />{% endif %}
+                            </svg>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('dashboard_user_sessions', sort_by='createAt', order='asc' if request.args.get('sort_by') == 'createAt' and request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                            Inicio / Último Acceso
+                            {% if request.args.get('sort_by') == 'createAt' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                {% if request.args.get('order') == 'asc' %}
+                                <path d="M12 19V5M5 12l7-7 7 7" />{% else %}
+                                <path d="M12 5v14M5 12l7 7 7-7" />{% endif %}
+                            </svg>
+                            {% endif %}
+                        </a>
+                    </th>
                     <th>Estado</th>
                 </tr>
             </thead>

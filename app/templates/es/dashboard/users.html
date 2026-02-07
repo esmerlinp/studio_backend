@@ -10,28 +10,97 @@
 
 {% block content %}
 <div class="data-card">
-    <div class="card-header">
+    <div class="card-header"
+        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <h3>Listado de Usuarios</h3>
-        <button onclick="openCreateUserModal()"
-            style="padding: 10px 20px; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Nuevo Usuario
-        </button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <form action="{{ url_for('dashboard_users') }}" method="get" style="display: flex; gap: 8px;">
+                <input type="text" name="search" placeholder="Buscar..." value="{{ request.args.get('search', '') }}"
+                    style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.875rem;">
+                <button type="submit" class="btn"
+                    style="padding: 8px 12px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 6px; cursor: pointer;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </form>
+            <button onclick="openCreateUserModal()"
+                style="padding: 10px 20px; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Nuevo Usuario
+            </button>
+        </div>
     </div>
     <div class="table-responsive">
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Nombre Completo</th>
-                    <th>Email</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
+                    <th>
+                        <a href="{{ url_for('dashboard_users', sort_by='userId', order='asc' if request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 5px;">
+                            ID
+                            {% if request.args.get('sort_by') == 'userId' %}
+                            <span style="font-size: 0.7em;">{{ '▲' if request.args.get('order') == 'asc' else '▼'
+                                }}</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('dashboard_users', sort_by='username', order='asc' if request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 5px;">
+                            Usuario
+                            {% if request.args.get('sort_by') == 'username' %}
+                            <span style="font-size: 0.7em;">{{ '▲' if request.args.get('order') == 'asc' else '▼'
+                                }}</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('dashboard_users', sort_by='firstName', order='asc' if request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 5px;">
+                            Nombre Completo
+                            {% if request.args.get('sort_by') == 'firstName' %}
+                            <span style="font-size: 0.7em;">{{ '▲' if request.args.get('order') == 'asc' else '▼'
+                                }}</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('dashboard_users', sort_by='email', order='asc' if request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 5px;">
+                            Email
+                            {% if request.args.get('sort_by') == 'email' %}
+                            <span style="font-size: 0.7em;">{{ '▲' if request.args.get('order') == 'asc' else '▼'
+                                }}</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('dashboard_users', sort_by='rol', order='asc' if request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 5px;">
+                            Rol
+                            {% if request.args.get('sort_by') == 'rol' %}
+                            <span style="font-size: 0.7em;">{{ '▲' if request.args.get('order') == 'asc' else '▼'
+                                }}</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('dashboard_users', sort_by='isActive', order='asc' if request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 5px;">
+                            Estado
+                            {% if request.args.get('sort_by') == 'isActive' %}
+                            <span style="font-size: 0.7em;">{{ '▲' if request.args.get('order') == 'asc' else '▼'
+                                }}</span>
+                            {% endif %}
+                        </a>
+                    </th>
                     <th>Acciones</th>
                 </tr>
             </thead>

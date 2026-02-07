@@ -1,4 +1,5 @@
 {% extends "es/dashboard/layout.html" %}
+{% from "es/dashboard/macros/pagination.html" import render_pagination %}
 
 {% set active_page = 'paises' %}
 
@@ -11,6 +12,15 @@
 <div class="data-card">
     <div class="card-header">
         <h3>Listado de Países</h3>
+        <form method="GET" action="{{ url_for('dashboard_countries') }}" class="search-container">
+            <input type="text" name="search" placeholder="Buscar País..." value="{{ request.args.get('search', '') }}"
+                class="search-input">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </form>
         <button onclick="openCreateModal()" class="badge"
             style="background: var(--primary); color: white; border: none; padding: 8px 16px; cursor: pointer;">+ Nuevo
             País</button>
@@ -20,8 +30,34 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Nombre</th>
-                    <th>ISO (3)</th>
+                    <th>
+                        <a href="{{ url_for('dashboard_countries', sort_by='name', order='asc' if request.args.get('sort_by') == 'name' and request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                            Nombre
+                            {% if request.args.get('sort_by') == 'name' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                {% if request.args.get('order') == 'asc' %}
+                                <path d="M12 19V5M5 12l7-7 7 7" />{% else %}
+                                <path d="M12 5v14M5 12l7 7 7-7" />{% endif %}
+                            </svg>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('dashboard_countries', sort_by='iso_code', order='asc' if request.args.get('sort_by') == 'iso_code' and request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                            ISO (3)
+                            {% if request.args.get('sort_by') == 'iso_code' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                {% if request.args.get('order') == 'asc' %}
+                                <path d="M12 19V5M5 12l7-7 7 7" />{% else %}
+                                <path d="M12 5v14M5 12l7 7 7-7" />{% endif %}
+                            </svg>
+                            {% endif %}
+                        </a>
+                    </th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
@@ -48,5 +84,7 @@
             </tbody>
         </table>
     </div>
+</div>
+{{ render_pagination(pagination) }}
 </div>
 {% endblock %}

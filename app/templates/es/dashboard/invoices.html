@@ -1,4 +1,5 @@
 {% extends "es/dashboard/layout.html" %}
+{% from "es/dashboard/macros/pagination.html" import render_pagination %}
 
 {% set active_page = 'facturas' %}
 
@@ -11,6 +12,15 @@
 <div class="data-card">
     <div class="card-header">
         <h3>Facturas Emitidas</h3>
+        <form method="GET" action="{{ url_for('dashboard_invoices') }}" class="search-container">
+            <input type="text" name="search" placeholder="Buscar Referencia..."
+                value="{{ request.args.get('search', '') }}" class="search-input">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </form>
         <button class="nav-link active"
             style="padding: 8px 16px; border:none; cursor:pointer; background: var(--primary); color: white;">
             Descargar Reporte
@@ -20,9 +30,35 @@
         <table>
             <thead>
                 <tr>
-                    <th>Nº Factura</th>
-                    <th>Fecha Vencimiento</th>
-                    <th>Monto</th>
+                    <th>
+                        <a href="{{ url_for('dashboard_invoices', sort_by='createdAt', order='asc' if request.args.get('sort_by') == 'createdAt' and request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                            Fecha / Ref
+                            {% if request.args.get('sort_by') == 'createdAt' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                {% if request.args.get('order') == 'asc' %}
+                                <path d="M12 19V5M5 12l7-7 7 7" />{% else %}
+                                <path d="M12 5v14M5 12l7 7 7-7" />{% endif %}
+                            </svg>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>Ref. Interna</th>
+                    <th>
+                        <a href="{{ url_for('dashboard_invoices', sort_by='amount', order='asc' if request.args.get('sort_by') == 'amount' and request.args.get('order') == 'desc' else 'desc', search=request.args.get('search', '')) }}"
+                            style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 4px;">
+                            Monto
+                            {% if request.args.get('sort_by') == 'amount' %}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                {% if request.args.get('order') == 'asc' %}
+                                <path d="M12 19V5M5 12l7-7 7 7" />{% else %}
+                                <path d="M12 5v14M5 12l7 7 7-7" />{% endif %}
+                            </svg>
+                            {% endif %}
+                        </a>
+                    </th>
                     <th>Impuestos</th>
                     <th>Estado</th>
                     <th>Acciones</th>
@@ -57,5 +93,7 @@
             </tbody>
         </table>
     </div>
+</div>
+{{ render_pagination(pagination) }}
 </div>
 {% endblock %}
