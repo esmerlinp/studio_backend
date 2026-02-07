@@ -1,0 +1,197 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'ncf' %}
+
+{% block title %}Secuencias NCF | Akdmia{% endblock %}
+
+{% block page_title %}Secuencias NCF (DGII){% endblock %}
+{% block page_subtitle %}Administra los rangos de comprobantes fiscales autorizados por la DGII.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Rangos Autorizados</h3>
+        <button onclick="openModal()" class="nav-link active"
+            style="padding: 10px 20px; border-radius: 8px; background: var(--primary-color); color: white; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Nueva Secuencia
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Prefijo</th>
+                    <th>Actual</th>
+                    <th>Máximo</th>
+                    <th>Vencimiento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="sequences-body">
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px;">Cargando secuencias...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para Nueva Secuencia -->
+<div id="ncf-modal"
+    style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center;">
+    <div class="data-card" style="width: 100%; max-width: 500px; margin: 20px;">
+        <div class="card-header">
+            <h3>Registrar Nueva Autorización</h3>
+            <button onclick="closeModal()"
+                style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 24px;">
+            <form id="sequence-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label
+                        style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Tipo
+                        NCF</label>
+                    <select id="type_ncf" required
+                        style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;">
+                        <option value="01">01 - Crédito Fiscal</option>
+                        <option value="02">02 - Consumidor Final</option>
+                        <option value="14">14 - Regímenes Especiales</option>
+                        <option value="15">15 - Gubernamental</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <label
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Prefijo</label>
+                        <input type="text" id="prefix" value="B" maxlength="1" required
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;">
+                    </div>
+                    <div>
+                        <label
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Vencimiento</label>
+                        <input type="date" id="expiration_date" required
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <label
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Desde</label>
+                        <input type="number" id="start_num" value="1" required
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;">
+                    </div>
+                    <div>
+                        <label
+                            style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Hasta</label>
+                        <input type="number" id="max_num" required
+                            style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 12px;">
+                    <button type="button" onclick="closeModal()"
+                        style="flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: white; font-weight: 600;">Cancelar</button>
+                    <button type="submit"
+                        style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: var(--primary-color); color: white; font-weight: 700;">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadSequences() {
+        try {
+            const res = await fetch('/api/v1/master/ncf/');
+            const body = document.getElementById('sequences-body');
+
+            const data = await res.json();
+            if (!data.success) {
+                body.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #f87171;">${data.error.msg}</td></tr>`;
+                return;
+            }
+
+            if (data.success && data.data.length > 0) {
+                body.innerHTML = '';
+                data.data.forEach(seq => {
+                    const row = document.createElement('tr');
+                    const statusColor = seq.is_Active ? '#059669' : '#9ca3af';
+                    const statusText = seq.is_Active ? 'Activa' : 'Inactiva';
+
+                    row.innerHTML = `
+                        <td><strong>${seq.type_ncf}</strong></td>
+                        <td>${seq.prefix}</td>
+                        <td>${seq.current_number.toString().padStart(8, '0')}</td>
+                        <td>${seq.max_number.toString().padStart(8, '0')}</td>
+                        <td>${seq.expiration_date || 'N/A'}</td>
+                        <td>
+                            <span class="badge" style="background: ${statusColor}15; color: ${statusColor}; border: 1px solid ${statusColor}30;">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td>
+                            <button onclick="toggleStatus(${seq.id}, ${!seq.is_Active})" class="badge" 
+                                style="border: 1px solid var(--border); background: white; cursor: pointer;">
+                                ${seq.is_Active ? 'Inactivar' : 'Activar'}
+                            </button>
+                        </td>
+                    `;
+                    body.appendChild(row);
+                });
+            } else {
+                body.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No hay secuencias registradas.</td></tr>';
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function openModal() { document.getElementById('ncf-modal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('ncf-modal').style.display = 'none'; }
+
+    document.getElementById('sequence-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            type_ncf: document.getElementById('type_ncf').value,
+            prefix: document.getElementById('prefix').value,
+            start_num: document.getElementById('start_num').value,
+            max_num: document.getElementById('max_num').value,
+            expiration_date: document.getElementById('expiration_date').value
+        };
+
+        try {
+            const res = await fetch('/api/v1/master/ncf/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                closeModal();
+                loadSequences();
+            } else {
+                const data = await res.json();
+                alert("Error: " + (data.error || "No se pudo crear la secuencia"));
+            }
+        } catch (err) {
+            alert("Error de conexión");
+        }
+    });
+
+    async function toggleStatus(id, active) {
+        try {
+            const res = await fetch(`/api/v1/master/ncf/${id}?active=${active}`, { method: 'PATCH' });
+            if (res.ok) loadSequences();
+        } catch (e) { console.error(e); }
+    }
+
+    window.onload = loadSequences;
+</script>
+{% endblock %}

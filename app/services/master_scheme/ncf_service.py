@@ -116,10 +116,19 @@ class NCFService:
             raise e
 
     @staticmethod
-    @audit_log(action=ActionType.READ, resource_type=ResourceTypes.NCF, resource_id_arg="type_ncf")
     def get_remaining_count(type_ncf: str):
         """Devuelve cuántos números quedan antes de que se agote la secuencia."""
         seq = NCFSequence.query.filter_by(type_ncf=type_ncf, is_active=True).first()
         if seq:
             return seq.max_number - seq.current_number + 1
         return 0
+
+    @staticmethod
+    def get_sequences():
+        """Obtiene todas las secuencias NCF."""
+        return NCFSequence.query.order_by(NCFSequence.id.desc()).all()
+
+    @staticmethod
+    def get_logs():
+        """Obtiene el historial de NCFs asignados."""
+        return NCFLog.query.order_by(NCFLog.created_at.desc()).all()

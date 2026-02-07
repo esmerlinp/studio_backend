@@ -11,6 +11,7 @@ from app.api.v1.master.log.routes import admin_bp
 from app.api.v1.master.country.routes import countries_bp
 from app.api.v1.base.storage.routes import documents_bp
 from app.api.v1.master.intelligence.routes import intelligence_bp
+from app.api.v1.master.ncf.routes import ncf_bp
 from app.api.v1.base.roles.routes import roles_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role
@@ -50,6 +51,7 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(documents_bp)
 app.register_blueprint(roles_bp)
 app.register_blueprint(intelligence_bp)
+app.register_blueprint(ncf_bp, url_prefix='/api/v1/master/ncf')
 
 # ------------------------------
 # Configuración de idioma
@@ -90,6 +92,15 @@ def health():
     return f'OK - {get_remote_address()}', 200
            
 
+
+@app.route("/logout")
+def logout_dashboard():
+    from flask_jwt_extended import unset_jwt_cookies
+    response = redirect("/login")
+    unset_jwt_cookies(response)
+    # Opcional: Inhabilitar sesión en DB si se desea mayor seguridad
+    # Pero para un logout simple de UI, esto es suficiente si el token vive en cookies
+    return response
 
 @app.before_request
 def load_user_preferences():
@@ -301,6 +312,18 @@ def dashboard_invoices():
     from app.models.master_scheme.pyments.payment_transaction_model import PaymentTransaction
     invoices = PaymentTransaction.query.filter(PaymentTransaction.status.in_(['SUCCESS', 'APPROVED'])).order_by(PaymentTransaction.createdAt.desc()).all()
     return render_template("es/dashboard/invoices.html", invoices=[i.to_dict() for i in invoices])
+
+@app.route("/dashboard/ncf")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_ncf():
+    return render_template("es/dashboard/ncf_sequences.html")
+
+@app.route("/dashboard/ncf/logs")
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+def dashboard_ncf_logs():
+    return render_template("es/dashboard/ncf_logs.html")
 
 @app.route("/reset-password")
 def reset_password_page():

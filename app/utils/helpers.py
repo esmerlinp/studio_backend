@@ -19,17 +19,28 @@ from datetime import datetime
 def format_datetime_user(dt_object):
     """
     Convierte un objeto datetime de la DB a la zona horaria 
-    y formato del usuario actual.
+    y formato del usuario actual. Soporta tanto datetime como date.
     """
     if dt_object is None:
         return None
     
-    # 1. Ajustar a la zona horaria del usuario
-    localized_dt = dt_object.astimezone(g.tz)
+    import datetime as dt
     
-    # 2. Aplicar formato de fecha y hora guardados en g
-    full_format = f"{g.date_format} {g.hour_format}"
-    return localized_dt.strftime(full_format)
+    # Si es solo fecha (date) y no fecha-hora (datetime)
+    if isinstance(dt_object, dt.date) and not isinstance(dt_object, dt.datetime):
+        return dt_object.strftime(getattr(g, 'date_format', '%Y-%m-%d'))
+    
+    try:
+        # 1. Ajustar a la zona horaria del usuario (si tiene astimezone)
+        # Algunos objetos de SQLAlchemy podrían comportarse raro, por eso el try
+        localized_dt = dt_object.astimezone(getattr(g, 'tz', dt.timezone.utc))
+        
+        # 2. Aplicar formato de fecha y hora guardados en g
+        full_format = f"{getattr(g, 'date_format', '%Y-%m-%d')} {getattr(g, 'hour_format', '%H:%M:%S')}"
+        return localized_dt.strftime(full_format)
+    except (AttributeError, ValueError):
+        # Fallback si no tiene astimezone o falla el formateo
+        return dt_object.strftime(getattr(g, 'date_format', '%Y-%m-%d'))
 
 
 def schema_exists(schema_name):

@@ -1,0 +1,80 @@
+{% extends "es/dashboard/layout.html" %}
+
+{% set active_page = 'ncf_logs' %}
+
+{% block title %}NCF Logs | Akdmia{% endblock %}
+
+{% block page_title %}Historial de NCF Asignados{% endblock %}
+{% block page_subtitle %}Registro de todos los comprobantes fiscales emitidos a clientes.{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="card-header">
+        <h3>Historial de Asignación</h3>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>ID Cliente</th>
+                    <th>NCF Asignado</th>
+                    <th>Stripe Invoice</th>
+                    <th>Estado e-CF</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="logs-body">
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px;">Cargando historial...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadLogs() {
+        try {
+            const res = await fetch('/api/v1/master/ncf/logs');
+            const body = document.getElementById('logs-body');
+
+            const data = await res.json();
+            if (!data.success) {
+                body.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f87171;">${data.error.msg}</td></tr>`;
+                return;
+            }
+
+            if (data.success && data.data.length > 0) {
+                body.innerHTML = '';
+                data.data.forEach(log => {
+                    const row = document.createElement('tr');
+                    const statusColor = log.ecf_status === 'ACEPTADO' ? '#059669' : (log.ecf_status === 'RECHAZADO' ? '#ef4444' : '#f59e0b');
+
+                    row.innerHTML = `
+                        <td>${log.assigned_at}</td>
+                        <td>Cliente #${log.client_id}</td>
+                        <td style="font-family: monospace; font-weight: 600;">${log.ncf}</td>
+                        <td><small>${log.stripe_invoice || 'Manual'}</small></td>
+                        <td>
+                            <span class="badge" style="background: ${statusColor}15; color: ${statusColor}; border: 1px solid ${statusColor}30;">
+                                ${log.ecf_status || 'PENDIENTE'}
+                            </span>
+                        </td>
+                        <td>-</td>
+                    `;
+                    body.appendChild(row);
+                });
+            } else {
+                body.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px;">No hay registros de asignación.</td></tr>';
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    window.onload = loadLogs;
+</script>
+{% endblock %}
