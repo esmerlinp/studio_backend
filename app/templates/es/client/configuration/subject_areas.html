@@ -1,0 +1,124 @@
+{% extends "es/client/layout.html" %}
+
+{% block title %}Areas Temáticas | Akdmia{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 32px;">
+    <h1 style="font-family: 'Outfit', sans-serif; font-size: 28px; color: var(--stripe-dark); margin-bottom: 4px;">
+        Areas Temáticas</h1>
+    <p style="font-size: 14px; color: var(--stripe-slate);">Agrupa las asignaturas en áreas de conocimiento
+        (Matemáticas, Ciencias, etc.).
+    </p>
+</div>
+
+<div
+    style="background: white; border-radius: 12px; border: 1px solid #e6ebf1; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+    <div
+        style="padding: 20px 24px; border-bottom: 1px solid #f6f9fc; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 16px; font-weight: 600; color: var(--stripe-dark);">Areas Registradas</h2>
+        <button onclick="openCreateModal()"
+            style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">+
+            Nueva</button>
+    </div>
+
+    <div id="loadingState" style="padding: 40px; text-align: center; color: #64748b;">
+        <i class="fas fa-spinner fa-spin"></i> Cargando areas...
+    </div>
+
+    <table id="areasTable" style="width: 100%; border-collapse: collapse; text-align: left; display: none;">
+        <thead>
+            <tr style="background: #fafbff; border-bottom: 1px solid #e6ebf1;">
+                <th
+                    style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
+                    Area Temática <i class="fas fa-arrow-down" style="font-size: 10px; margin-left: 4px;"></i></th>
+                <th
+                    style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
+                    Activo <i class="fas fa-arrow-down" style="font-size: 10px; margin-left: 4px;"></i></th>
+                <th
+                    style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase; text-align: right;">
+                    Acción</th>
+            </tr>
+        </thead>
+        <tbody id="areasTableBody">
+            <!-- Rows injected here -->
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAreas();
+    });
+
+    async function loadAreas() {
+        try {
+            const response = await fetch('/api/v1/client/subject-areas/');
+            if (!response.ok) throw new Error('Error loading areas');
+            const areas = await response.json();
+            renderAreas(areas);
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loadingState').innerText = 'Error al cargar datos.';
+        }
+    }
+
+    function renderAreas(areas) {
+        const tbody = document.getElementById('areasTableBody');
+        tbody.innerHTML = '';
+
+        if (areas.length === 0) {
+            document.getElementById('loadingState').innerText = 'No hay areas registradas.';
+            return;
+        }
+
+        areas.forEach(area => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #f6f9fc';
+
+            const statusHtml = area.isActive
+                ? `<span style="display: inline-flex; align-items: center; padding: 2px 8px; background: #ecfdf5; color: #10b981; border-radius: 100px; font-size: 12px; font-weight: 500;">
+                     <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; margin-right: 6px;"></span> Active
+                   </span>`
+                : `<span style="display: inline-flex; align-items: center; padding: 2px 8px; background: #f1f5f9; color: #64748b; border-radius: 100px; font-size: 12px; font-weight: 500;">
+                     <span style="width: 6px; height: 6px; background: #64748b; border-radius: 50%; margin-right: 6px;"></span> Inactive
+                   </span>`;
+
+            tr.innerHTML = `
+                <td style="padding: 16px 24px; font-weight: 500; color: var(--stripe-slate);">${area.name}</td>
+                <td style="padding: 16px 24px;">${statusHtml}</td>
+                <td style="padding: 16px 24px; text-align: right;">
+                    <button onclick="editArea(${area.id})" 
+                        style="color: #10b981; background: none; border: 2px solid #10b981; border-radius: 4px; padding: 2px 4px; cursor: pointer; margin-right: 8px;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteArea(${area.id})" 
+                        style="color: #ef4444; background: none; border: 2px solid #ef4444; border-radius: 4px; padding: 2px 4px; cursor: pointer;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('areasTable').style.display = 'table';
+    }
+
+    function openCreateModal() {
+        alert("Funcionalidad de crear area en desarrollo.");
+    }
+
+    function editArea(id) {
+        alert("Funcionalidad de editar area en desarrollo. ID: " + id);
+    }
+
+    function deleteArea(id) {
+        if (confirm("¿Estás seguro de eliminar este area?")) {
+            alert("Funcionalidad de eliminar area en desarrollo. ID: " + id);
+        }
+    }
+</script>
+{% endblock %}

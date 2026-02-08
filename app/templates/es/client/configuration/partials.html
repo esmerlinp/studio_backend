@@ -1,0 +1,143 @@
+{% extends "es/client/layout.html" %}
+
+{% block title %}Parciales | Akdmia{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 32px;">
+    <h1 style="font-family: 'Outfit', sans-serif; font-size: 28px; color: var(--stripe-dark); margin-bottom: 4px;">
+        Parciales</h1>
+    <p style="font-size: 14px; color: var(--stripe-slate);">Define los periodos de evaluación (parciales) y sus
+        fórmulas.
+    </p>
+</div>
+
+<div
+    style="background: white; border-radius: 12px; border: 1px solid #e6ebf1; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+    <div
+        style="padding: 20px 24px; border-bottom: 1px solid #f6f9fc; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 16px; font-weight: 600; color: var(--stripe-dark);">Parciales Registrados</h2>
+        <button onclick="openCreateModal()"
+            style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">+
+            Nuevo</button>
+    </div>
+
+    <div id="loadingState" style="padding: 40px; text-align: center; color: #64748b;">
+        <i class="fas fa-spinner fa-spin"></i> Cargando parciales...
+    </div>
+
+    <table id="partialsTable" style="width: 100%; border-collapse: collapse; text-align: left; display: none;">
+        <thead>
+            <tr style="background: #fafbff; border-bottom: 1px solid #e6ebf1;">
+                <th
+                    style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
+                    Parcial <i class="fas fa-arrow-down" style="font-size: 10px; margin-left: 4px;"></i></th>
+                <th
+                    style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
+                    Nombre Corto <i class="fas fa-arrow-down" style="font-size: 10px; margin-left: 4px;"></i></th>
+                <th
+                    style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
+                    Fórmula <i class="fas fa-arrow-down" style="font-size: 10px; margin-left: 4px;"></i></th>
+                <th
+                    style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
+                    Activo <i class="fas fa-arrow-down" style="font-size: 10px; margin-left: 4px;"></i></th>
+                <th
+                    style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase; text-align: right;">
+                    Acción</th>
+            </tr>
+        </thead>
+        <tbody id="partialsTableBody">
+            <!-- Rows injected here -->
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPartials();
+    });
+
+    async function loadPartials() {
+        try {
+            const response = await fetch('/api/v1/client/partials-list/');
+            if (!response.ok) throw new Error('Error loading partials');
+            const partials = await response.json();
+            renderPartials(partials);
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loadingState').innerText = 'Error al cargar datos.';
+        }
+    }
+
+    function renderPartials(partials) {
+        const tbody = document.getElementById('partialsTableBody');
+        tbody.innerHTML = '';
+
+        if (partials.length === 0) {
+            document.getElementById('loadingState').innerText = 'No hay parciales registrados.';
+            return;
+        }
+
+        partials.forEach(partial => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #f6f9fc';
+
+            const statusHtml = partial.isActive
+                ? `<span style="display: inline-flex; align-items: center; padding: 2px 8px; background: #ecfdf5; color: #10b981; border-radius: 100px; font-size: 12px; font-weight: 500;">
+                     <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; margin-right: 6px;"></span> Active
+                   </span>`
+                : `<span style="display: inline-flex; align-items: center; padding: 2px 8px; background: #f1f5f9; color: #64748b; border-radius: 100px; font-size: 12px; font-weight: 500;">
+                     <span style="width: 6px; height: 6px; background: #64748b; border-radius: 50%; margin-right: 6px;"></span> Inactive
+                   </span>`;
+
+            // Toggle for Formula (Visual only for now)
+            const formulaToggle = `
+                <div style="position: relative; display: inline-block; width: 36px; height: 20px;">
+                    <input type="checkbox" ${partial.isFormula ? 'checked' : ''} disabled 
+                        style="opacity: 0; width: 0; height: 0;">
+                    <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: ${partial.isFormula ? '#10b981' : '#ccc'}; transition: .4s; border-radius: 34px;"></span>
+                    <span style="position: absolute; content: ''; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; transform: ${partial.isFormula ? 'translateX(16px)' : 'translateX(0)'};"></span>
+                </div>
+            `;
+
+
+            tr.innerHTML = `
+                <td style="padding: 16px 24px; font-weight: 500; color: var(--stripe-slate);">${partial.name}</td>
+                <td style="padding: 16px 24px; font-size: 14px; color: #334155;">${partial.shortName || '-'}</td>
+                <td style="padding: 16px 24px;">${formulaToggle}</td>
+                <td style="padding: 16px 24px;">${statusHtml}</td>
+                <td style="padding: 16px 24px; text-align: right;">
+                    <button onclick="editPartial(${partial.id})" 
+                        style="color: #10b981; background: none; border: 2px solid #10b981; border-radius: 4px; padding: 2px 4px; cursor: pointer; margin-right: 8px;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deletePartial(${partial.id})" 
+                        style="color: #ef4444; background: none; border: 2px solid #ef4444; border-radius: 4px; padding: 2px 4px; cursor: pointer;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('partialsTable').style.display = 'table';
+    }
+
+    function openCreateModal() {
+        alert("Funcionalidad de crear parcial en desarrollo.");
+    }
+
+    function editPartial(id) {
+        alert("Funcionalidad de editar parcial en desarrollo. ID: " + id);
+    }
+
+    function deletePartial(id) {
+        if (confirm("¿Estás seguro de eliminar este parcial?")) {
+            alert("Funcionalidad de eliminar parcial en desarrollo. ID: " + id);
+        }
+    }
+</script>
+{% endblock %}
