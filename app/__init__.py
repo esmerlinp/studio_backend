@@ -4,7 +4,7 @@ from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from flask import Flask
 from dotenv import load_dotenv
 import os
-from .extensions import mail, db, limiter
+from .extensions import mail, db, limiter, migrate
 from app.services.master_scheme.session_service import get_session_active_by_user_id, invalidar_sesiones_por_id_session, actualizar_actividad_sesion
 from app.services.master_scheme.log_service import log_action
 
@@ -79,6 +79,7 @@ def create_app():
     
 
     db.init_app(app)
+    migrate.init_app(app, db)
     
     # Vinculamos el limitador a la aplicación
     limiter.init_app(app)

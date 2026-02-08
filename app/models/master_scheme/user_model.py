@@ -27,6 +27,10 @@ class User(db.Model):
     rol = db.Column("srol", db.String(20), nullable=True, default=None)
     is_disabled_by_client = db.Column('binactivadoporelcliente', db.Boolean, default=False)
     
+    # 2FA Fields
+    otp_secret = db.Column("sotpsecret", db.String(32), nullable=True)
+    otp_enabled = db.Column("botpenabled", db.Boolean, default=False)
+    
     # preferences = db.relationship(
     #     "UserPreference",
     #     uselist=False,

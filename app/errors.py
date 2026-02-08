@@ -74,6 +74,7 @@ def register_error_handlers(app):
                 resource_type=request.method,
                 description=f"{i18n._('audit.operation_failed')}: {e}\n {i18n._('common.user')}: {getattr(g, 'user_id', 'Anónimo')}",
                 new_values={"traceback": error_details},
+                user_id=getattr(g, 'user_id', None),
                 status="ERROR"
             )
         else:

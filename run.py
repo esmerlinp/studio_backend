@@ -99,6 +99,10 @@ app.wsgi_app = ProxyFix(
 
 jwt = JWTManager(app)
 
+@app.context_processor
+def inject_user():
+    return {'current_user': getattr(g, 'user', None)}
+
 app.register_blueprint(users_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(client_bp)
@@ -290,6 +294,9 @@ def before_request():
     user = get_user_by_id(user_id=user_id)
     if not user:
         return error(i18n._("auth.user_not_found"), 401)
+    
+    # Store user in global context
+    g.user = user
 
     # ... tus validaciones de isConfirmedUser y mustChangePassword ...
 
@@ -387,6 +394,11 @@ def dashboard():
                          recent_clients=data.get('recent_clients'), 
                          recent_payments=data.get('recent_payments'))
 
+@app.route("/dashboard/profile")
+@jwt_required()
+def dashboard_profile():
+    return render_template("es/dashboard/user_profile.html")
+
 @app.route("/dashboard/clients")
 @jwt_required()
 @require_permission("SC_CLIENTES", "CONSULTAR")
@@ -449,6 +461,11 @@ def dashboard_create_client():
 @jwt_required()
 def client_dashboard():
     return render_template("es/client/dashboard.html", active_page='dashboard')
+
+@app.route("/client/profile")
+@jwt_required()
+def client_profile():
+    return render_template("es/client/user_profile.html")
 
 @app.route("/client/configuration")
 @jwt_required()

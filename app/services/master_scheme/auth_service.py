@@ -1,9 +1,10 @@
 from flask import  request, jsonify, g
+from app.extensions import db
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token, set_access_cookies, set_refresh_cookies, unset_jwt_cookies
 from datetime import timedelta, datetime
 from app.services.master_scheme.user_service import get_user_by_user_name_with_passwd, get_user_by_id, get_user_preferences, add_default_user_preferences
-from app.services.master_scheme.session_service import close_session, create_session, get_session_active_by_refresh_token
+from app.services.master_scheme.session_service import close_session, create_session, get_session_active_by_refresh_token, get_open_sessions
 from app.utils.responses import success, error
 from app.models.master_scheme.user_client_model import UsuarioCliente
 from app.models.master_scheme.client_model import Client
@@ -15,6 +16,10 @@ from app.utils.helpers import send_email_template
 from app.utils import i18n
 from dotenv import load_dotenv
 import os
+import pyotp
+import qrcode
+import io
+import base64
 
 JWT_ACCESS_TOKEN_EXPIRES = 24   # horas
 
@@ -70,6 +75,18 @@ def login():
 
     if not check_password_hash(user.password, password):
         raise AuditedError(i18n._("error.auth.invalid_credentials"),
+                            resource_type=ResourceTypes.USER_SESSION,
+                            action_type=ActionType.LOGIN, user_id=user.userId, status_code=401)
+
+    # 2FA Verification
+    if user.otp_enabled:
+        otp_token = data.get("otp")
+        if not otp_token:
+            return error(message="2FA Required", status_code=202, data={"require_2fa": True})
+        
+        totp = pyotp.TOTP(user.otp_secret)
+        if not totp.verify(otp_token):
+             raise AuditedError(i18n._("error.auth.invalid_2fa"),
                             resource_type=ResourceTypes.USER_SESSION,
                             action_type=ActionType.LOGIN, user_id=user.userId, status_code=401)
 
@@ -198,3 +215,77 @@ def refresh_token(user_id: int):
         "accessToken": new_access_token
     }
     return result
+
+
+def generate_2fa_secret(user_id):
+    user = get_user_by_id(user_id)
+    if not user:
+        return error("User not found", 404)
+    
+    secret = pyotp.random_base32()
+    
+    # Generate QR Code
+    totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
+        name=user.email,
+        issuer_name="Akdmia Studio"
+    )
+    
+    img = qrcode.make(totp_uri)
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    qr_code_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    
+    return success(data={"secret": secret, "qr_code": qr_code_base64, "otp_enabled": user.otp_enabled}, message="2FA Secret Generated", status_code=200)
+
+def enable_2fa(user_id, token, secret):
+    user = get_user_by_id(user_id)
+    if not user:
+        return error("User not found", 404)
+
+    try:
+        totp = pyotp.TOTP(secret)
+        
+        # Verify with window to allow for slight time drift
+        if not totp.verify(token, valid_window=1):
+            return error("Invalid OTP Token", 400)
+        
+        user.otp_secret = secret
+        user.otp_enabled = True
+        db.session.commit()
+        
+        return success(data=None, message="2FA Enabled Successfully", status_code=200)
+    except Exception as e:
+        return error(f"Error enabling 2FA: {str(e)}", 500)
+
+def disable_2fa(user_id, token):
+    user = get_user_by_id(user_id)
+    if not user:
+        return error("User not found", 404)
+        
+    if not user.otp_enabled:
+         return error("2FA is not enabled", 400)
+
+    totp = pyotp.TOTP(user.otp_secret)
+    if not totp.verify(token):
+        return error("Invalid OTP Token", 400)
+    
+    user.otp_secret = None
+    user.otp_enabled = False
+    db.session.commit()
+    
+    return success(data=None, message="2FA Disabled Successfully", status_code=200)
+
+def get_user_profile_data(user_id):
+    user = get_user_by_id(user_id)
+    if not user:
+        return error("User not found", 404)
+    
+    preferences = get_user_preferences(user_id)
+    sessions = get_open_sessions(user_id)
+    
+    data = user.to_dict()
+    data['otp_enabled'] = user.otp_enabled
+    data['preferences'] = preferences.preferences if preferences else {}
+    data['sessions'] = [s.to_dict() for s in sessions]
+    
+    return success(data=data, message="Profile data retrieved", status_code=200)

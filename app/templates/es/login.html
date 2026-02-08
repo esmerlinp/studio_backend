@@ -250,6 +250,13 @@
                     </div>
                 </div>
 
+                <!-- 2FA Input (Hidden initially) -->
+                <div id="otp-group" class="form-group hidden">
+                    <label for="login-otp">Código de Verificación (2FA)</label>
+                    <input type="text" id="login-otp" name="otp" placeholder="000000" maxlength="6"
+                        style="letter-spacing: 4px; text-align: center;">
+                </div>
+
                 <div class="options">
                     <button type="button" class="link-btn" onclick="toggleViews('forgot-view')">¿Has olvidado tu
                         contraseña?</button>
@@ -288,6 +295,9 @@
         const message = document.getElementById('message');
         const passwordInput = document.getElementById('login-password');
         const eyeIcon = document.getElementById('eye-icon');
+        const otpGroup = document.getElementById('otp-group');
+        const otpInput = document.getElementById('login-otp');
+        let is2FAMode = false;
 
         function togglePasswordVisibility() {
             const isPassword = passwordInput.type === 'password';
@@ -305,6 +315,7 @@
             e.preventDefault();
             const username = document.getElementById('login-username').value;
             const password = passwordInput.value;
+            const otp = otpInput.value;
 
             // UI State: Cargando
             message.classList.add('hidden');
@@ -312,12 +323,19 @@
             btnText.innerText = 'Validando...';
             btnSpinner.style.display = 'block';
 
+            const payload = { username, password };
+            if (is2FAMode && otp) {
+                payload.otp = otp;
+            }
+
             try {
                 const response = await fetch('/api/v1/master/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify(payload)
                 });
+
+                const data = await response.json();
 
                 // CASO 200: Éxito
                 if (response.status === 200) {
@@ -325,37 +343,62 @@
                     return;
                 }
 
-                const data = await response.json();
+                // CASO 202: 2FA Requerido
+                if (response.status === 202 && data.data && data.data.require_2fa) {
+                    is2FAMode = true;
+                    otpGroup.classList.remove('hidden');
+                    otpInput.required = true;
+                    otpInput.focus();
+                    btnText.innerText = 'Verificar';
+                    showMessage('Ingresa el código de tu aplicación autenticadora', 'info');
+                    return;
+                }
 
                 // CASO 403: Suscripción Inactiva (Redirección a Restore)
                 if (response.status === 403) {
-                    const token = data.access_token; // Asumiendo que el login 403 te devuelve el token
-                    const clientId = data.clientId;
-                    localStorage.setItem('access_token', token);
-                    localStorage.setItem('clientId', clientId);
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                        return;
+                    }
+                    // Fallback manual construction if needed
+                    const token = data.data.access_token;
+                    const clientId = data.data.clientId;
+                    if (token) localStorage.setItem('access_token', token);
+                    if (clientId) localStorage.setItem('clientId', clientId);
 
-                    // window.location.href = '/billing/restore';
-                    //window.location.href = `/billing/restore?clientId=${clientId}`;
                     window.location.href = `/billing/restore?clientId=${clientId}&token=${token}`;
                     return;
                 }
 
                 // OTROS ERRORES (401, etc.)
-                showMessage(data.message || 'Credenciales incorrectas', 'error');
+                // OTROS ERRORES (401, etc.)
+                showMessage(data.message || data.error || 'Credenciales incorrectas', 'error');
 
             } catch (err) {
+                console.error(err);
                 showMessage('Error de red. Intenta de nuevo.', 'error');
             } finally {
                 submitBtn.disabled = false;
-                btnText.innerText = 'Siguiente';
+                if (!is2FAMode) btnText.innerText = 'Siguiente';
+                else btnText.innerText = 'Verificar';
                 btnSpinner.style.display = 'none';
             }
         });
 
         function showMessage(text, type) {
             message.classList.remove('hidden', 'error-msg', 'success-msg');
-            message.classList.add(type === 'error' ? 'error-msg' : 'success-msg');
+            if (type === 'info') {
+                message.style.backgroundColor = '#e8f0fe';
+                message.style.color = '#1a73e8';
+                message.style.border = '1px solid #dadce0';
+            } else {
+                message.classList.add(type === 'error' ? 'error-msg' : 'success-msg');
+                message.style.backgroundColor = ''; // Reset inline
+                message.style.color = '';
+                message.style.border = '';
+            }
             message.innerHTML = text;
+            message.classList.remove('hidden');
         }
     </script>
 </body>

@@ -383,13 +383,14 @@
             </div>
 
             <div class="header-right">
-                <div class="user-profile">
-                    <div class="avatar">AD</div>
-                    <span style="font-size: 14px; font-weight: 500; color: var(--stripe-dark);">Admin</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 9l6 6 6-6"></path>
-                    </svg>
-                </div>
+                <a href="/client/profile" style="text-decoration: none;">
+                    <div class="user-profile">
+                        <div class="avatar">{{ current_user.firstName[0] }}{{ current_user.lastName[0] }}</div>
+                        <span style="font-size: 14px; font-weight: 500; color: var(--stripe-dark);">{{
+                            current_user.firstName }}</span>
+                        <!-- Removed SVG or keep it if needed -->
+                    </div>
+                </a>
             </div>
         </header>
 
