@@ -26,6 +26,7 @@ class Session(db.Model):
     def to_dict(self, include_sensitive=False):
         expirationDate = format_datetime_user(self.expirationDate) if self.expirationDate else None
         lastAccessDate = format_datetime_user(self.lastAccessDate) if self.lastAccessDate else None
+        creationDate = format_datetime_user(self.createAt) if self.createAt else None
         
         data = {
             "deviceInfo": self.deviceInfo,
@@ -35,6 +36,7 @@ class Session(db.Model):
             "userId": self.userId,
             "expirationDate": expirationDate,
             "lastAccessDate": lastAccessDate,
+            "creationDate": creationDate,
             "isActive": self.isActive
         }
         if include_sensitive:

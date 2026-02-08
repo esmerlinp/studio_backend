@@ -3,6 +3,7 @@
 ## GET /api/v1/user/
 
 **Requiere Autenticación**: Sí
+**Permiso Requerido**: SC_USUARIOS:CONSULTAR
 
 **Descripción**: Obtiene el listado de usuarios.
 
@@ -19,6 +20,7 @@ Devuelve una lista de usuarios.
 ## GET /api/v1/user/<userId>
 
 **Requiere Autenticación**: Sí
+**Permiso Requerido**: SC_USUARIOS:CONSULTAR
 
 **Parámetros de URL**:
 - `userId`: ID del usuario.
@@ -36,6 +38,7 @@ Devuelve los detalles del usuario.
 ## PUT /api/v1/user/<userId>/desactivate
 
 **Requiere Autenticación**: Sí
+**Permiso Requerido**: SC_USUARIOS:EDITAR
 
 **Parámetros de URL**:
 - `userId`: ID del usuario a desactivar.
@@ -230,6 +233,7 @@ Devuelve los datos del plan.
 ## POST /api/v1/user/
 
 **Requiere Autenticación**: Sí (Admin)
+**Permiso Requerido**: SC_USUARIOS:CREAR
 
 **Parámetros del Cuerpo**:
 - `userName`: Nombre de usuario.

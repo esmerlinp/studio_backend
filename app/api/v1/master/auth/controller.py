@@ -1,6 +1,6 @@
 
 from flask import request
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app import track_activity
 from app.services.master_scheme import auth_service, session_service
 from app.utils.responses import success, error
@@ -26,6 +26,16 @@ def close_session(sessionId):
         user_id = get_jwt_identity()
         sessions = session_service.close_session(sessionId=sessionId, user_id=int(user_id))
         return success(data=sessions, message=i18n._("common.session_closed_successfully"), status_code=200)
+    except Exception as e:
+        return error(message=str(e), status_code=500)
+
+@jwt_required()
+@track_activity
+def close_other_sessions(sessionId):
+    try:
+        user_id = get_jwt_identity()
+        sessions = session_service.close_all_session_except_current(sessionId=sessionId, user_id=int(user_id))
+        return success(data=sessions, message=i18n._("common.other_sessions_closed_successfully"), status_code=200)
     except Exception as e:
         return error(message=str(e), status_code=500)
 
@@ -67,7 +77,9 @@ def refresh_token():
 def get_profile():
     try:
         user_id = get_jwt_identity()
-        return auth_service.get_user_profile_data(user_id=int(user_id))
+        claims = get_jwt()
+        session_id = claims.get("sessionId")
+        return auth_service.get_user_profile_data(user_id=int(user_id), current_session_id=session_id)
     except Exception as e:
         return error(message=str(e), status_code=500)
 
@@ -100,5 +112,15 @@ def disable_2fa():
         data = request.json
         token = data.get("token")
         return auth_service.disable_2fa(user_id=int(user_id), token=token)
+    except Exception as e:
+        return error(message=str(e), status_code=500)
+
+@jwt_required()
+@track_activity
+def update_preferences():
+    try:
+        user_id = get_jwt_identity()
+        data = request.json
+        return auth_service.update_user_preferences(user_id=int(user_id), preferences_data=data)
     except Exception as e:
         return error(message=str(e), status_code=500)

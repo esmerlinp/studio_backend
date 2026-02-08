@@ -76,7 +76,8 @@ def add_default_user_preferences(user_id:int,language="es", theme="light", timez
         "dateFormat": date_format,
         "notifications": {
             "email": receive_not_email,
-            "push": push_notifications
+            "push": push_notifications,
+            "login": True
         }
     }
 
@@ -101,6 +102,7 @@ def update_user_preference(
     hour_format: str | None = None,
     receive_not_email: bool | None = None,
     push_notifications: bool | None = None,
+    login_notifications: bool | None = None
 ) -> UserPreference:
     prefs = UserPreference.query.filter_by(userId=user_id).first()
 
@@ -127,6 +129,8 @@ def update_user_preference(
         prefs.preferences["notifications"]["email"] = receive_not_email
     if push_notifications is not None:
         prefs.preferences["notifications"]["push"] = push_notifications
+    if login_notifications is not None:
+        prefs.preferences["notifications"]["login"] = login_notifications
 
     # 3. EL TRUCO MÁGICO: Forzar la detección de cambios
     flag_modified(prefs, "preferences")

@@ -2,7 +2,7 @@ from flask import request
 from werkzeug.security import generate_password_hash
 from app.services.master_scheme import user_service
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import track_activity, require_role
+from app import track_activity, require_role, require_permission
 from app.utils.responses import success, error
 from app.utils.helpers import generate_reset_token, send_reset_email
 from app.utils import i18n
@@ -31,6 +31,7 @@ def me():
 @jwt_required()
 @track_activity
 @require_role(["SUPER_ADMIN", "SYS_ADMIN"])
+@require_permission("SC_USUARIOS", "CONSULTAR")
 def get_users():
     # data = db.fetch_data('SELECT * FROM usuarios')
     user_id = get_jwt_identity()
@@ -46,6 +47,7 @@ def get_users():
 @jwt_required()
 @track_activity
 @require_role(["SUPER_ADMIN", "SYS_ADMIN"])
+@require_permission("SC_USUARIOS", "CONSULTAR")
 def get_user(userId):
     user = user_service.get_user_by_id(user_id=userId)
     if not user:
@@ -91,6 +93,7 @@ def change_password():
 @jwt_required()
 @track_activity
 @require_role(["SUPER_ADMIN", "SYS_ADMIN", "ADMIN", "OWNER"])
+@require_permission("SC_USUARIOS", "EDITAR")
 def inactivate_user(userId):
     admin_user_id = get_jwt_identity()
     user = user_service.deactivate_user(user_id=userId, admin_user_id=admin_user_id)
@@ -99,8 +102,10 @@ def inactivate_user(userId):
 
 
 
+@jwt_required()
 @track_activity
 @require_role(["SUPER_ADMIN", "SYS_ADMIN", "ADMIN", "OWNER"])
+@require_permission("SC_USUARIOS", "CREAR")
 def create_user():
     try:
         admin_user_id = get_jwt_identity()

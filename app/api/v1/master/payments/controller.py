@@ -1,5 +1,5 @@
 from flask import  request, jsonify, render_template
-from app import db, require_role
+from app import db, require_role, require_permission
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -445,6 +445,7 @@ def cancel_subscription():
 
 @jwt_required()
 @require_role([r.ROOT, r.SYS_ADMIN, r.OWNER, r.AUDITOR])
+@require_permission("SC_PAGOS", "CONSULTAR")
 def get_payment_detail(payment_id):
     transaction = PaymentTransaction.query.get(payment_id)
     if not transaction:

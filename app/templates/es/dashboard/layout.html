@@ -569,13 +569,7 @@
             font-size: 0.9rem;
         }
 
-            {
-            % block extra_css %
-        }
 
-            {
-            % endblock %
-        }
 
 
         @media (max-width: 768px) {
@@ -599,6 +593,7 @@
             }
         }
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body>
@@ -998,7 +993,11 @@
                     </svg>
                     <span>IA</span>
                 </button>
-                <div class="avatar">AD</div>
+                <a href="/dashboard/profile" style="text-decoration: none;">
+                    <div class="avatar" title="Ir a mi perfil">
+                        {{ current_user.firstName[0] }}{{ current_user.lastName[0] }}
+                    </div>
+                </a>
             </div>
         </header>
 

@@ -79,15 +79,44 @@
             </div>
 
             <h3 style="margin-top: 30px;">Preferencias</h3>
-            <div class="form-group" style="max-width: 400px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Idioma</label>
-                <select id="pref-language" class="form-select"
-                    style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
-                    <option value="es" {% if g.lang=='es' %}selected{% endif %}>Español</option>
-                    <option value="en" {% if g.lang=='en' %}selected{% endif %}>English</option>
-                </select>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Idioma</label>
+                    <select id="pref-language" class="form-select"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                        <option value="es">Español</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Formato de Hora</label>
+                    <select id="pref-hourFormat" class="form-select"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                        <option value="12">12 Horas (AM/PM)</option>
+                        <option value="24">24 Horas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Formato de Fecha</label>
+                    <select id="pref-dateFormat" class="form-select"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                        <option value="DD-MM-YYYY">DD-MM-YYYY</option>
+                        <option value="MM-DD-YYYY">MM-DD-YYYY</option>
+                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Zona Horaria</label>
+                    <select id="pref-timezone" class="form-select"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                        <option value="UTC">UTC</option>
+                        <option value="America/Santo_Domingo">America/Santo_Domingo</option>
+                        <option value="America/New_York">America/New_York</option>
+                    </select>
+                </div>
             </div>
-            <button onclick="savePreferences()" class="main-btn" style="margin-top: 20px;">Guardar Preferencias</button>
+            <button type="button" onclick="savePreferences()" class="main-btn" style="margin-top: 20px;">Guardar
+                Preferencias</button>
         </div>
     </div>
 
@@ -116,14 +145,21 @@
         <div class="card" style="padding: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="margin: 0;">Sesiones Activas</h3>
-                <button onclick="loadSessions()"
-                    style="background: none; border: 1px solid var(--border); padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M23 4v6h-6"></path>
-                        <path d="M20.49 15a9 9 0 1 1 2.12-9.36L23 10"></path>
-                    </svg>
-                    Actualizar
-                </button>
+                <div style="display: flex; gap: 10px;">
+                    <button id="close-others-btn" onclick="closeOtherSessions()"
+                        style="display: none; background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                        Cerrar otras sesiones
+                    </button>
+                    <button onclick="loadSessions()"
+                        style="background: none; border: 1px solid var(--border); padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M23 4v6h-6"></path>
+                            <path d="M20.49 15a9 9 0 1 1 2.12-9.36L23 10"></path>
+                        </svg>
+                        Actualizar
+                    </button>
+                </div>
             </div>
 
             <div id="sessions-list">
@@ -160,7 +196,7 @@
                 </label>
             </div>
 
-            <button class="main-btn" disabled title="Próximamente">Guardar Cambios</button>
+            <button type="button" class="main-btn" onclick="savePreferences()">Guardar Cambios</button>
         </div>
     </div>
 
@@ -194,6 +230,63 @@
         </div>
     </div>
 </div>
+<!-- Modal Confirmar Cierre Sesión -->
+<div id="modalConfirmSession"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div
+        style="background-color: white; padding: 24px; border-radius: 12px; width: 400px; max-width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h3 id="modalSessionTitle" style="margin-top: 0;">Confirmar acción</h3>
+        <p id="modalSessionText" style="color: var(--text-muted); margin-bottom: 24px;">¿Estás seguro de continuar?</p>
+        <div style="text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
+            <button onclick="closeConfirmSessionModal()"
+                style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+            <button id="modalSessionConfirmBtn" class="main-btn" style="background-color: #ef4444;">Cerrar
+                Sesión</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Desactivar 2FA -->
+<div id="modalDisable2FA"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div
+        style="background-color: white; padding: 24px; border-radius: 12px; width: 400px; max-width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h3 style="margin-top: 0; color: #ef4444;">Desactivar 2FA</h3>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">
+            ¿Estás seguro? Tu cuenta será menos segura si desactivas la autenticación de dos pasos.
+        </p>
+
+        <div style="margin-top: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ingresa tu código para
+                confirmar</label>
+            <input type="text" id="otp-disable-input" placeholder="000000" maxlength="6"
+                style="width: 100%; padding: 10px; font-size: 1.2rem; text-align: center; letter-spacing: 5px; border: 1px solid var(--border); border-radius: 6px;">
+        </div>
+
+        <div style="margin-top: 20px; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
+            <button onclick="closeDisable2FAModal()"
+                style="padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer;">Cancelar</button>
+            <button onclick="confirmDisable2FA()" class="main-btn"
+                style="background-color: #ef4444;">Desactivar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Éxito Genérico -->
+<div id="modalSuccess"
+    style="display: none; position: fixed; z-index: 1100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div
+        style="background-color: white; padding: 32px; border-radius: 16px; width: 360px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center;">
+        <div
+            style="width: 64px; height: 64px; background-color: #ecfdf5; color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px;">
+            ✓
+        </div>
+        <h3 style="margin: 0 0 10px; color: var(--text-main);">¡Éxito!</h3>
+        <p id="modalSuccessMessage" style="color: var(--text-muted); margin-bottom: 24px;">Operación completada.</p>
+        <button onclick="closeSuccessModal()" class="main-btn" style="width: 100%;">Aceptar</button>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -209,37 +302,48 @@
 
         document.getElementById(`tab-${tabName}`).style.display = 'block';
         const btn = document.querySelector(`.tab-btn[onclick="switchTab('${tabName}')"]`);
-        btn.classList.add('active');
-        btn.style.borderBottom = '2px solid var(--primary)';
-        btn.style.color = 'var(--text-main)';
+        if (btn) {
+            btn.classList.add('active');
+            btn.style.borderBottom = '2px solid var(--primary)';
+            btn.style.color = 'var(--text-main)';
+        }
 
         if (tabName === 'sessions') {
             loadSessions();
         } else if (tabName === 'security') {
             check2FAStatus();
+        } else if (tabName === 'general' || tabName === 'notifications') {
+            loadPreferences();
         }
     }
 
-    // API Helpers
+    // API Helper
     async function apiCall(url, method = 'GET', body = null) {
         const headers = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}` // Assumes token in localStorage
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         };
-
-        // If not in localStorage, maybe cookies handle it (configured in backend)
-        // But explicit header is safer if we have it. 
-        // Backend config is JWT_TOKEN_LOCATION = ["headers", "cookies"], so cookies should work automatically if browser handles them.
-
         const options = { method, headers };
         if (body) options.body = JSON.stringify(body);
 
-        const res = await fetch(url, options);
-        if (res.status === 401) {
-            window.location.href = '/dashboard/login';
-            return null;
+        try {
+            const res = await fetch(url, options);
+
+            if (res.status === 401 || res.status === 422) {
+                localStorage.removeItem('access_token');
+                window.location.href = '/dashboard/login';
+                return null;
+            }
+
+            const text = await res.text();
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                return { success: false, msg: "Invalid JSON response", raw: text };
+            }
+        } catch (e) {
+            return { success: false, msg: "Network error", error: e };
         }
-        return await res.json();
     }
 
     // 2FA Logic
@@ -248,29 +352,35 @@
     async function check2FAStatus() {
         const container = document.getElementById('2fa-status-container');
         container.innerHTML = 'Cargando...';
-
         const res = await apiCall('/api/v1/master/auth/profile');
-        if (!res) return;
 
-        const user = res.data;
-        if (user.otp_enabled) {
+        if (!res || !res.success) {
+            container.innerHTML = `<div style="color: var(--error); padding: 20px;">Error al cargar estado.</div>`;
+            return;
+        }
+
+        const enabled = res.data.otp_enabled;
+        if (enabled) {
             container.innerHTML = `
-                <div style="background: #ecfdf5; border: 1px solid #d1fae5; padding: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center;">
-                        <span style="height: 10px; width: 10px; background: #10b981; border-radius: 50%; display: inline-block; margin-right: 10px;"></span>
-                        <strong style="color: #065f46;">2FA está Activado</strong>
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="color: #10b981;">✓</span>
+                        <div>
+                            <strong style="display: block;">2FA Activado</strong>
+                            <small style="color: var(--text-muted);">Tu cuenta está protegida.</small>
+                        </div>
                     </div>
                     <button onclick="disable2FA()" style="background: white; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 6px; cursor: pointer;">Desactivar</button>
                 </div>
             `;
         } else {
             container.innerHTML = `
-                <div style="background: #f9fafb; border: 1px solid var(--border); padding: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center;">
-                        <span style="height: 10px; width: 10px; background: #6b7280; border-radius: 50%; display: inline-block; margin-right: 10px;"></span>
-                        <strong style="color: #374151;">2FA está Desactivado</strong>
+                <div style="background: var(--bg-light); border: 1px solid var(--border); padding: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <strong style="display: block;">2FA Desactivado</strong>
+                        <small style="color: var(--text-muted);">Recomendamos activarlo para mayor seguridad.</small>
                     </div>
-                    <button onclick="setup2FA()" class="main-btn">Configurar</button>
+                    <button onclick="setup2FA()" class="main-btn" style="padding: 5px 15px;">Configurar</button>
                 </div>
             `;
         }
@@ -280,66 +390,79 @@
         const res = await apiCall('/api/v1/master/auth/2fa/setup', 'POST');
         if (res && res.success) {
             currentSecret = res.data.secret;
-            document.getElementById('qr-image-container').innerHTML = `<img src="data:image/png;base64,${res.data.qr_code}" style="width: 180px; height: 180px; display: block;">`;
+            document.getElementById('qr-image-container').innerHTML = `<img src="data:image/png;base64,${res.data.qr_code}" style="width: 180px;">`;
             document.getElementById('secret-text').textContent = currentSecret;
             document.getElementById('modal2FA').style.display = 'flex';
         } else {
-            alert("Error al iniciar configuración 2FA: " + (res.msg || JSON.stringify(res)));
+            alert("Error al iniciar configuración: " + (res.error || res.msg || 'Desconocido'));
         }
     }
 
     function close2FAModal() {
         document.getElementById('modal2FA').style.display = 'none';
         document.getElementById('otp-input').value = '';
-        currentSecret = null;
     }
 
     async function confirm2FA() {
         const token = document.getElementById('otp-input').value;
-        if (token.length !== 6) {
-            alert('Ingresa el código de 6 dígitos');
-            return;
-        }
-
-        const res = await apiCall('/api/v1/master/auth/2fa/enable', 'POST', {
-            token: token,
-            secret: currentSecret
-        });
-
-        if (res.success) {
+        if (token.length < 6) return alert('Ingresa el código');
+        const res = await apiCall('/api/v1/master/auth/2fa/enable', 'POST', { token, secret: currentSecret });
+        if (res && res.success) {
             alert('2FA Activado Correctamente');
             close2FAModal();
             check2FAStatus();
         } else {
-            alert('Código incorrecto. Intenta de nuevo.');
+            alert('Código inválido: ' + (res.error || res.msg || 'Desconocido'));
         }
     }
 
-    async function disable2FA() {
-        if (!confirm('¿Estás seguro de desactivar la autenticación de dos pasos? Tu cuenta será menos segura.')) return;
+    function disable2FA() {
+        document.getElementById('modalDisable2FA').style.display = 'flex';
+        document.getElementById('otp-disable-input').focus();
+    }
 
-        const token = prompt("Ingresa el código de tu autenticador para confirmar:");
-        if (!token) return;
+    function closeDisable2FAModal() {
+        document.getElementById('modalDisable2FA').style.display = 'none';
+    }
 
-        const res = await apiCall('/api/v1/master/auth/2fa/disable', 'POST', { token: token });
-
-        if (res.success) {
-            alert('2FA Desactivado');
+    async function confirmDisable2FA() {
+        const token = document.getElementById('otp-disable-input').value;
+        const res = await apiCall('/api/v1/master/auth/2fa/disable', 'POST', { token });
+        if (res && res.success) {
+            closeDisable2FAModal();
             check2FAStatus();
+            alert('2FA Desactivado');
         } else {
-            alert('Error al desactivar 2FA. Código inválido.');
+            alert('No se pudo desactivar: ' + (res.error || res.msg || 'Desconocido'));
         }
     }
+
+    let currentSessionId = null;
 
     // Sessions Logic
     async function loadSessions() {
         const container = document.getElementById('sessions-list');
         container.innerHTML = 'Cargando...';
 
-        const res = await apiCall('/api/v1/master/auth/profile'); // Using profile endpoint which includes sessions
-        if (!res) return;
+        const res = await apiCall('/api/v1/master/auth/profile');
+        if (!res || !res.success) {
+            container.innerHTML = '<div style="color: var(--error);">Error al cargar sesiones.</div>';
+            return;
+        }
 
-        const sessions = res.data.sessions;
+        const sessions = res.data.sessions || [];
+        currentSessionId = res.data.sessionId;
+
+        sessions.sort((a, b) => {
+            if (a.sessionId === currentSessionId) return -1;
+            if (b.sessionId === currentSessionId) return 1;
+            return new Date(b.creationDate) - new Date(a.creationDate);
+        });
+
+        const closeOthersBtn = document.getElementById('close-others-btn');
+        if (closeOthersBtn) {
+            closeOthersBtn.style.display = sessions.length > 1 ? 'block' : 'none';
+        }
 
         if (sessions.length === 0) {
             container.innerHTML = '<div style="text-align: center; color: var(--text-muted);">No hay sesiones activas.</div>';
@@ -348,17 +471,17 @@
 
         let html = '';
         sessions.forEach(s => {
-            const isCurrent = s.sessionId === res.data.current_session_id; // Backend should return this or we infer
-            // Actually, backend profile endpoint returns sessions list. We need to know which one is current.
-            // Assuming the token used matches one of them. For now, we list them all.
-
+            const isCurrent = s.sessionId === currentSessionId;
             html += `
                 <div style="border-bottom: 1px solid var(--border); padding: 15px 0; display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <div style="font-weight: 500;">${s.userAgent || 'Dispositivo desconocido'}</div>
+                        <div style="font-weight: 500;">
+                            ${s.userAgent || 'Dispositivo desconocido'}
+                            ${isCurrent ? '<span class="badge badge-success" style="margin-left: 10px; font-size: 0.7rem;">Actual</span>' : ''}
+                        </div>
                         <div style="font-size: 0.85rem; color: var(--text-muted);">
-                            IP: ${s.ipAddress} <span style="margin: 0 5px;">•</span> 
-                            Creada: ${s.creationDate}
+                            ${s.ipAddress} <span style="margin: 0 5px;">•</span> 
+                            ${s.creationDate}
                         </div>
                     </div>
                     <button onclick="closeSession(${s.sessionId})" style="color: #ef4444; background: none; border: none; cursor: pointer; font-size: 0.9rem;">Cerrar Sesión</button>
@@ -368,25 +491,129 @@
         container.innerHTML = html;
     }
 
-    async function closeSession(sessionId) {
-        if (!confirm('¿Estás seguro de cerrar esta sesión?')) return;
+    let pendingSessionId = null;
+    let isClosingOthers = false;
 
-        const res = await apiCall(`/api/v1/master/auth/sessions/close/${sessionId}`, 'PUT');
-        if (res.success) {
+    function openConfirmSessionModal(sessionId, isOthers = false) {
+        pendingSessionId = sessionId;
+        isClosingOthers = isOthers;
+        const title = document.getElementById('modalSessionTitle');
+        const text = document.getElementById('modalSessionText');
+        const confirmBtn = document.getElementById('modalSessionConfirmBtn');
+
+        if (isOthers) {
+            title.innerText = 'Cerrar otras sesiones';
+            text.innerText = '¿Estás seguro de cerrar TODAS las otras sesiones excepto esta?';
+            confirmBtn.innerText = 'Cerrar Todas';
+            confirmBtn.onclick = confirmCloseOtherSessions;
+        } else {
+            title.innerText = 'Cerrar sesión';
+            text.innerText = '¿Estás seguro de cerrar esta sesión?';
+            confirmBtn.innerText = 'Cerrar Sesión';
+            confirmBtn.onclick = confirmCloseSession;
+        }
+        document.getElementById('modalConfirmSession').style.display = 'flex';
+    }
+
+    function closeConfirmSessionModal() {
+        document.getElementById('modalConfirmSession').style.display = 'none';
+    }
+
+    async function confirmCloseSession() {
+        if (!pendingSessionId) return;
+        const res = await apiCall(`/api/v1/master/auth/sessions/close/${pendingSessionId}`, 'PUT');
+        if (res && res.success && pendingSessionId === currentSessionId) {
+            localStorage.removeItem('access_token');
+            window.location.href = '/dashboard/login';
+            return;
+        }
+        closeConfirmSessionModal();
+        if (res && res.success) {
             loadSessions();
         } else {
-            alert('Error al cerrar sesión');
+            alert('Error al cerrar sesión: ' + (res.error || res.msg || 'Desconocido'));
         }
     }
 
-    // Preferences - Placeholder for now
-    function savePreferences() {
-        alert('Funcionalidad de guardar preferencias en desarrollo.');
+    async function confirmCloseOtherSessions() {
+        if (!currentSessionId) return;
+        const res = await apiCall(`/api/v1/master/auth/sessions/close_others/${currentSessionId}`, 'PUT');
+        closeConfirmSessionModal();
+        if (res && res.success) {
+            loadSessions();
+        } else {
+            alert('Error al cerrar sesiones: ' + (res.error || res.msg || 'Desconocido'));
+        }
     }
 
-    // Initial Load if page accessed directly with hash
+    function closeSession(sessionId) {
+        openConfirmSessionModal(sessionId, false);
+    }
+
+    function closeOtherSessions() {
+        if (!currentSessionId) return;
+        openConfirmSessionModal(currentSessionId, true);
+    }
+
+    async function loadPreferences() {
+        const res = await apiCall('/api/v1/master/auth/profile');
+        if (!res || !res.success) return;
+        const prefs = res.data.preferences || {};
+        if (document.getElementById('pref-language')) document.getElementById('pref-language').value = prefs.language || 'es';
+        if (document.getElementById('pref-hourFormat')) document.getElementById('pref-hourFormat').value = prefs.hourFormat || '24';
+        if (document.getElementById('pref-dateFormat')) document.getElementById('pref-dateFormat').value = prefs.dateFormat || 'DD-MM-YYYY';
+        if (document.getElementById('pref-timezone')) document.getElementById('pref-timezone').value = prefs.timezone || 'UTC';
+        const notifPrefs = prefs.notifications || {};
+        if (document.getElementById('notif-email')) document.getElementById('notif-email').checked = notifPrefs.email !== false;
+        if (document.getElementById('notif-login')) document.getElementById('notif-login').checked = notifPrefs.login !== false;
+    }
+
+    async function savePreferences() {
+        console.log('Iniciando savePreferences...');
+        const data = {
+            language: document.getElementById('pref-language').value,
+            hourFormat: document.getElementById('pref-hourFormat').value,
+            dateFormat: document.getElementById('pref-dateFormat').value,
+            timezone: document.getElementById('pref-timezone').value,
+            notifications: {
+                email: document.getElementById('notif-email') ? document.getElementById('notif-email').checked : true,
+                login: document.getElementById('notif-login') ? document.getElementById('notif-login').checked : true
+            }
+        };
+
+        console.log('Datos a enviar:', data);
+        const res = await apiCall('/api/v1/master/auth/profile/preferences', 'PUT', data);
+        console.log('Respuesta backend:', res);
+
+        if (res && res.success) {
+            console.log('Éxito detectado, mostrando modal...');
+            showSuccessModal('Preferencias guardadas correctamente.');
+        } else {
+            console.error('Error en respuesta:', res);
+            alert('Error al guardar preferencias: ' + (res?.error || res?.msg || 'Desconocido'));
+        }
+    }
+
+    function showSuccessModal(message) {
+        console.log('showSuccessModal llamado con:', message);
+        const modal = document.getElementById('modalSuccess');
+        const msgEl = document.getElementById('modalSuccessMessage');
+        if (modal && msgEl) {
+            msgEl.innerText = message;
+            modal.style.display = 'flex';
+            console.log('Modal success mostrado (flex)');
+        } else {
+            console.error('No se encontraron los elementos del modal success');
+            alert(message);
+        }
+    }
+
+    function closeSuccessModal() {
+        document.getElementById('modalSuccess').style.display = 'none';
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-        // Optional: check hash in URL to switch tab
+        loadPreferences();
     });
 
 </script>

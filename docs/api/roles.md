@@ -3,6 +3,7 @@
 ## GET /api/v1/core/roles/
 
 **Requiere Autenticación**: Sí
+**Permiso Requerido**: SC_ROLES_MASTER:CONSULTAR
 
 **Descripción**: Obtiene el listado de roles.
 
@@ -28,6 +29,7 @@ Devuelve una respuesta JSON con la lista de roles.
 ## POST /api/v1/core/roles/
 
 **Requiere Autenticación**: Sí
+**Permiso Requerido**: SC_ROLES_MASTER:CREAR
 
 **Descripción**: Crea un nuevo rol.
 
@@ -56,6 +58,7 @@ Devuelve una respuesta JSON con el rol creado.
 ## DELETE /api/v1/core/roles/<int:role_id>
 
 **Requiere Autenticación**: Sí
+**Permiso Requerido**: SC_ROLES_MASTER:ELIMINAR
 
 **Descripción**: Elimina un rol existente.
 

@@ -1,5 +1,5 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import track_activity, require_role
+from app import track_activity, require_role, require_permission
 from app.services.master_scheme.documents_service import export_client_data
 from app.services.master_scheme.client_service import (get_client_preferences, get_client_logs, get_logs_by_entity,
                                                        onboard_client_service, storage_info, 
@@ -182,6 +182,7 @@ def change_plan():
 @jwt_required()
 @track_activity
 @require_role([r.ROOT])
+@require_permission("SC_CLIENTES", "CONSULTAR")
 def get_client(clientId):
     data = get_client_by_id(clientId=clientId)
     if not data:
@@ -194,6 +195,7 @@ def get_client(clientId):
 @jwt_required()
 @track_activity
 @require_role([r.ROOT])
+@require_permission("SC_CLIENTES", "CONSULTAR")
 def get_all_clients():
     data = get_clients()
     return success(data=[d.to_dict() for d in data])
@@ -203,6 +205,7 @@ def get_all_clients():
 @jwt_required()
 @track_activity
 @require_role([r.ROOT])
+@require_permission("SC_CLIENTES", "CREAR")
 def new_cliente():
     data = request.get_json()
 
@@ -346,6 +349,7 @@ def trigger_cleanup():
 @jwt_required()
 @track_activity
 @require_role([r.ROOT, r.SYS_ADMIN])
+@require_permission("SC_CLIENTES", "EDITAR")
 def update_client(clientId):
     try:
         data = request.get_json()
@@ -359,6 +363,7 @@ def update_client(clientId):
 @jwt_required()
 @track_activity
 @require_role([r.ROOT, r.SYS_ADMIN])
+@require_permission("SC_CLIENTES", "EDITAR")
 def toggle_client_status(clientId):
     try:
         data = request.get_json()

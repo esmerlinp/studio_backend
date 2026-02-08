@@ -1,8 +1,10 @@
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required
 from app.services.client_scheme.subject_area_list_service import get_subject_areas
+from app import require_permission
 
 @jwt_required()
+@require_permission("SC_AREAS_TEMATICAS", "CONSULTAR")
 def get_all():
     """
     Get all subject areas.

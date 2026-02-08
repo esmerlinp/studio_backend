@@ -1,15 +1,22 @@
 from flask import request
 from app.services.master_scheme import functionality_service
 from app.utils.responses import success, error
-from app import limiter, audit_log
+from app import limiter, audit_log, require_role, require_permission
+from flask_jwt_extended import jwt_required
 from app.utils import i18n
 
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_FUNCIONALIDADES", "CONSULTAR")
 @limiter.limit("60 per minute")
 def get_functionalities():
     active_only = request.args.get('active_only', 'false').lower() == 'true'
     funcs = functionality_service.get_functionalities(active_only=active_only)
     return success(data=[f.to_dict() for f in funcs])
 
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_FUNCIONALIDADES", "CONSULTAR")
 @limiter.limit("60 per minute")
 def get_functionality(func_id):
     func = functionality_service.get_functionality_by_id(func_id)
@@ -17,6 +24,9 @@ def get_functionality(func_id):
         return error(i18n._("error.functionality_not_found"), 404)
     return success(data=func.to_dict())
 
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_FUNCIONALIDADES", "CREAR")
 @audit_log(action="create", resource_type="functionality")
 def create_functionality():
     data = request.get_json()
@@ -31,6 +41,9 @@ def create_functionality():
     except Exception as e:
         return error(str(e), 500)
 
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_FUNCIONALIDADES", "EDITAR")
 @audit_log(action="update", resource_type="functionality", resource_id_arg="func_id")
 def update_functionality(func_id):
     data = request.get_json()
@@ -48,6 +61,9 @@ def update_functionality(func_id):
     except Exception as e:
         return error(str(e), 500)
 
+@jwt_required()
+@require_role(["ROOT", "SYS_ADMIN", "OWNER"])
+@require_permission("SC_FUNCIONALIDADES", "ELIMINAR")
 @audit_log(action="delete", resource_type="functionality", resource_id_arg="func_id")
 def delete_functionality(func_id):
     if functionality_service.delete_functionality(func_id):

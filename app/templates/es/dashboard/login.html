@@ -186,6 +186,11 @@
                     <input type="password" id="password" required autocomplete="current-password"
                         placeholder="••••••••">
                 </div>
+                <div class="form-group" id="otp-group" style="display: none;">
+                    <label>Código 2FA</label>
+                    <input type="text" id="otp" autocomplete="one-time-code" placeholder="000 000" maxlength="6"
+                        style="text-align: center; letter-spacing: 0.25rem;">
+                </div>
                 <button type="submit" id="submit-btn">
                     <span>Iniciar Sesión</span>
                     <div class="spinner" id="spinner"></div>
@@ -207,25 +212,53 @@
             btn.disabled = true;
             spinner.style.display = 'block';
 
+            const payload = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+
+            const otpInput = document.getElementById('otp');
+            if (otpInput.value) {
+                payload.otp = otpInput.value;
+            }
+
             try {
                 const res = await fetch('/api/v1/master/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: document.getElementById('username').value,
-                        password: document.getElementById('password').value
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await res.json();
 
-                if (res.ok) {
+                if (res.status === 202) { // 2FA Required
+                    document.getElementById('otp-group').style.display = 'block';
+                    document.getElementById('username').readOnly = true;
+                    document.getElementById('password').readOnly = true;
+                    btn.querySelector('span').innerText = 'Verificar';
+                    document.getElementById('otp').focus();
+
+                    // Optional: Show message
+                    errorMsg.innerText = "Ingresa el código de 2FA";
+                    errorMsg.style.color = "var(--primary)";
+                    errorMsg.style.background = "#e0e7ff";
+                    errorMsg.style.borderColor = "#c7d2fe";
+                    errorMsg.style.display = 'block';
+
+                } else if (res.ok) {
+                    if (data.data && data.data.accessToken) {
+                        localStorage.setItem('access_token', data.data.accessToken);
+                    }
                     window.location.href = '/dashboard';
                 } else {
-                    errorMsg.innerText = data.message || 'Error al iniciar sesión';
+                    errorMsg.innerText = data.msg || data.message || 'Error al iniciar sesión';
+                    errorMsg.style.color = "var(--error)";
+                    errorMsg.style.background = "#fef2f2";
+                    errorMsg.style.borderColor = "#fee2e2";
                     errorMsg.style.display = 'block';
                 }
             } catch (err) {
+                console.error(err);
                 errorMsg.innerText = 'Error de conexión';
                 errorMsg.style.display = 'block';
             } finally {

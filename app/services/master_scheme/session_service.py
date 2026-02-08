@@ -87,8 +87,13 @@ from typing import List, Optional
 #            resource_type=ResourceTypes.USER_SESSION,
 #            resource_id_arg="user_id", description="consultar sessiones abiertas por id usuario")
 def get_open_sessions(user_id: int) -> List[Optional[Session]]:
+    now = datetime.now(timezone.utc)
     #rows = db.fetch_data("SELECT * FROM usuariossesiones where bactivo = TRUE AND idusuario = %s", (int(user_id), ))
-    sessions = Session.query.filter_by(userId=int(user_id), isActive=True).all()
+    sessions = Session.query.filter(
+        Session.userId == int(user_id),
+        Session.isActive == True,
+        Session.expirationDate > now
+    ).all()
     return sessions
 
 # @audit_log(action=ActionType.UPDATE,

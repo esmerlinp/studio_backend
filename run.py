@@ -474,31 +474,37 @@ def client_configuration():
 
 @app.route("/client/config/cycles")
 @jwt_required()
+@require_permission("SC_CICLOS", "CONSULTAR")
 def client_config_cycles():
     return render_template("es/client/cycles.html", active_page='cycles')
 
 @app.route("/client/config/levels")
 @jwt_required()
+@require_permission("SC_NIVELES", "CONSULTAR")
 def client_config_levels():
     return render_template("es/client/configuration/levels.html", active_page='levels')
 
 @app.route("/client/config/courses")
 @jwt_required()
+@require_permission("SC_CURSOS", "CONSULTAR")
 def client_config_courses():
     return render_template("es/client/configuration/courses.html", active_page='courses')
 
 @app.route("/client/config/subject-areas")
 @jwt_required()
+@require_permission("SC_AREAS_TEMATICAS", "CONSULTAR")
 def client_config_subject_areas():
     return render_template("es/client/configuration/subject_areas.html", active_page='subject_areas')
 
 @app.route("/client/config/partials")
 @jwt_required()
+@require_permission("SC_PARCIALES", "CONSULTAR")
 def client_config_partials():
     return render_template("es/client/configuration/partials.html", active_page='partials')
 
 @app.route("/client/config/schedule-blocks")
 @jwt_required()
+@require_permission("SC_BLOQUES_DE_HORARIOS", "CONSULTAR")
 def client_config_schedule_blocks():
     return render_template("es/client/configuration/schedule_blocks.html", active_page='schedule_blocks')
 

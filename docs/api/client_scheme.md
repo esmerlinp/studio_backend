@@ -393,6 +393,7 @@ Devuelve un objeto JSON que contiene la lista y los metadatos de paginación.
 ### GET /api/v1/client/courses-list/
 
 **Requiere Autenticación**: Sí
+**Permiso Requerido**: SC_CURSOS:CONSULTAR
 
 **Descripción**: Obtiene el listado de cursos.
 
@@ -714,6 +715,7 @@ Devuelve un objeto JSON que contiene la lista y los metadatos de paginación.
 ### GET /api/v1/client/levels-list/
 
 **Requiere Autenticación**: Sí
+**Permiso Requerido**: SC_NIVELES:CONSULTAR
 
 **Descripción**: Obtiene el listado de niveles.
 
@@ -742,6 +744,7 @@ Devuelve un objeto JSON que contiene la lista y los metadatos de paginación.
 ### GET /api/v1/client/partials-list/
 
 **Requiere Autenticación**: Sí
+**Permiso Requerido**: SC_PARCIALES:CONSULTAR
 
 **Descripción**: Obtiene el listado de parciales.
 
@@ -1172,6 +1175,7 @@ Devuelve un objeto JSON que contiene la lista y los metadatos de paginación.
 ### GET /api/v1/client/subject-areas/
 
 **Requiere Autenticación**: Sí
+**Permiso Requerido**: SC_AREAS_TEMATICAS:CONSULTAR
 
 **Descripción**: Obtiene el listado de áreas temáticas.
 

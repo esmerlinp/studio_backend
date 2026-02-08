@@ -2,7 +2,7 @@ from flask import  request, jsonify, g
 from app.extensions import db
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token, set_access_cookies, set_refresh_cookies, unset_jwt_cookies
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from app.services.master_scheme.user_service import get_user_by_user_name_with_passwd, get_user_by_id, get_user_preferences, add_default_user_preferences
 from app.services.master_scheme.session_service import close_session, create_session, get_session_active_by_refresh_token, get_open_sessions
 from app.utils.responses import success, error
@@ -139,6 +139,7 @@ def login():
             "hourFormat": preferences.preferences.get("hourFormat", 24),
             "timezone": preferences.preferences.get("timezone", "UTC"),
             "dateFormat": preferences.preferences.get("dateFormat", "DD-MM-YYYY"),
+            "sessionId": session_create.sessionId
         }
     )
 
@@ -153,18 +154,20 @@ def login():
                 data={"access_token":access_token},
                 redirect_url=f"/billing/restore?clientId={clientId}&token={access_token}", 
                 status_code=403)               
+    # Validar preferencia de notificaciones
+    login_notifications = preferences.preferences.get("notifications", {}).get("login", True)
 
-    #TODO: Comentado por pruebas
-    # send_email_template(subject=i18n._("email.subject.login_notification"), 
-    #                     to=[user.email], 
-    #                     path_template=f"emails/{lang}/notification_login.html",
-    #                     app_name=app_name,
-    #                     nombre_usuario=user.firstName,
-    #                     ip_address=session_create.ipAddress,
-    #                     dispositivo=session_create.userAgent,
-    #                     fecha_hora=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
-    #                     email_usuario=user.email
-    #                     )
+    if login_notifications:
+        send_email_template(subject=i18n._("email.subject.login_notification"), 
+                            to=[user.email], 
+                            path_template=f"emails/{lang}/notification_login.html",
+                            app_name=app_name,
+                            nombre_usuario=user.firstName,
+                            ip_address=session_create.ipAddress,
+                            dispositivo=session_create.userAgent,
+                            fecha_hora=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+                            email_usuario=user.email
+                            )
     
     log_action(action=ActionType.LOGIN, resource_type=ResourceTypes.USER_SESSION,
                 resource_id=user.userId, description="Login successful", user_id=user.userId)
@@ -275,7 +278,7 @@ def disable_2fa(user_id, token):
     
     return success(data=None, message="2FA Disabled Successfully", status_code=200)
 
-def get_user_profile_data(user_id):
+def get_user_profile_data(user_id, current_session_id=None):
     user = get_user_by_id(user_id)
     if not user:
         return error("User not found", 404)
@@ -287,5 +290,31 @@ def get_user_profile_data(user_id):
     data['otp_enabled'] = user.otp_enabled
     data['preferences'] = preferences.preferences if preferences else {}
     data['sessions'] = [s.to_dict() for s in sessions]
+    if current_session_id:
+        data['sessionId'] = current_session_id
     
     return success(data=data, message="Profile data retrieved", status_code=200)
+
+def update_user_preferences(user_id, preferences_data):
+    user = get_user_by_id(user_id)
+    if not user:
+        return error("User not found", 404)
+        
+    preferences = get_user_preferences(user_id)
+    if not preferences:
+        preferences = add_default_user_preferences(user_id)
+        
+    # Update preferences JSON
+    if preferences.preferences is None:
+        current_prefs = {}
+    else:
+        current_prefs = dict(preferences.preferences)
+        
+    current_prefs.update(preferences_data)
+    
+    preferences.preferences = current_prefs
+    preferences.updatedAt = datetime.now(timezone.utc)
+    
+    db.session.commit()
+    
+    return success(data=current_prefs, message="Preferences updated successfully", status_code=200)
