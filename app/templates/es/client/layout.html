@@ -156,6 +156,96 @@
             opacity: 0;
         }
 
+        /* Module Switcher Styles */
+        .module-switcher {
+            padding: 0 16px 16px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #e6ebf1;
+        }
+
+        .module-selector {
+            width: 100%;
+            padding: 10px 12px;
+            background: #f6f9fc;
+            border: 1px solid #e6ebf1;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--stripe-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .module-selector:hover {
+            border-color: var(--stripe-indigo);
+            background: #ffffff;
+        }
+
+        .sidebar.collapsed .module-switcher {
+            padding: 0 12px 16px;
+        }
+
+        .sidebar.collapsed .module-selector span,
+        .sidebar.collapsed .module-selector i:last-child {
+            display: none;
+        }
+
+        .module-dropdown {
+            position: relative;
+        }
+
+        .module-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 220px;
+            background: #ffffff;
+            border: 1px solid #e6ebf1;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin-top: 8px;
+            padding: 8px;
+            display: none;
+            z-index: 1100;
+        }
+
+        .module-menu.show {
+            display: block;
+        }
+
+        .module-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            text-decoration: none;
+            color: var(--stripe-slate);
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .module-item:hover {
+            background: var(--stripe-indigo-soft);
+            color: var(--stripe-indigo);
+        }
+
+        .module-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .module-item.active {
+            color: var(--stripe-indigo);
+            background: var(--stripe-indigo-soft);
+        }
+
         /* Main Content */
         .main-wrapper {
             flex: 1;
@@ -266,102 +356,58 @@
             <span class="logo-text">Akdmia</span>
         </div>
 
-        <nav class="sidebar-nav">
-            <div class="nav-group">
-                <div class="nav-label">Admisiones</div>
-                <a href="/client/admissions" class="nav-link {% if active_page == 'admissions' %}active{% endif %}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                        </path>
-                    </svg>
-                    <span>Solicitudes</span>
-                </a>
+        <!-- Module Switcher -->
+        <div class="module-switcher">
+            <div class="module-dropdown">
+                <div class="module-selector" id="moduleSelector">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i
+                            class="fas {% if active_module == 'academic' %}fa-graduation-cap text-indigo{% elif active_module == 'finance' %}fa-wallet{% elif active_module == 'health' %}fa-heartbeat{% elif active_module == 'parents' %}fa-users{% elif active_module == 'cafeteria' %}fa-utensils{% else %}fa-th-large{% endif %}"></i>
+                        <span>
+                            {% if active_module == 'academic' %}Académico
+                            {% elif active_module == 'finance' %}Financiero
+                            {% elif active_module == 'health' %}Enfermería
+                            {% elif active_module == 'parents' %}Padres
+                            {% elif active_module == 'cafeteria' %}Cafetería
+                            {% else %}Módulos{% endif %}
+                        </span>
+                    </div>
+                    <i class="fas fa-chevron-down" style="font-size: 10px; opacity: 0.5;"></i>
+                </div>
+                <div class="module-menu" id="moduleMenu">
+                    <div
+                        style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--stripe-light); padding: 4px 12px 8px;">
+                        Cambiar Módulo</div>
+                    <a href="/client/dashboard"
+                        class="module-item {% if active_module == 'academic' %}active{% endif %}">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Académico</span>
+                    </a>
+                    <a href="/client/financial"
+                        class="module-item {% if active_module == 'finance' %}active{% endif %}">
+                        <i class="fas fa-wallet"></i>
+                        <span>Financiero</span>
+                    </a>
+                    <a href="/client/health" class="module-item {% if active_module == 'health' %}active{% endif %}">
+                        <i class="fas fa-heartbeat"></i>
+                        <span>Enfermería</span>
+                    </a>
+                    <a href="/client/parents" class="module-item {% if active_module == 'parents' %}active{% endif %}">
+                        <i class="fas fa-users"></i>
+                        <span>Padres</span>
+                    </a>
+                    <a href="/client/cafeteria"
+                        class="module-item {% if active_module == 'cafeteria' %}active{% endif %}">
+                        <i class="fas fa-utensils"></i>
+                        <span>Cafetería</span>
+                    </a>
+                </div>
             </div>
+        </div>
 
-            <div class="nav-group">
-                <div class="nav-label">Estudiantes</div>
-                <a href="/client/students" class="nav-link {% if active_page == 'students' %}active{% endif %}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                        </path>
-                    </svg>
-                    <span>Expedientes</span>
-                </a>
-                <a href="/client/attendance" class="nav-link">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                        </path>
-                    </svg>
-                    <span>Asistencia</span>
-                </a>
-                <a href="/client/grades" class="nav-link {% if active_page == 'grades' %}active{% endif %}">
-                    <i class="fas fa-edit" style="width: 20px; font-size: 16px;"></i>
-                    <span>Digitación de Notas</span>
-                </a>
-                <a href="/client/classroom-assignment"
-                    class="nav-link {% if active_page == 'classroom_assignment' %}active{% endif %}">
-                    <i class="fas fa-chalkboard-teacher" style="width: 20px; font-size: 16px;"></i>
-                    <span>Asignación de Aulas</span>
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">Configuración</div>
-                <a href="/client/config/cycles" class="nav-link {% if active_page == 'cycles' %}active{% endif %}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                        </path>
-                    </svg>
-                    <span>Ciclos Escolares</span>
-                </a>
-                <a href="/client/config/levels" class="nav-link {% if active_page == 'levels' %}active{% endif %}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                        </path>
-                    </svg>
-                    <span>Niveles</span>
-                </a>
-                <a href="/client/config/courses" class="nav-link {% if active_page == 'courses' %}active{% endif %}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                        </path>
-                    </svg>
-                    <span>Cursos</span>
-                </a>
-                <a href="/client/config/subject-areas"
-                    class="nav-link {% if active_page == 'subject_areas' %}active{% endif %}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                        </path>
-                    </svg>
-                    <span>Areas Temáticas</span>
-                </a>
-                <a href="/client/config/partials" class="nav-link {% if active_page == 'partials' %}active{% endif %}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
-                        </path>
-                    </svg>
-                    <span>Parciales</span>
-                </a>
-                <a href="/client/config/schedule-blocks"
-                    class="nav-link {% if active_page == 'schedule_blocks' %}active{% endif %}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
-                        </path>
-                    </svg>
-                    <span>Bloques de Horario</span>
-                </a>
-            </div>
-        </nav>
+        {% if active_module %}
+        {% include 'es/client/' + active_module + '/_sidebar.html' %}
+        {% endif %}
     </aside>
 
     <!-- Main Content -->
@@ -402,6 +448,8 @@
     <script>
         const sidebar = document.getElementById('sidebar');
         const toggleBtn = document.getElementById('toggle-sidebar');
+        const moduleSelector = document.getElementById('moduleSelector');
+        const moduleMenu = document.getElementById('moduleMenu');
 
         toggleBtn.addEventListener('click', () => {
             if (window.innerWidth > 991) {
@@ -410,6 +458,16 @@
             } else {
                 sidebar.classList.toggle('active');
             }
+        });
+
+        // Module Switcher toggle
+        moduleSelector.addEventListener('click', (e) => {
+            e.stopPropagation();
+            moduleMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', () => {
+            moduleMenu.classList.remove('show');
         });
 
         // Initialize state

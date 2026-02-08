@@ -460,98 +460,118 @@ def dashboard_create_client():
 @app.route("/client/dashboard")
 @jwt_required()
 def client_dashboard():
-    return render_template("es/client/dashboard.html", active_page='dashboard')
+    return render_template("es/client/academic/dashboard.html", active_page='dashboard', active_module='academic')
 
 @app.route("/client/profile")
 @jwt_required()
 def client_profile():
-    return render_template("es/client/user_profile.html")
+    return render_template("es/client/shared/user_profile.html", active_module='academic')
 
 @app.route("/client/configuration")
 @jwt_required()
 def client_configuration():
-    return render_template("es/client/configuration/index.html")
+    return render_template("es/client/academic/configuration/index.html", active_module='academic')
 
 @app.route("/client/config/cycles")
 @jwt_required()
 @require_permission("SC_CICLOS", "CONSULTAR")
 def client_config_cycles():
-    return render_template("es/client/cycles.html", active_page='cycles')
+    return render_template("es/client/academic/cycles.html", active_page='cycles', active_module='academic')
 
 @app.route("/client/config/levels")
 @jwt_required()
 @require_permission("SC_NIVELES", "CONSULTAR")
 def client_config_levels():
-    return render_template("es/client/configuration/levels.html", active_page='levels')
+    return render_template("es/client/academic/configuration/levels.html", active_page='levels', active_module='academic')
 
 @app.route("/client/config/courses")
 @jwt_required()
 @require_permission("SC_CURSOS", "CONSULTAR")
 def client_config_courses():
-    return render_template("es/client/configuration/courses.html", active_page='courses')
+    return render_template("es/client/academic/configuration/courses.html", active_page='courses', active_module='academic')
 
 @app.route("/client/config/subject-areas")
 @jwt_required()
 @require_permission("SC_AREAS_TEMATICAS", "CONSULTAR")
 def client_config_subject_areas():
-    return render_template("es/client/configuration/subject_areas.html", active_page='subject_areas')
+    return render_template("es/client/academic/configuration/subject_areas.html", active_page='subject_areas', active_module='academic')
 
 @app.route("/client/config/partials")
 @jwt_required()
 @require_permission("SC_PARCIALES", "CONSULTAR")
 def client_config_partials():
-    return render_template("es/client/configuration/partials.html", active_page='partials')
+    return render_template("es/client/academic/configuration/partials.html", active_page='partials', active_module='academic')
 
 @app.route("/client/config/schedule-blocks")
 @jwt_required()
 @require_permission("SC_BLOQUES_DE_HORARIOS", "CONSULTAR")
 def client_config_schedule_blocks():
-    return render_template("es/client/configuration/schedule_blocks.html", active_page='schedule_blocks')
+    return render_template("es/client/academic/configuration/schedule_blocks.html", active_page='schedule_blocks', active_module='academic')
 
 @app.route("/client/configuration/payments")
 @jwt_required()
 def client_payments():
-    return render_template("es/client/configuration/payments.html")
+    return render_template("es/client/academic/configuration/payments.html", active_module='academic')
 
 @app.route("/client/admissions/inscriptions")
 @jwt_required()
 def client_inscriptions():
-    return render_template("es/client/admissions/inscriptions.html")
+    return render_template("es/client/academic/admissions/inscriptions.html", active_module='academic')
 
 @app.route("/client/students")
 @jwt_required()
 def client_students():
-    return render_template("es/client/students/list.html")
+    return render_template("es/client/academic/students/list.html", active_module='academic')
 
 @app.route("/client/students/<int:id>")
 @jwt_required()
 def client_student_detail(id):
-    return render_template("es/client/students/detail.html", student_id=id)
+    return render_template("es/client/academic/students/detail.html", student_id=id, active_module='academic')
 
 @app.route("/client/students/create")
 @jwt_required()
 def client_student_create():
-    return render_template("es/client/students/detail.html", student_id=None)
+    return render_template("es/client/academic/students/detail.html", student_id=None, active_module='academic')
 
 @app.route("/client/admissions")
 @jwt_required()
 def client_admissions():
-    return render_template("es/client/admissions.html", active_page='admissions')
+    return render_template("es/client/academic/admissions.html", active_page='admissions', active_module='academic')
 
 @app.route("/client/attendance")
 @jwt_required()
 def client_attendance():
-    return render_template("es/client/attendance.html", active_page='attendance')
+    return render_template("es/client/academic/attendance.html", active_page='attendance', active_module='academic')
 
 @app.route("/client/grades")
 @jwt_required()
 def client_grades():
-    return render_template("es/client/grades.html", active_page='grades')
+    return render_template("es/client/academic/grades.html", active_page='grades', active_module='academic')
 
 @app.route("/client/classroom-assignment")
 @jwt_required()
 def client_classroom_assignment():
-    return render_template("es/client/classroom_assignment.html", active_page='classroom_assignment')
+    return render_template("es/client/academic/classroom_assignment.html", active_page='classroom_assignment', active_module='academic')
+
+@app.route("/client/financial")
+@jwt_required()
+def client_financial():
+    return render_template("es/client/financial/dashboard.html", active_module='finance')
+
+@app.route("/client/health")
+@jwt_required()
+def client_health():
+    return render_template("es/client/health/dashboard.html", active_module='health')
+
+@app.route("/client/parents")
+@jwt_required()
+def client_parents():
+    return render_template("es/client/parents/dashboard.html", active_module='parents')
+
+@app.route("/client/cafeteria")
+@jwt_required()
+def client_cafeteria():
+    return render_template("es/client/cafeteria/dashboard.html", active_module='cafeteria')
 
 @app.route("/dashboard/plans")
 @jwt_required()
