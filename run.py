@@ -75,6 +75,7 @@ from app.api.v1.client_scheme.school_payments.routes import school_payments_bp
 from app.api.v1.client_scheme.sub_cycle_course_competencies.routes import sub_cycle_course_competencies_bp
 from app.api.v1.client_scheme.classrooms.routes import classrooms_bp
 from app.api.v1.client_scheme.payments.routes import payments_bp
+from app.api.v1.client_scheme.admissions.routes import admissions_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role, require_permission
 from app.utils import i18n
@@ -161,6 +162,7 @@ app.register_blueprint(child_discounts_bp)
 app.register_blueprint(students_bp)
 app.register_blueprint(payments_bp)
 app.register_blueprint(requests_bp)
+app.register_blueprint(admissions_bp)
 app.register_blueprint(evaluation_requests_bp)
 app.register_blueprint(formulas_bp)
 app.register_blueprint(payment_frequencies_bp)
@@ -190,6 +192,9 @@ MASTER_PUBLIC_ENDPOINTS = {
     "health",
     "client_form",
     "main_page",
+    "public_apply_view",
+    "public_catalogs",
+    "public_submit",
     "restore",
     "auth.login",
     "login",

@@ -566,6 +566,27 @@
         </div>
     </div>
 
+    <!-- Section: Documents -->
+    <div class="section-card">
+        <div class="section-header">
+            <i class="fas fa-file-alt" style="color: var(--stripe-indigo);"></i>
+            <span class="section-title">Documentos</span>
+            <button class="btn btn-sm" onclick="document.getElementById('documentUpload').click()"
+                style="margin-left: auto; padding: 6px 16px; font-size: 13px; background: var(--stripe-indigo); color: white; border: none; border-radius: 6px; cursor: pointer;">
+                <i class="fas fa-upload"></i> Subir Documento
+            </button>
+            <input type="file" id="documentUpload" style="display: none;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+        </div>
+        <div class="section-body">
+            <div id="documentsList" style="min-height: 100px;">
+                <p style="text-align: center; color: var(--stripe-light); padding: 40px 0;">
+                    <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 12px; display: block;"></i>
+                    Cargando documentos...
+                </p>
+            </div>
+        </div>
+    </div>
+
     <div class="footer"
         style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 40px; padding-top: 24px; border-top: 1px solid #e6ebf1;">
         <button class="btn btn-secondary" onclick="window.location.href='/client/students'">Cancelar</button>

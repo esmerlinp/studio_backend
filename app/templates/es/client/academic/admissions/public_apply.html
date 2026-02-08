@@ -1,0 +1,26 @@
+{% extends "es/client/academic/admissions/public_layout.html" %}
+
+{% block title %}Solicitud de Admisión | Akdmia{% endblock %}
+
+{% block content %}
+{% include "es/client/academic/admissions/form_base.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const IS_PUBLIC = true;
+    const CLIENT_UUID = '{{ client_uuid }}';
+    // Specific logic for public apply
+    console.log('Public Admission Apply loaded');
+
+    // In public mode, we might want to hide internal-only actions
+    document.addEventListener('DOMContentLoaded', () => {
+        const internalActions = document.getElementById('internalActions');
+        if (internalActions) internalActions.style.display = 'none';
+
+        // Disable "Associate Family" button if it exists outside the group
+        const btnAssociateFamily = document.getElementById('btnAssociateFamily');
+        if (btnAssociateFamily) btnAssociateFamily.style.display = 'none';
+    });
+</script>
+{% endblock %}

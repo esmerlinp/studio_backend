@@ -1,0 +1,1076 @@
+<!-- Shared Admission Form Base -->
+<style>
+    :root {
+        --stripe-indigo: #635bff;
+        --stripe-dark: #0a2540;
+        --stripe-slate: #425466;
+        --stripe-light: #727f96;
+        --section-header-bg: #f8fafc;
+        --section-border: #e2e8f0;
+        --akdmia-bg: #fff5f8;
+        /* Light pinkish background from Figma */
+    }
+
+    .form-container {
+        padding: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: var(--akdmia-bg);
+        border-radius: 16px;
+    }
+
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        position: sticky;
+        top: 0;
+        background: var(--akdmia-bg);
+        z-index: 100;
+        padding: 10px 0;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn {
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-save {
+        background: var(--stripe-indigo);
+        color: white;
+    }
+
+    .btn-save:hover {
+        background: #5851f2;
+    }
+
+    .btn-cancel {
+        background: #ff5a5f;
+        color: white;
+    }
+
+    .btn-cancel:hover {
+        background: #e04a4f;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--section-border);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .section-header {
+        padding: 12px 20px;
+        background: white;
+        border-bottom: 1px solid var(--section-border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .section-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--stripe-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .section-body {
+        padding: 20px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--stripe-slate);
+    }
+
+    input,
+    select,
+    textarea {
+        padding: 10px 12px;
+        border: 1px solid #e1e7ef;
+        border-radius: 8px;
+        font-size: 14px;
+        color: var(--stripe-dark);
+        background: white;
+    }
+
+    input:focus,
+    select:focus {
+        outline: none;
+        border-color: var(--stripe-indigo);
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.1);
+    }
+
+    input[readonly] {
+        background-color: #f1f5f9 !important;
+        cursor: not-allowed;
+    }
+
+    .info-box {
+        background: #fff9c4;
+        padding: 16px;
+        border-radius: 8px;
+        border: 0;
+        font-size: 12px;
+        color: #333;
+        line-height: 1.5;
+        font-weight: 500;
+    }
+
+    .avatar-box {
+        width: 120px;
+        height: 140px;
+        background: #e6ebf1;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #718096;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .avatar-box i {
+        font-size: 64px;
+    }
+
+    .avatar-actions {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        display: flex;
+        gap: 4px;
+    }
+
+    .btn-circle {
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-size: 10px;
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+
+    .radio-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+    }
+
+    /* Sub-tables */
+    .sub-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .sub-table th {
+        text-align: left;
+        padding: 8px;
+        font-size: 11px;
+        color: var(--stripe-light);
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .sub-table td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .btn-add {
+        color: var(--stripe-indigo);
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 24px;
+        border-radius: 12px;
+        width: 80%;
+        max-width: 900px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--section-border);
+        padding-bottom: 12px;
+    }
+
+    .modal-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .modal-table th,
+    .modal-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+    }
+
+    .modal-table tr:hover {
+        background-color: #f8fafc;
+        cursor: pointer;
+    }
+
+    .btn-indigo {
+        background: var(--stripe-indigo);
+        color: white;
+    }
+
+    .btn-indigo:hover {
+        background: #5851f2;
+    }
+
+    .btn-slate {
+        background: #64748b;
+        color: white;
+    }
+
+    .btn-slate:hover {
+        background: #475569;
+    }
+
+    .btn-red {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-red:hover {
+        background: #dc2626;
+    }
+</style>
+
+<div class="form-container">
+    <div id="associationTopBar" style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+        <button class="btn btn-indigo" onclick="openAssociationModal()" id="btnAssociateFamily">
+            <i class="fas fa-users"></i> Asociar a Familia Existente
+        </button>
+    </div>
+
+    <!-- Main Form -->
+    <div class="section-card">
+        <div class="section-body" style="padding-top: 32px;">
+            <div style="display: flex; gap: 32px;">
+                <div style="flex: 1;">
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                        <div class="form-group">
+                            <label>Solicitud No.</label>
+                            <input type="text" id="requestId" readonly placeholder="00000000"
+                                style="background: #f8fafc; font-family: monospace;">
+                        </div>
+                        <div class="form-group">
+                            <label>Ciclo Escolar de Inscripción</label>
+                            <select id="cycleId">
+                                <option value="">Seleccione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha</label>
+                            <input type="date" id="requestDate">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Apellidos</label>
+                            <input type="text" id="lastName" placeholder="Primer Apellido">
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <input type="text" id="secondLastName" placeholder="Segundo Apellido">
+                        </div>
+                        <div class="form-group">
+                            <label>Nombres</label>
+                            <input type="text" id="firstName" placeholder="Primer Nombre">
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <input type="text" id="middleName" placeholder="Segundo Nombre">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr; margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Fecha de Nacimiento</label>
+                            <input type="date" id="birthDate" onchange="calculateAge()">
+                        </div>
+                        <div class="form-group">
+                            <label>Edad</label>
+                            <input type="text" id="age" readonly style="background: #f8fafc;">
+                        </div>
+                        <div class="form-group">
+                            <label>Curso</label>
+                            <select id="courseId">
+                                <option value="">Seleccione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Sexo</label>
+                            <select id="genderId">
+                                <option value="">Seleccione...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="width: 280px; display: flex; flex-direction: column; gap: 16px;">
+                    <div class="avatar-box">
+                        <i class="fas fa-user"></i>
+                        <div class="avatar-actions">
+                            <div class="btn-circle" title="Subir foto"><i class="fas fa-camera"></i></div>
+                            <div class="btn-circle" title="Quitar foto"><i class="fas fa-ban"></i></div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        Si se asocia una familia, los datos del padre, madre y/o tutor se bloquean y se llenan con los
+                        datos de la familia asociada y solo se insertan los datos de la solicitud.
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid" style="grid-template-columns: 1.5fr 1fr; margin-top: 24px;">
+                <div class="form-group">
+                    <label>Vive con</label>
+                    <div style="display: flex; gap: 20px; align-items: center; height: 38px;">
+                        <label><input type="radio" name="livingWith" value="1" checked> Madre y Padre</label>
+                        <label><input type="radio" name="livingWith" value="2"> Madre</label>
+                        <label><input type="radio" name="livingWith" value="3"> Padre</label>
+                        <label><input type="radio" name="livingWith" value="4"> Otros</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Responsable</label>
+                    <div style="display: flex; gap: 20px; align-items: center; height: 38px;">
+                        <label><input type="radio" name="responsible" value="1" checked> Padre</label>
+                        <label><input type="radio" name="responsible" value="2"> Madre</label>
+                        <label><input type="radio" name="responsible" value="3"> Tutor</label>
+                        <label><input type="radio" name="responsible" value="4"> Otros</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr; margin-top: 20px;">
+                <div class="form-group"><label>País</label><select id="countryId"></select></div>
+                <div class="form-group"><label>Ciudad</label><select id="cityId"></select></div>
+                <div class="form-group"><label>Sector</label><select id="sectorId"></select></div>
+                <div class="form-group"><label>Dirección</label><input type="text" id="address"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parent Data Sections -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <!-- Father Section -->
+        <div class="section-card">
+            <div class="section-header"><span class="section-title">Datos del Padre</span></div>
+            <div class="section-body">
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group"><label>Apellidos</label><input type="text" id="f_lastName1"></div>
+                    <div class="form-group"><label>&nbsp;</label><input type="text" id="f_lastName2"></div>
+                    <div class="form-group"><label>Nombres</label><input type="text" id="f_firstName1"></div>
+                    <div class="form-group"><label>&nbsp;</label><input type="text" id="f_firstName2"></div>
+                    <div class="form-group"><label>Tipo de Documento</label><select id="f_docType"></select></div>
+                    <div class="form-group"><label>Documento</label><input type="text" id="f_docNum"></div>
+                    <div class="form-group"><label>Profesión</label><select id="f_prof"></select></div>
+                    <div class="form-group"><label>Estado Civil</label><select id="f_marital"></select></div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 16px; gap: 24px;">
+                    <div class="form-group">
+                        <label>Teléfonos</label>
+                        <table class="sub-table" id="f_phones">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%">Tipo</th>
+                                    <th style="width: 40%">Teléfono</th>
+                                    <th>P.</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <i class="fas fa-plus btn-add" onclick="addTableRow('f_phones')"></i>
+                    </div>
+                    <div class="form-group">
+                        <label>Correos Electrónicos</label>
+                        <table class="sub-table" id="f_emails">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80%">Correo Electrónico</th>
+                                    <th>P.</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <i class="fas fa-plus btn-add" onclick="addTableRow('f_emails')"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mother Section -->
+        <div class="section-card">
+            <div class="section-header"><span class="section-title">Datos de la Madre</span></div>
+            <div class="section-body">
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group"><label>Apellidos</label><input type="text" id="m_lastName1"></div>
+                    <div class="form-group"><label>&nbsp;</label><input type="text" id="m_lastName2"></div>
+                    <div class="form-group"><label>Nombres</label><input type="text" id="m_firstName1"></div>
+                    <div class="form-group"><label>&nbsp;</label><input type="text" id="m_firstName2"></div>
+                    <div class="form-group"><label>Tipo de Documento</label><select id="m_docType"></select></div>
+                    <div class="form-group"><label>Documento</label><input type="text" id="m_docNum"></div>
+                    <div class="form-group"><label>Profesión</label><select id="m_prof"></select></div>
+                    <div class="form-group"><label>Estado Civil</label><select id="m_marital"></select></div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 16px; gap: 24px;">
+                    <div class="form-group">
+                        <label>Teléfonos</label>
+                        <table class="sub-table" id="m_phones">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%">Tipo</th>
+                                    <th style="width: 40%">Teléfono</th>
+                                    <th>P.</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <i class="fas fa-plus btn-add" onclick="addTableRow('m_phones')"></i>
+                    </div>
+                    <div class="form-group">
+                        <label>Correos Electrónicos</label>
+                        <table class="sub-table" id="m_emails">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80%">Correo Electrónico</th>
+                                    <th>P.</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <i class="fas fa-plus btn-add" onclick="addTableRow('m_emails')"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical Data -->
+    <div class="section-card">
+        <div class="section-header"><span class="section-title">Datos Médicos</span></div>
+        <div class="section-body">
+            <div class="form-grid" style="grid-template-columns: 1.5fr 1fr;">
+                <div class="form-group"><label>Nombre</label><input type="text" id="med_name"></div>
+                <div class="form-group"><label>No. del Seguro Médico</label><input type="text" id="med_insurance"></div>
+            </div>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 16px;">
+                <div class="form-group"><label>Institución Médica</label><select id="med_inst"></select></div>
+                <div class="form-group"><label>Institucion del Seguro Médico</label><select id="med_seg"></select></div>
+                <div class="form-group"><label>Tipo de Sangre</label><select id="med_blood"></select></div>
+            </div>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top: 16px;">
+                <div class="form-group">
+                    <label>Teléfonos</label>
+                    <table class="sub-table" id="med_phones">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%">Tipo</th>
+                                <th style="width: 40%">Teléfono</th>
+                                <th>P.</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <i class="fas fa-plus btn-add" onclick="addTableRow('med_phones')"></i>
+                </div>
+                <div class="form-group">
+                    <label>Alergias</label>
+                    <table class="sub-table" id="med_allergies">
+                        <thead>
+                            <tr>
+                                <th style="width: 80%">Alergia</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <i class="fas fa-plus btn-add" onclick="addTableRow('med_allergies')"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other Data -->
+    <div class="section-card">
+        <div class="section-header"><span class="section-title">Otros Datos</span></div>
+        <div class="section-body">
+            <div class="form-group"><label>Institución de Procedencia</label><select id="prev_school"></select></div>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top: 16px;">
+                <div class="form-group"><label>Motivo de Entrada</label><textarea id="entry_reason" rows="3"></textarea>
+                </div>
+                <div class="form-group"><label>Motivo de Salida Institución de Procedencia</label><textarea
+                        id="exit_reason" rows="3"></textarea></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Documents -->
+    <div class="section-card">
+        <div class="section-header">
+            <i class="fas fa-file-alt" style="color: var(--stripe-indigo);"></i>
+            <span class="section-title">Documentos Adjuntos</span>
+        </div>
+        <div class="section-body">
+            <div id="dropZone"
+                style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px; text-align: center; background: #f8fafc; cursor: pointer; transition: all 0.2s;">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #94a3b8; margin-bottom: 16px;"></i>
+                <p style="font-size: 14px; color: var(--stripe-slate); margin-bottom: 8px;">
+                    <strong>Arrastra archivos aquí o haz clic para seleccionar</strong>
+                </p>
+                <p style="font-size: 12px; color: var(--stripe-light);">
+                    PDF, imágenes, documentos de Word (máx. 10MB por archivo)
+                </p>
+                <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    style="display: none;">
+            </div>
+
+            <div id="fileList" style="margin-top: 24px;"></div>
+        </div>
+    </div>
+
+    <!-- Action Bar at bottom -->
+    <div class="action-bar"
+        style="margin-top: 32px; border-top: 1px solid var(--section-border); padding-top: 24px; position: static;">
+        <div class="action-group">
+            <button class="btn btn-indigo" onclick="saveAdmission()">
+                <i class="fas fa-save"></i> Guardar Solicitud
+            </button>
+            <button class="btn btn-slate" onclick="cancelAdmission()">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Association Modal -->
+<div id="associationModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="margin: 0; font-size: 16px;">Asociar Solicitud a Familia Existente</h3>
+            <i class="fas fa-times" style="cursor: pointer" onclick="closeAssociationModal()"></i>
+        </div>
+        <div style="margin-bottom: 16px;">
+            <input type="text" id="familySearch" placeholder="Buscar por código o nombre..." style="width: 100%"
+                onkeyup="filterFamilies()">
+        </div>
+        <div style="max-height: 400px; overflow-y: auto;">
+            <table class="modal-table" id="familiesTable">
+                <thead>
+                    <tr>
+                        <th>Familia No.</th>
+                        <th>Padre</th>
+                        <th>Madre</th>
+                        <th>Tutor</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="familiesList"></tbody>
+            </table>
+        </div>
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+            <button class="btn btn-slate" onclick="closeAssociationModal()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Logic for loading catalogs and handling table rows
+    const CATALOGS = {
+        cycleId: '/api/v1/client/cycles-list/',
+        courseId: '/api/v1/client/courses-list/',
+        genderId: '/api/v1/master/genders/',
+        countryId: '/countries',
+        f_docType: '/api/v1/master/document-types/',
+        m_docType: '/api/v1/master/document-types/',
+        f_prof: '/api/v1/master/professions/',
+        m_prof: '/api/v1/master/professions/',
+        f_marital: '/api/v1/master/marital_status/',
+        m_marital: '/api/v1/master/marital_status/',
+        med_inst: '/api/v1/master/medical-institutions/',
+        med_seg: '/api/v1/master/health-insurance-institutions/',
+        med_blood: '/api/v1/master/blood-types/',
+        prev_school: '/api/v1/master/other-schools/'
+    };
+
+    let PUBLIC_CATALOG_CACHE = null;
+    let ALL_FAMILIES = [];
+
+    async function initForm() {
+        document.getElementById('requestDate').valueAsDate = new Date();
+
+        if (IS_PUBLIC) {
+            document.getElementById('associationTopBar').style.display = 'none';
+            await loadPublicCatalogs();
+        } else {
+            await loadAllCatalogs();
+        }
+
+        // Listeners for dynamic location filtering
+        document.getElementById('countryId').onchange = (e) => filterCities(e.target.value);
+        document.getElementById('cityId').onchange = (e) => filterSectors(e.target.value);
+    }
+
+    async function loadPublicCatalogs() {
+        try {
+            const res = await fetch(`/api/v1/public/admissions/catalogs/${CLIENT_UUID}`);
+            const data = await res.json();
+            PUBLIC_CATALOG_CACHE = data;
+
+            for (let [id, items] of Object.entries(data)) {
+                if (['phoneTypes', 'allergies'].includes(id)) continue;
+                fillSelect(id, items);
+            }
+        } catch (e) {
+            console.error('Error loading public catalogs', e);
+        }
+    }
+
+    async function loadAllCatalogs() {
+        const promises = Object.entries(CATALOGS).map(([id, url]) => loadCatalog(id, url));
+        await Promise.all(promises);
+
+        // Initialize RD as default for internal too
+        const countrySelect = document.getElementById('countryId');
+        if (countrySelect && !countrySelect.value) {
+            countrySelect.value = "1";
+            filterCities("1");
+        }
+    }
+
+    function fillSelect(selectId, items) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '<option value="">Seleccione...</option>';
+        items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name || item.snombre || item.sdescripcion || item.applicantName || item.sciclo || item.scurso;
+            select.appendChild(opt);
+        });
+
+        // Default Country RD
+        if (selectId === 'countryId' && items.find(i => i.id === 1)) {
+            select.value = "1";
+            if (IS_PUBLIC) setTimeout(() => filterCities("1"), 100);
+        }
+    }
+
+    function filterCities(countryId) {
+        const cities = IS_PUBLIC ? PUBLIC_CATALOG_CACHE.cities : []; // Internal should load from API or cache
+        const citySelect = document.getElementById('cityId');
+        if (!citySelect) return;
+
+        if (IS_PUBLIC) {
+            const filtered = cities.filter(c => c.country_id == countryId);
+            fillSelect('cityId', filtered);
+        } else {
+            // Optimization: if not public, we could fetch or use a global cache if we had one
+            // For now, let's keep it simple and filter if we have them
+            loadCatalog('cityId', `/api/v1/master/cities/?countryId=${countryId}`);
+        }
+    }
+
+    function filterSectors(cityId) {
+        const sectorSelect = document.getElementById('sectorId');
+        if (!sectorSelect) return;
+
+        if (IS_PUBLIC) {
+            const filtered = PUBLIC_CATALOG_CACHE.sectors.filter(s => s.city_id == cityId);
+            fillSelect('sectorId', filtered);
+        } else {
+            loadCatalog('sectorId', `/api/v1/master/sectors/?cityId=${cityId}`);
+        }
+    }
+
+    async function loadCatalog(selectId, url) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            const items = data.data || data;
+            select.innerHTML = '<option value="">Seleccione...</option>';
+            items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.name || item.snombre || item.sdescripcion;
+                select.appendChild(opt);
+            });
+        } catch (e) { console.error('Error loading catalog', selectId, e); }
+    }
+
+    function calculateAge() {
+        const birthDateInput = document.getElementById('birthDate').value;
+        if (!birthDateInput) return;
+        const birthDate = new Date(birthDateInput);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+        document.getElementById('age').value = age + ' años';
+    }
+
+    function addTableRow(tableId) {
+        const tbody = document.querySelector(`#${tableId} tbody`);
+        const row = document.createElement('tr');
+        if (tableId.includes('phones')) {
+            row.innerHTML = `
+                <td><select class="phone-type"></select></td>
+                <td><input type="text" placeholder="809-000-0000" style="width: 100%"></td>
+                <td><input type="checkbox"></td>
+                <td><i class="fas fa-trash text-red" style="cursor: pointer" onclick="this.closest('tr').remove()"></i></td>
+            `;
+            const phoneTypesUrl = '/api/v1/master/phone-types/';
+            if (IS_PUBLIC && PUBLIC_CATALOG_CACHE) {
+                fillSelectInRow(row.querySelector('select'), PUBLIC_CATALOG_CACHE.phoneTypes);
+            } else {
+                loadCatalogInRow(row.querySelector('select'), phoneTypesUrl);
+            }
+        } else if (tableId.includes('emails')) {
+            row.innerHTML = `
+                <td><input type="email" placeholder="correo@ejemplo.com" style="width: 100%"></td>
+                <td><input type="checkbox"></td>
+                <td><i class="fas fa-trash text-red" style="cursor: pointer" onclick="this.closest('tr').remove()"></i></td>
+            `;
+        } else if (tableId === 'med_allergies') {
+            row.innerHTML = `
+                <td><select class="allergy-type"></select></td>
+                <td><i class="fas fa-trash text-red" style="cursor: pointer" onclick="this.closest('tr').remove()"></i></td>
+            `;
+            const allergiesUrl = '/api/v1/master/allergies/';
+            if (IS_PUBLIC && PUBLIC_CATALOG_CACHE) {
+                fillSelectInRow(row.querySelector('select'), PUBLIC_CATALOG_CACHE.allergies);
+            } else {
+                loadCatalogInRow(row.querySelector('select'), allergiesUrl);
+            }
+        }
+        tbody.appendChild(row);
+    }
+
+    function fillSelectInRow(select, items) {
+        select.innerHTML = '<option value="">...</option>';
+        items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name || item.snombre;
+            select.appendChild(opt);
+        });
+    }
+
+    async function loadCatalogInRow(select, url) {
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            const items = data.data || data;
+            select.innerHTML = '<option value="">...</option>';
+            items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.name || item.snombre;
+                select.appendChild(opt);
+            });
+        } catch (e) { console.error('Error loading row catalog', url, e); }
+    }
+
+    function saveAdmission() {
+        const btn = document.querySelector('.btn-indigo'); // Match bottom button
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        const data = {
+            studentFamilyId: window.SELECTED_FAMILY_ID || null,
+            cycleId: document.getElementById('cycleId').value,
+            lastName: document.getElementById('lastName').value,
+            secondLastName: document.getElementById('secondLastName').value,
+            firstName: document.getElementById('firstName').value,
+            middleName: document.getElementById('middleName').value,
+            birthDate: document.getElementById('birthDate').value,
+            courseId: document.getElementById('courseId').value,
+            genderId: document.getElementById('genderId').value,
+            livingSituation: document.querySelector('input[name="livingWith"]:checked').value,
+            responsibleType: document.querySelector('input[name="responsible"]:checked').value,
+            countryId: document.getElementById('countryId').value,
+            cityId: document.getElementById('cityId').value,
+            sectorId: document.getElementById('sectorId').value,
+            address: document.getElementById('address').value,
+
+            // Family Data
+            family: {
+                responsibleType: document.querySelector('input[name="responsible"]:checked').value,
+                father: {
+                    firstName1: document.getElementById('f_firstName1').value,
+                    firstName2: document.getElementById('f_firstName2').value,
+                    lastName1: document.getElementById('f_lastName1').value,
+                    lastName2: document.getElementById('f_lastName2').value,
+                    documentTypeId: document.getElementById('f_docType').value,
+                    document: document.getElementById('f_docNum').value,
+                    professionId: document.getElementById('f_prof').value,
+                    maritalStatusId: document.getElementById('f_marital').value
+                },
+                mother: {
+                    firstName1: document.getElementById('m_firstName1').value,
+                    firstName2: document.getElementById('m_firstName2').value,
+                    lastName1: document.getElementById('m_lastName1').value,
+                    lastName2: document.getElementById('m_lastName2').value,
+                    documentTypeId: document.getElementById('m_docType').value,
+                    document: document.getElementById('m_docNum').value,
+                    professionId: document.getElementById('m_prof').value,
+                    maritalStatusId: document.getElementById('m_marital').value
+                },
+                phones: gatherTableData('f_phones', 'm_phones'),
+                emails: gatherTableData('f_emails', 'm_emails')
+            },
+
+            // Medical
+            doctorName: document.getElementById('med_name').value,
+            insuranceNumber: document.getElementById('med_insurance').value,
+            medicalInstitutionId: document.getElementById('med_inst').value,
+            insuranceInstitutionId: document.getElementById('med_seg').value,
+            bloodTypeId: document.getElementById('med_blood').value,
+
+            // Others
+            previousSchoolId: document.getElementById('prev_school').value,
+            entryReason: document.getElementById('entry_reason').value,
+            exitReason: document.getElementById('exit_reason').value
+        };
+
+        const url = IS_PUBLIC ? `/api/v1/public/admissions/${CLIENT_UUID}` : '/api/v1/client/admissions';
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(async res => {
+                if (res.id) {
+                    // Upload documents if any
+                    if (uploadedDocuments.length > 0) {
+                        await uploadDocumentsForAdmission(res.id);
+                    }
+
+                    alert('Solicitud enviada correctamente. El número de solicitud es: ' + res.id);
+                    if (!IS_PUBLIC) window.location.href = '/client/academic/admissions';
+                    else window.location.reload();
+                } else {
+                    alert('Error: ' + (res.message || 'No se pudo guardar la solicitud.'));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error al enviar la solicitud.');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Guardar';
+            });
+    }
+
+    function gatherTableData(fatherTableId, motherTableId) {
+        const results = [];
+        // Gather father row data
+        document.querySelectorAll(`#${fatherTableId} tbody tr`).forEach(row => {
+            const inputs = row.querySelectorAll('input, select');
+            if (fatherTableId.includes('phones')) {
+                results.push({ phoneTypeId: inputs[0].value, phoneNumber: inputs[1].value, isPrincipal: inputs[2].checked, owner: 'father' });
+            } else {
+                results.push({ email: inputs[0].value, isPrincipal: inputs[1].checked, owner: 'father' });
+            }
+        });
+        // Gather mother row data
+        document.querySelectorAll(`#${motherTableId} tbody tr`).forEach(row => {
+            const inputs = row.querySelectorAll('input, select');
+            if (motherTableId.includes('phones')) {
+                results.push({ phoneTypeId: inputs[0].value, phoneNumber: inputs[1].value, isPrincipal: inputs[2].checked, owner: 'mother' });
+            } else {
+                results.push({ email: inputs[0].value, isPrincipal: inputs[1].checked, owner: 'mother' });
+            }
+        });
+        return results;
+    }
+
+    function cancelAdmission() {
+        if (confirm('¿Está seguro de cancelar? Se perderán los cambios.')) {
+            window.history.back();
+        }
+    }
+
+    // Family Association Functions
+    async function openAssociationModal() {
+        document.getElementById('associationModal').style.display = 'block';
+        if (ALL_FAMILIES.length === 0) {
+            try {
+                const res = await fetch('/api/v1/client/admissions/families');
+                ALL_FAMILIES = await res.json();
+                renderFamilies(ALL_FAMILIES);
+            } catch (e) {
+                console.error('Error fetching families', e);
+                alert('No se pudieron cargar las familias.');
+            }
+        }
+    }
+
+    function closeAssociationModal() {
+        document.getElementById('associationModal').style.display = 'none';
+    }
+
+    function renderFamilies(families) {
+        const list = document.getElementById('familiesList');
+        list.innerHTML = '';
+        families.forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${f.familyCode || '---'}</td>
+                <td>${f.fatherName || '---'}</td>
+                <td>${f.motherName || '---'}</td>
+                <td>${f.tutorName || '---'}</td>
+                <td><button class="btn btn-indigo" style="padding: 4px 12px; font-size: 11px;" onclick="applyFamily(${f.id})">Seleccionar</button></td>
+            `;
+            list.appendChild(tr);
+        });
+    }
+
+    function filterFamilies() {
+        const q = document.getElementById('familySearch').value.toLowerCase();
+        const filtered = ALL_FAMILIES.filter(f =>
+            (f.familyCode && f.familyCode.toLowerCase().includes(q)) ||
+            (f.fatherName && f.fatherName.toLowerCase().includes(q)) ||
+            (f.motherName && f.motherName.toLowerCase().includes(q)) ||
+            (f.tutorName && f.tutorName.toLowerCase().includes(q))
+        );
+        renderFamilies(filtered);
+    }
+
+    async function applyFamily(familyId) {
+        if (!confirm('¿Seguro que desea asociar esta familia? Se sobrescribirán los datos actuales de los padres/tutores.')) return;
+
+        try {
+            const res = await fetch(`/api/v1/client/admissions/families/${familyId}`);
+            const data = await res.json();
+
+            // Populate and lock fields
+            document.getElementById('f_lastName1').value = data.father.lastName1 || '';
+            document.getElementById('f_lastName2').value = data.father.lastName2 || '';
+            document.getElementById('f_firstName1').value = data.father.firstName1 || '';
+            document.getElementById('f_firstName2').value = data.father.firstName2 || '';
+            document.getElementById('f_docType').value = data.father.documentTypeId || '';
+            document.getElementById('f_docNum').value = data.father.document || '';
+            document.getElementById('f_prof').value = data.father.professionId || '';
+            document.getElementById('f_marital').value = data.father.maritalStatusId || '';
+
+            document.getElementById('m_lastName1').value = data.mother.lastName1 || '';
+            document.getElementById('m_lastName2').value = data.mother.lastName2 || '';
+            document.getElementById('m_firstName1').value = data.mother.firstName1 || '';
+            document.getElementById('m_firstName2').value = data.mother.firstName2 || '';
+            document.getElementById('m_docType').value = data.mother.documentTypeId || '';
+            document.getElementById('m_docNum').value = data.mother.document || '';
+            document.getElementById('m_prof').value = data.mother.professionId || '';
+            document.getElementById('m_marital').value = data.mother.maritalStatusId || '';
+
+            // Lock fields
+            const parentsSelectors = '#f_lastName1, #f_lastName2, #f_firstName1, #f_firstName2, #f_docType, #f_docNum, #f_prof, #f_marital, ' +
+                '#m_lastName1, #m_lastName2, #m_firstName1, #m_firstName2, #m_docType, #m_docNum, #m_prof, #m_marital';
+            document.querySelectorAll(parentsSelectors).forEach(el => {
+                el.readOnly = true;
+                el.style.backgroundColor = '#f1f5f9';
+            });
+
+            // Store familyId in global
+            window.SELECTED_FAMILY_ID = familyId;
+
+            closeAssociationModal();
+            alert('Familia asociada correctamente. Los campos de los padres han sido bloqueados.');
+        } catch (e) {
+            console.error('Error applying family', e);
+            alert('Error al asociar la familia.');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initForm);
+</script>
