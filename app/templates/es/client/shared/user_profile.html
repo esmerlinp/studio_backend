@@ -18,6 +18,22 @@
         color: #166534;
     }
 
+    .avatar-large {
+        width: 100px;
+        height: 100px;
+        background: #f1f4f9;
+        color: var(--stripe-indigo);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 600;
+        border: 2px dashed #d1d9e6;
+        overflow: hidden;
+        padding: 8px;
+    }
+
     .btn-primary {
         background-color: var(--stripe-indigo);
         color: white;
@@ -66,36 +82,139 @@
         background-color: #fef2f2;
     }
 
-    /* Modal Styles */
-    .modal-overlay {
-        animation: fadeIn 0.2s ease-out;
+    /* Tab Styles */
+    .tabs-nav {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 32px;
+        border-bottom: 1px solid #e6ebf1;
+        padding: 0 4px;
+    }
+
+    .tab-btn {
+        padding: 12px 20px;
+        border: none;
+        background: none;
+        font-family: 'Outfit', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--stripe-slate);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 8px 8px 0 0;
+    }
+
+    .tab-btn:hover {
+        color: var(--stripe-indigo);
+        background: var(--stripe-indigo-soft);
+    }
+
+    .tab-btn.active {
+        color: var(--stripe-indigo);
+    }
+
+    .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--stripe-indigo);
+        border-radius: 2px 2px 0 0;
+        animation: tabSlideIn 0.3s ease-out;
+    }
+
+    @keyframes tabSlideIn {
+        from {
+            transform: scaleX(0);
+        }
+
+        to {
+            transform: scaleX(1);
+        }
     }
 
     @keyframes fadeIn {
         from {
             opacity: 0;
+            transform: translateY(4px);
         }
 
         to {
             opacity: 1;
+            transform: translateY(0);
         }
+    }
+
+    .tab-content {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--stripe-dark);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--stripe-dark);
+        background-color: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--stripe-indigo);
+        box-shadow: 0 0 0 3px var(--stripe-indigo-soft), 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control[readonly] {
+        background-color: #f9fafb;
+        color: var(--stripe-slate);
+        cursor: not-allowed;
+    }
+
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 40px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<header class="page-header" style="margin-bottom: 24px;">
-    <h1 style="font-size: 1.8rem; font-weight: 700; color: var(--stripe-dark);">Mi Perfil</h1>
-</header>
-
-<div class="profile-container" style="max-width: 900px;">
+<div class="profile-container" style="max-width: 900px; margin: 0 auto; padding-top: 24px;">
 
     <!-- Header del Perfil -->
     <div class="card"
         style="background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 24px; padding: 24px; display: flex; align-items: center; gap: 24px; border: 1px solid #e6ebf1;">
-        <div class="avatar-large"
-            style="width: 72px; height: 72px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; font-weight: 600;">
-            {{ current_user.firstName[0] }}{{ current_user.lastName[0] }}
+        <div class="avatar-large">
+            {% if current_user.profileImage %}
+            <img src="{{ current_user.profileImage }}" alt="Profile" class="avatar-image">
+            {% else %}
+            <img src="https://ui-avatars.com/api/?name={{ current_user.firstName }}+{{ current_user.lastName }}&background=f1f4f9&color=635bff&size=200&bold=true&font-size=0.33"
+                alt="Profile" class="avatar-image">
+            {% endif %}
         </div>
         <div>
             <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; color: var(--text-color);">{{ current_user.firstName }}
@@ -106,15 +225,19 @@
     </div>
 
     <!-- Pestañas -->
-    <div class="tabs-container" style="border-bottom: 1px solid var(--border-color); margin-bottom: 24px;">
-        <button class="tab-btn active" onclick="switchTab('general')"
-            style="padding: 12px 24px; border: none; background: none; font-weight: 500; cursor: pointer; border-bottom: 2px solid var(--primary-color); color: var(--text-color);">General</button>
-        <button class="tab-btn" onclick="switchTab('preferences')"
-            style="padding: 12px 24px; border: none; background: none; font-weight: 500; cursor: pointer; color: var(--text-light);">Preferencias</button>
-        <button class="tab-btn" onclick="switchTab('security')"
-            style="padding: 12px 24px; border: none; background: none; font-weight: 500; cursor: pointer; color: var(--text-light);">Seguridad</button>
-        <button class="tab-btn" onclick="switchTab('sessions')"
-            style="padding: 12px 24px; border: none; background: none; font-weight: 500; cursor: pointer; color: var(--text-light);">Sesiones</button>
+    <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="general" onclick="switchTab('general')">
+            <i class="fas fa-user-circle" style="margin-right: 8px;"></i>General
+        </button>
+        <button class="tab-btn" data-tab="preferences" onclick="switchTab('preferences')">
+            <i class="fas fa-cog" style="margin-right: 8px;"></i>Preferencias
+        </button>
+        <button class="tab-btn" data-tab="security" onclick="switchTab('security')">
+            <i class="fas fa-shield-alt" style="margin-right: 8px;"></i>Seguridad
+        </button>
+        <button class="tab-btn" data-tab="sessions" onclick="switchTab('sessions')">
+            <i class="fas fa-history" style="margin-right: 8px;"></i>Sesiones
+        </button>
     </div>
 
     <!-- Contenido General -->
@@ -125,28 +248,20 @@
                 Personal</h3>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="form-group">
-                    <label
-                        style="display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-color);">Nombre</label>
-                    <input type="text" value="{{ current_user.firstName }}" readonly
-                        style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-light); color: var(--text-color);">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" value="{{ current_user.firstName }}" readonly class="form-control">
                 </div>
                 <div class="form-group">
-                    <label
-                        style="display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-color);">Apellido</label>
-                    <input type="text" value="{{ current_user.lastName }}" readonly
-                        style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-light); color: var(--text-color);">
+                    <label class="form-label">Apellido</label>
+                    <input type="text" value="{{ current_user.lastName }}" readonly class="form-control">
                 </div>
                 <div class="form-group">
-                    <label
-                        style="display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-color);">Email</label>
-                    <input type="email" value="{{ current_user.email }}" readonly
-                        style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-light); color: var(--text-color);">
+                    <label class="form-label">Email</label>
+                    <input type="email" value="{{ current_user.email }}" readonly class="form-control">
                 </div>
                 <div class="form-group">
-                    <label
-                        style="display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-color);">Usuario</label>
-                    <input type="text" value="{{ current_user.username }}" readonly
-                        style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-light); color: var(--text-color);">
+                    <label class="form-label">Usuario</label>
+                    <input type="text" value="{{ current_user.username }}" readonly class="form-control">
                 </div>
             </div>
         </div>
@@ -163,40 +278,30 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="form-group">
-                    <label
-                        style="display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-color);">Idioma</label>
-                    <select id="pref-language"
-                        style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: white; color: var(--text-color);">
+                    <label class="form-label">Idioma</label>
+                    <select id="pref-language" class="form-control">
                         <option value="es">Español</option>
                         <option value="en">English</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label
-                        style="display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-color);">Formato
-                        de Hora</label>
-                    <select id="pref-hourFormat"
-                        style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: white; color: var(--text-color);">
+                    <label class="form-label">Formato de Hora</label>
+                    <select id="pref-hourFormat" class="form-control">
                         <option value="12">12 Horas (AM/PM)</option>
                         <option value="24">24 Horas</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label
-                        style="display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-color);">Formato
-                        de Fecha</label>
-                    <select id="pref-dateFormat"
-                        style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: white; color: var(--text-color);">
+                    <label class="form-label">Formato de Fecha</label>
+                    <select id="pref-dateFormat" class="form-control">
                         <option value="DD-MM-YYYY">DD-MM-YYYY</option>
                         <option value="MM-DD-YYYY">MM-DD-YYYY</option>
                         <option value="YYYY-MM-DD">YYYY-MM-DD</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label style="display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-color);">Zona
-                        Horaria</label>
-                    <select id="pref-timezone"
-                        style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: white; color: var(--text-color);">
+                    <label class="form-label">Zona Horaria</label>
+                    <select id="pref-timezone" class="form-control">
                         <option value="UTC">UTC</option>
                         <!-- Se podrian cargar mas dinamicamente -->
                         <option value="America/Santo_Domingo">America/Santo_Domingo</option>
@@ -293,9 +398,9 @@
         </div>
 
         <div class="form-group" style="margin-bottom: 24px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Código de verificación</label>
-            <input type="text" id="otp-input" placeholder="000 000" maxlength="6"
-                style="width: 100%; padding: 12px; font-size: 1.25rem; text-align: center; letter-spacing: 0.25rem; border: 1px solid var(--border-color); border-radius: 8px;">
+            <label class="form-label" style="font-size: 15px;">Código de verificación</label>
+            <input type="text" id="otp-input" placeholder="000 000" maxlength="6" class="form-control"
+                style="font-size: 1.25rem; text-align: center; letter-spacing: 0.25rem;">
         </div>
 
         <div style="display: flex; gap: 12px; justify-content: flex-end;">
@@ -317,10 +422,9 @@
         </p>
 
         <div class="form-group" style="margin-bottom: 24px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ingresa el código de tu app para
-                confirmar</label>
-            <input type="text" id="otp-disable-input" placeholder="000 000" maxlength="6"
-                style="width: 100%; padding: 12px; font-size: 1.25rem; text-align: center; letter-spacing: 0.25rem; border: 1px solid var(--border-color); border-radius: 8px;">
+            <label class="form-label" style="font-size: 15px;">Ingresa el código de tu app para confirmar</label>
+            <input type="text" id="otp-disable-input" placeholder="000 000" maxlength="6" class="form-control"
+                style="font-size: 1.25rem; text-align: center; letter-spacing: 0.25rem;">
         </div>
 
         <div style="display: flex; gap: 12px; justify-content: flex-end;">
@@ -366,21 +470,25 @@
 <script>
     // Tab Switching
     function switchTab(tabName) {
+        // Ocultar todos los contenidos
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.tab-btn').forEach(el => {
-            el.classList.remove('active');
-            el.style.borderBottom = 'none';
-            el.style.color = 'var(--text-light)';
-        });
 
-        document.getElementById(`tab-${tabName}`).style.display = 'block';
-        const btn = document.querySelector(`.tab-btn[onclick="switchTab('${tabName}')"]`);
-        if (btn) {
-            btn.classList.add('active');
-            btn.style.borderBottom = '2px solid var(--primary-color)';
-            btn.style.color = 'var(--text-color)';
+        // Quitar clase active de todos los botones
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        // Mostrar el contenido actual
+        const targetContent = document.getElementById(`tab-${tabName}`);
+        if (targetContent) {
+            targetContent.style.display = 'block';
         }
 
+        // Activar el botón correspondiente
+        const targetBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+        }
+
+        // Cargar datos si es necesario
         if (tabName === 'sessions') loadSessions();
         if (tabName === 'security') check2FAStatus();
         if (tabName === 'preferences') loadPreferences();
