@@ -1,0 +1,246 @@
+{% extends "es/client/layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Pago de Escolaridad</h4>
+            <div>
+                <span class="badge bg-primary fs-6">Ciclo Escolar Activo: {{ active_cycle.sciclo if active_cycle else
+                    'N/A' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Payment Filters -->
+        <div class="col-12 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Familia</label>
+                            <select class="form-select" id="familySelect">
+                                <option value="">Buscar familia...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">Período</label>
+                            <select class="form-select" id="cycleSelect">
+                                {% if cycles %}
+                                {% for cycle in cycles %}
+                                <option value="{{ cycle.id }}">{{ cycle.name }}</option>
+                                {% endfor %}
+                                {% else %}
+                                <option value="">No hay ciclos</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">Frecuencia de Pago</label>
+                            <input type="text" class="form-control bg-light" id="frequencyDisplay" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">Total Pagado</label>
+                            <input type="text" class="form-control text-end bg-light" id="totalPaidDisplay" readonly
+                                value="0.00">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">Balance a la fecha</label>
+                            <input type="text" class="form-control text-end bg-light" id="balanceDisplay" readonly
+                                value="0.00">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Calendario de Pago</label>
+                            <select class="form-select" id="calendarSelect" multiple size="1" style="height: 38px;">
+                                <!-- Options populated via JS -->
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">Fecha de Pago</label>
+                            <input type="date" class="form-control" id="paymentDate" value="{{ today }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">Próximo Pago</label>
+                            <input type="date" class="form-control bg-light" id="nextPaymentDate" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charges Table -->
+        <div class="col-12 mb-3">
+            <div class="card shadow-sm">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover table-striped mb-0 align-middle" id="chargesTable">
+                        <thead class="bg-light sticky-top">
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" class="form-check-input" id="selectAll">
+                                </th>
+                                <th>Código</th>
+                                <th>Estudiante</th>
+                                <th>Curso</th>
+                                <th>Cargo</th>
+                                <th class="text-end">Monto</th>
+                                <th class="text-end">Descuento</th>
+                                <th class="text-end">Recargo</th>
+                                <th class="text-end">Itbis</th>
+                                <th class="text-end">SubTotal</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows populated via JS -->
+                            <tr>
+                                <td colspan="11" class="text-center py-5 text-muted">
+                                    <i class="fas fa-search fa-3x mb-3 text-secondary"></i>
+                                    <p>Seleccione una familia para ver los cargos pendientes</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods & Summary -->
+        <div class="col-12">
+            <div class="row g-3">
+                <!-- Methods -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Métodos de Pago</h5>
+
+                            <div class="mb-3 row align-items-center">
+                                <label class="col-sm-4 col-form-label fw-bold"
+                                    style="font-size: 1.1em;">Efectivo:</label>
+                                <div class="col-sm-8">
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01"
+                                            class="form-control text-end fs-5 payment-method-input" id="cashInput"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3 row align-items-center">
+                                <label class="col-sm-4 col-form-label fw-bold"
+                                    style="font-size: 1.1em;">Tarjeta:</label>
+                                <div class="col-sm-7 px-1">
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01"
+                                            class="form-control text-end fs-5 payment-method-input" id="cardInput"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div class="col-sm-1 px-0">
+                                    <button class="btn btn-secondary w-100 h-100"><i
+                                            class="fas fa-ellipsis-v"></i></button>
+                                </div>
+                            </div>
+                            <div class="mb-3 row align-items-center">
+                                <label class="col-sm-4 col-form-label fw-bold"
+                                    style="font-size: 1.1em;">Transferencia:</label>
+                                <div class="col-sm-7 px-1">
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01"
+                                            class="form-control text-end fs-5 payment-method-input" id="transferInput"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div class="col-sm-1 px-0">
+                                    <button class="btn btn-secondary w-100 h-100"><i
+                                            class="fas fa-ellipsis-v"></i></button>
+                                </div>
+                            </div>
+                            <div class="mb-3 row align-items-center">
+                                <label class="col-sm-4 col-form-label fw-bold" style="font-size: 1.1em;">N.
+                                    Crédito:</label>
+                                <div class="col-sm-7 px-1">
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01"
+                                            class="form-control text-end fs-5 payment-method-input" id="creditNoteInput"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div class="col-sm-1 px-0">
+                                    <button class="btn btn-secondary w-100 h-100"><i
+                                            class="fas fa-ellipsis-v"></i></button>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-primary text-white p-3 rounded d-flex justify-content-between align-items-center mt-4 shadow-sm">
+                                <h2 class="mb-0 fs-3">Total Recibido:</h2>
+                                <h2 class="mb-0 fs-3" id="totalPaymentDisplay">0.00</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Change -->
+                <div class="col-md-4 d-flex align-items-end">
+                    <div class="card w-100 text-white mb-0 shadow-sm border-0"
+                        style="height: 150px; background-color: #4ade80;">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <div class="text-center w-100">
+                                <h4 class="mb-2 text-dark opacity-75">Devuelta</h4>
+                                <h1 class="mb-0 display-3 fw-bold text-dark" id="changeDisplay">0.00</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Resumen de Cobro</h5>
+
+                            <div class="d-flex justify-content-between mb-2 border-bottom pb-2">
+                                <span class="fs-5 fw-bold text-secondary">Monto:</span>
+                                <span class="fs-5 fw-bold" id="summaryAmount">0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 border-bottom pb-2">
+                                <span class="fs-5 fw-bold text-secondary">Descuento:</span>
+                                <span class="fs-5 fw-bold text-success" id="summaryDiscount">0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 border-bottom pb-2">
+                                <span class="fs-5 fw-bold text-secondary">Recargo:</span>
+                                <span class="fs-5 fw-bold text-danger" id="summarySurcharge">0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-4 border-bottom pb-2">
+                                <span class="fs-5 fw-bold text-secondary">Itbis:</span>
+                                <span class="fs-5 fw-bold" id="summaryTax">0.00</span>
+                            </div>
+
+                            <div
+                                class="bg-danger text-white p-3 rounded d-flex justify-content-between align-items-center shadow-sm">
+                                <h2 class="mb-0 fs-3">Total a Pagar:</h2>
+                                <h2 class="mb-0 fs-3" id="summaryTotal">0.00</h2>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button class="btn btn-success btn-lg py-3 fw-bold" id="btnProcessPayment" disabled>
+                                    <i class="fas fa-check-circle me-2"></i> Procesar Pago
+                                </button>
+                                <button class="btn btn-warning btn-lg py-2 fw-bold" id="btnNewPayment">
+                                    <i class="fas fa-plus-circle me-2"></i> Nuevo Pago
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/client/financial.js"></script>
+{% endblock %}

@@ -75,11 +75,13 @@ def get_public_catalogs(uuid):
     
     return jsonify(catalogs), 200
 
+@jwt_required()
 def get_families():
     """Returns all families from the FamilyListView."""
     families = FamilyListView.query.all()
     return jsonify([f.to_dict() for f in families]), 200
 
+@jwt_required()
 def get_family_detail(family_id):
     """Returns full detail of a family including phones and emails."""
     family = StudentFamily.query.get(family_id)

@@ -1,0 +1,88 @@
+{% extends "es/client/layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h4 class="mb-0">{% if cycle %}Editar{% else %}Nuevo{% endif %} Ciclo Escolar</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="cycleForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre del Ciclo</label>
+                            <input type="text" class="form-control" name="name"
+                                value="{{ cycle.name if cycle else '' }}" placeholder="Ej: 2025-2026" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Fecha Inicio</label>
+                                <input type="date" class="form-control" name="startDate"
+                                    value="{{ cycle.startDate if cycle else '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Fecha Fin</label>
+                                <input type="date" class="form-control" name="endDate"
+                                    value="{{ cycle.endDate if cycle else '' }}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isActive" name="isActive" {% if cycle
+                                and cycle.isActive %}checked{% endif %}>
+                            <label class="form-check-label" for="isActive">Ciclo Activo</label>
+                        </div>
+
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Al activar este ciclo, se desactivarán automáticamente otros ciclos vigentes si la lógica de
+                            negocio lo requiere.
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="/client/financial/cycles" class="btn btn-light">Cancelar</a>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('cycleForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        data.isActive = document.getElementById('isActive').checked;
+
+        const url = '{{ "/api/v1/client/financial/cycles/" + (cycle.id|string) if cycle else "/api/v1/client/financial/cycles" }}';
+        const method = '{{ "PUT" if cycle else "POST" }}';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.href = '/client/financial/cycles';
+            } else {
+                const result = await response.json();
+                alert('Error al guardar: ' + (result.message || 'Error desconocido'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        }
+    });
+</script>
+{% endblock %}

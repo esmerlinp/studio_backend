@@ -1,0 +1,83 @@
+{% extends "es/client/layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h4 class="mb-0">{% if box %}Editar{% else %}Nueva{% endif %} Caja</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="boxForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre de la Caja</label>
+                            <input type="text" class="form-control" name="name" value="{{ box.name if box else '' }}"
+                                required placeholder="Ej: Caja Principal">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Usuario Asignado (Opcional)</label>
+                            <select class="form-select" name="userId">
+                                <option value="">Seleccione...</option>
+                                {% for user in users %}
+                                <option value="{{ user.id }}" {% if box and box.userId==user.id %}selected{% endif %}>{{
+                                    user.firstName }} {{ user.lastName }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isActive" name="isActive" {% if box and
+                                box.isActive %}checked{% endif %}>
+                            <label class="form-check-label" for="isActive">Activa</label>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="/client/financial/boxes" class="btn btn-light">Cancelar</a>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('boxForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        data.isActive = document.getElementById('isActive').checked;
+        if (data.userId) data.userId = parseInt(data.userId);
+        else data.userId = null;
+
+
+        const url = '{{ "/api/v1/client/financial/boxes/" + (box.id|string) if box else "/api/v1/client/financial/boxes" }}';
+        const method = '{{ "PUT" if box else "POST" }}';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.href = '/client/financial/boxes';
+            } else {
+                alert('Error al guardar');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        }
+    });
+</script>
+{% endblock %}

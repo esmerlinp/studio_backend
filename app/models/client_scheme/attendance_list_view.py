@@ -2,7 +2,7 @@ from app import db
 
 class AttendanceListView(db.Model):
     __tablename__ = 'vlistaasistencias'
-    __table_args__ = {'info': dict(is_view=True)}
+    __table_args__ = {'schema': 'cliente', 'info': dict(is_view=True)}
 
     # Primary Key
     id = db.Column("idasistencia", db.Integer, primary_key=True)

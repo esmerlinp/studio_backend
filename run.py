@@ -76,6 +76,10 @@ from app.api.v1.client_scheme.sub_cycle_course_competencies.routes import sub_cy
 from app.api.v1.client_scheme.classrooms.routes import classrooms_bp
 from app.api.v1.client_scheme.payments.routes import payments_bp
 from app.api.v1.client_scheme.admissions.routes import admissions_bp
+from app.api.v1.client_scheme.parents.routes import parents_bp
+from app.api.v1.client_scheme.roles.routes import client_roles_bp
+from app.api.v1.client_scheme.cafeteria.routes import cafeteria_api_bp
+from app.api.v1.client_scheme.health.routes import health_api_bp
 from app.services.master_scheme.user_service import change_user_password, get_user_scheme, get_user_by_id
 from app import create_app, require_role, require_permission
 from app.utils import i18n
@@ -102,7 +106,85 @@ jwt = JWTManager(app)
 
 @app.context_processor
 def inject_user():
-    return {'current_user': getattr(g, 'user', None)}
+    user = getattr(g, 'user', None)
+    allowed_modules = []
+    
+    if user:
+        try:
+            from app.services.master_scheme.permission_service import get_user_effective_permissions
+            from app.services.master_scheme.user_client_service import get_client_by_user
+            
+            # Get client for current user
+            client = get_client_by_user(user.userId)
+            if client:
+                # Check if user is OWNER or ROOT - they get all modules automatically
+                from app.models.master_scheme.user_model import User
+                user_obj = User.query.get(user.userId)
+                if user_obj and user_obj.rol in ['OWNER', 'ROOT']:
+                    allowed_modules = ['academic', 'finance', 'health', 'parents', 'cafeteria']
+                else:
+                    # Get module permissions (summary mode returns only modules)
+                    permissions = get_user_effective_permissions(
+                        user_id=user.userId,
+                        client_uuid=client.uuid,
+                        summary=True
+                    )
+                    
+                    # Extract module identifiers from permissions
+                    # The function returns records with 'smodulo' field containing module name
+                    module_mapping = {
+                        'Académico': 'academic',
+                        'Financiero': 'finance',
+                        'Enfermería': 'health',
+                        'Padres': 'parents',
+                        'Cafetería': 'cafeteria'
+                    }
+                    
+                    # Check for root user or admin role
+                    # If checking permissions, we iterate over the result
+                    for perm in permissions:
+                        module_name = perm.get('smodulo')
+                        if module_name and module_name in module_mapping:
+                            module_id = module_mapping[module_name]
+                            if module_id not in allowed_modules:
+                                allowed_modules.append(module_id)
+        except Exception as e:
+            # Log error but don't break the page
+            app.logger.error(f"Error loading module permissions: {str(e)}")
+            # Default to showing all modules if there's an error
+            allowed_modules = ['academic', 'finance', 'health', 'parents', 'cafeteria']
+    
+    # Determine current module from request path
+    current_module = None
+    if request.path.startswith('/client/health'):
+        current_module = 'health'
+    elif request.path.startswith('/client/financial'):
+        current_module = 'finance'
+    elif request.path.startswith('/client/parents'):
+        current_module = 'parents'
+    elif request.path.startswith('/client/cafeteria'):
+        current_module = 'cafeteria'
+    elif request.path.startswith('/client/'):
+        current_module = 'academic'
+    
+    # Get menu items for current module
+    menu_items = []
+    if user and current_module:
+        try:
+            from app.services.master_scheme.menu_service import get_user_menu_items
+            from app.services.master_scheme.user_client_service import get_client_by_user
+            
+            client = get_client_by_user(user.userId)
+            if client:
+                menu_items = get_user_menu_items(user.userId, str(client.uuid), current_module)
+        except Exception as e:
+            app.logger.error(f"Error loading menu items: {str(e)}")
+    
+    return {
+        'current_user': user,
+        'allowed_modules': allowed_modules,
+        'menu_items': menu_items
+    }
 
 app.register_blueprint(users_bp)
 app.register_blueprint(auth_bp)
@@ -178,6 +260,10 @@ app.register_blueprint(active_cycle_grade_corrections_bp)
 app.register_blueprint(active_cycle_student_grades_bp)
 app.register_blueprint(school_payments_bp)
 app.register_blueprint(sub_cycle_course_competencies_bp)
+app.register_blueprint(parents_bp, url_prefix='/client/parents')
+app.register_blueprint(client_roles_bp, url_prefix='/api/v1/client/roles')
+app.register_blueprint(cafeteria_api_bp, url_prefix='/api/v1/client/cafeteria')
+app.register_blueprint(health_api_bp, url_prefix='/api/v1/client/health')
 
 # ------------------------------
 # Configuración de idioma
@@ -513,6 +599,24 @@ def client_config_partials():
 def client_config_schedule_blocks():
     return render_template("es/client/academic/configuration/schedule_blocks.html", active_page='schedule_blocks', active_module='academic')
 
+@app.route("/client/config/roles")
+@jwt_required()
+@require_permission("SC_ROLES_CLIENTE", "CONSULTAR")
+def client_config_roles():
+    return render_template("es/client/academic/configuration/roles.html", active_page='roles', active_module='academic')
+
+@app.route("/client/config/roles/<int:role_id>/permissions")
+@jwt_required()
+@require_permission("SC_ROLES_CLIENTE", "EDITAR")
+def client_config_role_permissions(role_id):
+    return render_template("es/client/academic/configuration/permissions.html", active_page='roles', active_module='academic', role_id=role_id)
+
+@app.route("/client/config/roles/<int:role_id>/users")
+@jwt_required()
+@require_permission("SC_ROLES_CLIENTE", "EDITAR")
+def client_config_role_users(role_id):
+    return render_template("es/client/academic/configuration/role_users.html", active_page='roles', active_module='academic', role_id=role_id)
+
 @app.route("/client/configuration/payments")
 @jwt_required()
 def client_payments():
@@ -565,18 +669,49 @@ def client_financial():
 
 @app.route("/client/health")
 @jwt_required()
+@require_permission("SC_ENFERMERIA_DASHBOARD", "CONSULTAR")
 def client_health():
-    return render_template("es/client/health/dashboard.html", active_module='health')
+    from datetime import datetime
+    now_str = datetime.now().strftime('%d/%m/%Y %H:%M')
+    return render_template("es/client/health/dashboard.html", active_module='health', active_page='dashboard', now=now_str)
 
-@app.route("/client/parents")
+@app.route("/client/health/visits")
 @jwt_required()
-def client_parents():
-    return render_template("es/client/parents/dashboard.html", active_module='parents')
+@require_permission("SC_ENFERMERIA_VISITAS", "CONSULTAR")
+def client_health_visits():
+    return render_template("es/client/health/visits.html", active_module='health', active_page='visits')
+
+@app.route("/client/health/inventory")
+@jwt_required()
+@require_permission("SC_ENFERMERIA_INVENTARIO", "CONSULTAR")
+def client_health_inventory():
+    return render_template("es/client/health/inventory.html", active_module='health', active_page='inventory')
+
+# Handled by parents_bp
 
 @app.route("/client/cafeteria")
 @jwt_required()
+@require_permission("SC_CAFETERIA_DASHBOARD", "CONSULTAR")
 def client_cafeteria():
-    return render_template("es/client/cafeteria/dashboard.html", active_module='cafeteria')
+    return render_template("es/client/cafeteria/dashboard.html", active_module='cafeteria', active_page='dashboard')
+
+@app.route("/client/cafeteria/pos")
+@jwt_required()
+@require_permission("SC_CAFETERIA_POS", "CONSULTAR")
+def client_cafeteria_pos():
+    return render_template("es/client/cafeteria/pos.html", active_module='cafeteria', active_page='pos')
+
+@app.route("/client/cafeteria/items")
+@jwt_required()
+@require_permission("SC_CAFETERIA_ITEMS", "CONSULTAR")
+def client_cafeteria_items():
+    return render_template("es/client/cafeteria/items.html", active_module='cafeteria', active_page='items')
+
+@app.route("/client/cafeteria/orders")
+@jwt_required()
+@require_permission("SC_CAFETERIA_ORDERS", "CONSULTAR")
+def client_cafeteria_orders():
+    return render_template("es/client/cafeteria/orders.html", active_module='cafeteria', active_page='orders')
 
 @app.route("/dashboard/plans")
 @jwt_required()

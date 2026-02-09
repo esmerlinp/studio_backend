@@ -1,0 +1,109 @@
+./run.py:@require_permission("SC_DASHBOARD", "CONSULTAR")
+./run.py:@require_permission("SC_CLIENTES", "CONSULTAR")
+./run.py:@require_permission("SC_CLIENTES", "CONSULTAR")
+./run.py:@require_permission("SC_CLIENTES", "CREAR")
+./run.py:@require_permission("SC_CICLOS", "CONSULTAR")
+./run.py:@require_permission("SC_NIVELES", "CONSULTAR")
+./run.py:@require_permission("SC_CURSOS", "CONSULTAR")
+./run.py:@require_permission("SC_AREAS_TEMATICAS", "CONSULTAR")
+./run.py:@require_permission("SC_PARCIALES", "CONSULTAR")
+./run.py:@require_permission("SC_BLOQUES_DE_HORARIOS", "CONSULTAR")
+./run.py:@require_permission("SC_PLANES", "CONSULTAR")
+./run.py:@require_permission("SC_LISTAS_DE_PRECIOS", "CONSULTAR")
+./run.py:@require_permission("SC_PAGOS", "CONSULTAR")
+./run.py:@require_permission("SC_INVOICES", "CONSULTAR")
+./run.py:@require_permission("SC_SECUENCIAS_NCF", "CONSULTAR")
+./run.py:@require_permission("SC_LOGS_NCF", "CONSULTAR")
+./run.py:@require_permission("SC_ALERGIAS", "CONSULTAR")
+./run.py:@require_permission("SC_BANCOS", "CONSULTAR")
+./run.py:@require_permission("SC_CIUDADES", "CONSULTAR")
+./run.py:@require_permission("SC_ESTADOS_CIVILES", "CONSULTAR")
+./run.py:@require_permission("SC_FUNCIONALIDADES", "CONSULTAR")
+./run.py:@require_permission("SC_FUNCIONES", "CONSULTAR")
+./run.py:@require_permission("SC_INSTITUCIONES_MÉDICAS", "CONSULTAR")
+./run.py:@require_permission("SC_ARS", "CONSULTAR")
+./run.py:@require_permission("SC_LOGS_WEBHOOKS", "CONSULTAR")
+./run.py:@require_permission("SC_MÓDULOS", "CONSULTAR")
+./run.py:@require_permission("SC_MONEDAS", "CONSULTAR")
+./run.py:@require_permission("SC_NOMBRES_DE_MESES", "CONSULTAR")
+./run.py:@require_permission("SC_NOMBRES_DE_DÍAS", "CONSULTAR")
+./run.py:@require_permission("SC_OTRAS_ESCUELAS", "CONSULTAR")
+./run.py:@require_permission("SC_COUNTRIES", "CONSULTAR")
+./run.py:@require_permission("SC_USUARIOS", "CONSULTAR")
+./run.py:@require_permission("SC_PANTALLAS", "CONSULTAR")
+./run.py:@require_permission("SC_FUNCIONALIDADES_PANTALLA", "CONSULTAR")
+./run.py:@require_permission("SC_PROCESADORES_DE_PAGO", "CONSULTAR")
+./run.py:@require_permission("SC_PROFESIONES", "CONSULTAR")
+./run.py:@require_permission("SC_PERMISOS_DE_ROLES", "CONSULTAR")
+./run.py:@require_permission("SC_GÉNEROS", "CONSULTAR")
+./run.py:@require_permission("SC_TIPOS_DE_ASISTENCIA", "CONSULTAR")
+./run.py:@require_permission("SC_TIPOS_DE_DOCUMENTO", "CONSULTAR")
+./run.py:@require_permission("SC_TIPOS_DE_SANGRE", "CONSULTAR")
+./run.py:@require_permission("SC_TIPOS_DE_TELÉFONO", "CONSULTAR")
+./run.py:@require_permission("SC_ROLES", "CONSULTAR")
+./run.py:@require_permission("SC_SECTORES", "CONSULTAR")
+./run.py:@require_permission("SC_ROLES_DE_USUARIO", "CONSULTAR")
+./run.py:@require_permission("SC_SESIONES", "CONSULTAR")
+./app/__init__.py:        screen_code (str): Código único de la pantalla (ej: SC_DASHBOARD)
+./app/api/v1/client_scheme/courses/controller.py:@require_permission("SC_CURSOS", "CONSULTAR")
+./app/api/v1/client_scheme/levels/controller.py:@require_permission("SC_NIVELES", "CONSULTAR")
+./app/api/v1/client_scheme/subject_areas/controller.py:@require_permission("SC_AREAS_TEMATICAS", "CONSULTAR")
+./app/api/v1/client_scheme/partials/controller.py:@require_permission("SC_PARCIALES", "CONSULTAR")
+./app/api/v1/master/clients/controller.py:@require_permission("SC_CLIENTES", "CONSULTAR")
+./app/api/v1/master/clients/controller.py:@require_permission("SC_CLIENTES", "CONSULTAR")
+./app/api/v1/master/clients/controller.py:@require_permission("SC_CLIENTES", "CREAR")
+./app/api/v1/master/clients/controller.py:@require_permission("SC_CLIENTES", "EDITAR")
+./app/api/v1/master/clients/controller.py:@require_permission("SC_CLIENTES", "EDITAR")
+./app/api/v1/master/payments/controller.py:@require_permission("SC_PAGOS", "CONSULTAR")
+./app/api/v1/master/roles/controller.py:@require_permission("SC_ROLES_MASTER", "CONSULTAR")
+./app/api/v1/master/roles/controller.py:@require_permission("SC_ROLES_MASTER", "CONSULTAR")
+./app/api/v1/master/roles/controller.py:@require_permission("SC_ROLES_MASTER", "CREAR")
+./app/api/v1/master/roles/controller.py:@require_permission("SC_ROLES_MASTER", "EDITAR")
+./app/api/v1/master/roles/controller.py:@require_permission("SC_ROLES_MASTER", "ELIMINAR")
+./app/api/v1/master/screens/controller.py:@require_permission("SC_PANTALLAS", "CONSULTAR")
+./app/api/v1/master/screens/controller.py:@require_permission("SC_PANTALLAS", "CONSULTAR")
+./app/api/v1/master/screens/controller.py:@require_permission("SC_PANTALLAS", "CREAR")
+./app/api/v1/master/screens/controller.py:@require_permission("SC_PANTALLAS", "EDITAR")
+./app/api/v1/master/screens/controller.py:@require_permission("SC_PANTALLAS", "ELIMINAR")
+./app/api/v1/master/users/controller.py:@require_permission("SC_USUARIOS", "CONSULTAR")
+./app/api/v1/master/users/controller.py:@require_permission("SC_USUARIOS", "CONSULTAR")
+./app/api/v1/master/users/controller.py:@require_permission("SC_USUARIOS", "EDITAR")
+./app/api/v1/master/users/controller.py:@require_permission("SC_USUARIOS", "CREAR")
+./app/api/v1/master/functionalities/controller.py:@require_permission("SC_FUNCIONALIDADES", "CONSULTAR")
+./app/api/v1/master/functionalities/controller.py:@require_permission("SC_FUNCIONALIDADES", "CONSULTAR")
+./app/api/v1/master/functionalities/controller.py:@require_permission("SC_FUNCIONALIDADES", "CREAR")
+./app/api/v1/master/functionalities/controller.py:@require_permission("SC_FUNCIONALIDADES", "EDITAR")
+./app/api/v1/master/functionalities/controller.py:@require_permission("SC_FUNCIONALIDADES", "ELIMINAR")
+./app/templates/es/dashboard/screens.html:                    <small style="color: var(--text-muted);">Ej: SC_INVOICES</small>
+./docs/api/roles.md:**Permiso Requerido**: SC_ROLES_MASTER:CONSULTAR
+./docs/api/roles.md:**Permiso Requerido**: SC_ROLES_MASTER:CREAR
+./docs/api/roles.md:**Permiso Requerido**: SC_ROLES_MASTER:ELIMINAR
+./docs/api/users.md:**Permiso Requerido**: SC_USUARIOS:CONSULTAR
+./docs/api/users.md:**Permiso Requerido**: SC_USUARIOS:CONSULTAR
+./docs/api/users.md:**Permiso Requerido**: SC_USUARIOS:EDITAR
+./docs/api/users.md:**Permiso Requerido**: SC_USUARIOS:CREAR
+./docs/api/client_scheme.md:**Permiso Requerido**: SC_CURSOS:CONSULTAR
+./docs/api/client_scheme.md:**Permiso Requerido**: SC_NIVELES:CONSULTAR
+./docs/api/client_scheme.md:**Permiso Requerido**: SC_PARCIALES:CONSULTAR
+./docs/api/client_scheme.md:**Permiso Requerido**: SC_AREAS_TEMATICAS:CONSULTAR
+./.venv/lib/python3.12/site-packages/cffi/vengine_gen.py:#if defined(_MSC_VER)
+./.venv/lib/python3.12/site-packages/cffi/vengine_gen.py:# if _MSC_VER < 1600   /* MSVC < 2010 */
+./.venv/lib/python3.12/site-packages/cffi/vengine_gen.py:# if _MSC_VER < 1800   /* MSVC < 2013 */
+./.venv/lib/python3.12/site-packages/cffi/vengine_cpy.py:#if defined(_MSC_VER)
+./.venv/lib/python3.12/site-packages/cffi/vengine_cpy.py:# if _MSC_VER < 1600   /* MSVC < 2010 */
+./.venv/lib/python3.12/site-packages/cffi/vengine_cpy.py:# if _MSC_VER < 1800   /* MSVC < 2013 */
+./.venv/lib/python3.12/site-packages/cffi/recompiler.py:        prnt('#  ifdef _MSC_VER')
+./.venv/lib/python3.12/site-packages/sqlalchemy/util/typing.py:_DESC_co = TypeVar("_DESC_co", bound=DescriptorProto, covariant=True)
+./.venv/lib/python3.12/site-packages/sqlalchemy/util/typing.py:class RODescriptorReference(Generic[_DESC_co]):
+./.venv/lib/python3.12/site-packages/sqlalchemy/util/typing.py:        def __get__(self, instance: object, owner: Any) -> _DESC_co: ...
+./.venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/array.py:    text = array_string.replace(r"\"", "_$ESC_QUOTE$_")
+./.venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/array.py:            result.append(tok.replace("_$ESC_QUOTE$_", '"'))
+./.venv/lib/python3.12/site-packages/billiard/compat.py:        return os.sysconf('SC_OPEN_MAX')
+./.venv/lib/python3.12/site-packages/billiard/context.py:                    num = os.sysconf('SC_NPROCESSORS_ONLN')
+./scripts/grant_invoice_permissions.py:                screen_code = f"SC_{screen_name.upper().replace(' ', '_')}"
+./scripts/grant_all_permissions.py:                screen_code = f"SC_{screen_name.upper().replace(' ', '_')}"
+./scripts/migrate_screen_codes.py:    # Ej: "Dashboard" -> "SC_DASHBOARD"
+./scripts/migrate_screen_codes.py:    # Ej: "Users" -> "SC_USERS"
+./scripts/migrate_screen_codes.py:            return f"SC_{base}"
+./scripts/migrate_screen_codes.py:        return "SC_DASHBOARD"
+./scripts/migrate_screen_codes.py:    return f"SC_{name.upper().replace(' ', '_')}"

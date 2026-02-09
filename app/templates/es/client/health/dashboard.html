@@ -1,43 +1,317 @@
 {% extends "es/client/layout.html" %}
 
-{% block title %}Enfermería - Akdmia{% endblock %}
+{% block title %}Consola de Enfermería - Akdmia{% endblock %}
 
 {% block content %}
 <style>
-    .welcome-card {
-        background: white;
-        padding: 40px;
-        border-radius: 12px;
-        border: 1px solid #e6ebf1;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(50, 50, 93, 0.05);
+    .nursing-container {
+        display: grid;
+        grid-template-columns: 1fr 450px;
+        gap: 24px;
+        height: calc(100vh - 120px);
     }
 
-    .icon-box {
-        width: 80px;
-        height: 80px;
-        background: #fff5f5;
-        color: #ef4444;
+    .main-column {
+        overflow-y: auto;
+        padding-right: 8px;
+    }
+
+    .search-section {
+        background: white;
+        padding: 32px;
         border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        margin-bottom: 24px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .visit-form {
+        background: white;
+        padding: 32px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Student 360 Side Panel */
+    .health-panel {
+        background: #f8fafc;
+        border-radius: 24px;
+        border: 1px solid #e2e8f0;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 32px;
-        margin: 0 auto 24px;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .panel-section {
+        padding: 24px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .critical-alert {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: 1px solid #fecaca;
+    }
+
+    .auth-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    .auth-valid {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .auth-invalid {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .contact-card {
+        background: white;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 8px;
     }
 </style>
 
-<div class="welcome-card">
-    <div class="icon-box">
-        <i class="fas fa-heartbeat"></i>
-    </div>
-    <h1 style="color: var(--stripe-dark); margin-bottom: 12px;">Módulo de Enfermería</h1>
-    <p style="color: var(--stripe-slate); margin-bottom: 32px;">Control médico, historial de salud y reporte de
-        incidencias.</p>
+<div class="nursing-container">
+    <div class="main-column">
+        <div class="search-section">
+            <h2 class="fw-bold mb-4">Registro de Nueva Visita</h2>
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <label class="form-label text-muted small fw-bold">BUSCAR ESTUDIANTE</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white border-end-0"><i
+                                class="fas fa-search text-muted"></i></span>
+                        <select id="studentSearch" class="form-select form-select-lg border-start-0"
+                            style="background: white;">
+                            <option value="">Seleccione un estudiante...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-inline-block text-start">
+                        <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill">
+                            <i class="far fa-clock me-1"></i> {{ now }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div style="padding: 24px; border: 1px dashed var(--stripe-light); border-radius: 8px; color: var(--stripe-light);">
-        <i class="fas fa-tools" style="margin-right: 8px;"></i>
-        Este módulo se encuentra actualmente en desarrollo.
+        <div class="visit-form" id="visitFormSection" style="display: none; opacity: 0; transition: opacity 0.3s;">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Motivo de Consulta</label>
+                    <input type="text" id="reason" class="form-control" placeholder="Ej: Dolor de cabeza, fiebre...">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Tipo de Tratamiento</label>
+                    <select id="treatmentType" class="form-control" onchange="toggleMedSection()">
+                        <option value="observation">Observación / Descanso</option>
+                        <option value="first_aid">Primeros Auxilios (Curación)</option>
+                        <option value="medication">Suministro de Medicamento</option>
+                    </select>
+                </div>
+
+                <!-- Vital Signs Grid -->
+                <div class="col-12">
+                    <label class="form-label fw-bold mb-3">Signos Vitales</label>
+                    <div class="row g-3">
+                        <div class="col">
+                            <input type="text" id="v_temp" class="form-control" placeholder="Temp (°C)">
+                        </div>
+                        <div class="col">
+                            <input type="text" id="v_pressure" class="form-control" placeholder="Presión">
+                        </div>
+                        <div class="col">
+                            <input type="text" id="v_heart" class="form-control" placeholder="Ritmo Card.">
+                        </div>
+                        <div class="col">
+                            <input type="text" id="v_ox" class="form-control" placeholder="O2 %">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medication Section (Dynamic) -->
+                <div id="medSection" class="col-12" style="display: none;">
+                    <div class="p-4 rounded-4" style="background: #f1f5f9; border: 1px dashed #cbd5e1;">
+                        <label class="form-label fw-bold text-primary"><i class="fas fa-pills me-2"></i>Validación de
+                            Medicamento</label>
+                        <input type="text" id="medName" class="form-control mb-2"
+                            placeholder="Nombre completo del medicamento">
+                        <div id="medValidationMsg" class="small mt-2"></div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-bold">Notas de Enfermería</label>
+                    <textarea id="nurseNotes" class="form-control" rows="4"></textarea>
+                </div>
+
+                <div class="col-12 text-end">
+                    <button class="btn btn-primary btn-lg px-5 py-3 rounded-4 fw-bold shadow-sm" onclick="saveVisit()">
+                        Guardar y Notificar Padres <i class="fas fa-paper-plane ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Placeholder when no student selected -->
+        <div id="formPlaceholder" class="text-center py-5 opacity-50">
+            <i class="fas fa-user-injured fa-4x mb-4"></i>
+            <h4>Seleccione un estudiante para iniciar el registro</h4>
+        </div>
+    </div>
+
+    <!-- Right Summary Panel -->
+    <div class="health-panel">
+        <div class="panel-section bg-white">
+            <h5 class="fw-bold mb-3">Expediente Rápido 360</h5>
+            <div id="studentSummary">
+                <p class="text-muted small">Seleccione un estudiante para ver alérgenos, condiciones y contactos.</p>
+            </div>
+        </div>
+
+        <div class="panel-section flex-1 overflow-auto" id="healthDetails" style="display: none;">
+            <div class="mb-4">
+                <h6 class="text-uppercase small fw-bold text-danger mb-3">Alerta de Salud</h6>
+                <div id="conditionsList"></div>
+            </div>
+
+            <div class="mb-4">
+                <h6 class="text-uppercase small fw-bold text-primary mb-3">Autorizaciones Médicas</h6>
+                <div id="authList"></div>
+            </div>
+
+            <div class="mb-2">
+                <h6 class="text-uppercase small fw-bold text-success mb-3">Contactos de Emergencia</h6>
+                <div id="contactsList"></div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    let currentProfile = null;
+
+    async function loadStudents() {
+        // Use existing students list or POS data endpoint
+        const response = await fetch('/api/v1/client/cafeteria/pos-data');
+        const data = await response.json();
+        const select = document.getElementById('studentSearch');
+        data.students.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.name;
+            select.appendChild(opt);
+        });
+    }
+
+    async function loadStudentProfile(studentId) {
+        if (!studentId) {
+            document.getElementById('visitFormSection').style.display = 'none';
+            document.getElementById('formPlaceholder').style.display = 'block';
+            document.getElementById('healthDetails').style.display = 'none';
+            return;
+        }
+
+        const response = await fetch(`/api/v1/client/health/student/${studentId}/profile`);
+        currentProfile = await response.json();
+
+        renderProfile(currentProfile);
+
+        document.getElementById('visitFormSection').style.display = 'block';
+        document.getElementById('visitFormSection').style.opacity = '1';
+        document.getElementById('formPlaceholder').style.display = 'none';
+        document.getElementById('healthDetails').style.display = 'block';
+    }
+
+    function renderProfile(profile) {
+        // Render Conditions
+        const cList = document.getElementById('conditionsList');
+        if (profile.conditions.length > 0) {
+            cList.innerHTML = profile.conditions.map(c => `
+                <div class="critical-alert">
+                    <div class="fw-bold">${c.conditionName}</div>
+                    <div class="small">${c.careInstructions || 'Sin instrucciones adicionales.'}</div>
+                </div>
+            `).join('');
+        } else {
+            cList.innerHTML = '<p class="small text-muted italic">Sin condiciones crónicas registradas.</p>';
+        }
+
+        // Render Authorizations
+        const aList = document.getElementById('authList');
+        aList.innerHTML = profile.activeAuthorizations.map(a => `
+            <div class="mb-2 p-2 border rounded bg-white">
+                <div class="fw-bold small">${a.medicationName}</div>
+                <span class="auth-badge auth-valid">Autorizado por: ${a.authorizedBy}</span>
+            </div>
+        `).join('') || '<p class="small text-muted italic">Sin autorizaciones vigentes.</p>';
+
+        // Render Contacts
+        const coList = document.getElementById('contactsList');
+        coList.innerHTML = profile.emergencyContacts.map(c => `
+            <div class="contact-card">
+                <div class="fw-bold small">${c.name} (${c.relationship})</div>
+                <div class="text-primary fw-bold">${c.phone1}</div>
+            </div>
+        `).join('') || '<p class="small text-muted italic">Sin contactos de emergencia específicos.</p>';
+    }
+
+    function toggleMedSection() {
+        const type = document.getElementById('treatmentType').value;
+        const medSec = document.getElementById('medSection');
+        medSec.style.display = type === 'medication' ? 'block' : 'none';
+    }
+
+    async function saveVisit() {
+        const studentId = document.getElementById('studentSearch').value;
+        const payload = {
+            studentId: studentId,
+            reason: document.getElementById('reason').value,
+            treatment: document.getElementById('treatmentType').value,
+            isMedication: document.getElementById('treatmentType').value === 'medication',
+            medicationName: document.getElementById('medName').value,
+            vitalSigns: {
+                temp: document.getElementById('v_temp').value,
+                pressure: document.getElementById('v_pressure').value,
+                pulse: document.getElementById('v_heart').value,
+                oxygen: document.getElementById('v_ox').value
+            },
+            nurseNotes: document.getElementById('nurseNotes').value
+        };
+
+        const response = await fetch('/api/v1/client/health/visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert("✅ Visita registrada correctamente. El padre ha sido notificado.");
+            window.location.reload();
+        } else {
+            alert("❌ Error: " + result.error);
+        }
+    }
+
+    document.getElementById('studentSearch').addEventListener('change', (e) => loadStudentProfile(e.target.value));
+
+    // Initial
+    loadStudents();
+</script>
 {% endblock %}

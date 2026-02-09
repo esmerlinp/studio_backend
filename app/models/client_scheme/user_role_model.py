@@ -3,6 +3,7 @@ from app import db
 
 class UserRole(db.Model):
     __tablename__ = "usuariosroles"
+    __table_args__ = {"schema": "cliente"}
 
     id = db.Column("idusuariorol", db.Integer, primary_key=True)
     user_id = db.Column("idusuario", db.Integer, nullable=False, index=True)

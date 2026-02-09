@@ -2,7 +2,7 @@ from app import db
 
 class ActiveCycleStudentView(db.Model):
     __tablename__ = 'vestudiantescicloactivo'
-    __table_args__ = {'info': dict(is_view=True)}
+    __table_args__ = {'schema': 'cliente', 'info': dict(is_view=True)}
 
     # Primary Key
     studentCycleClassroomId = db.Column("idestudianteaulacic", db.Integer, primary_key=True)

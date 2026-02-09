@@ -1,43 +1,289 @@
 {% extends "es/client/layout.html" %}
 
-{% block title %}Padres - Akdmia{% endblock %}
+{% block title %}Mi Familia - Akdmia{% endblock %}
 
 {% block content %}
 <style>
-    .welcome-card {
-        background: white;
-        padding: 40px;
-        border-radius: 12px;
-        border: 1px solid #e6ebf1;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(50, 50, 93, 0.05);
+    :root {
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --accent-green: #10b981;
+        --accent-blue: #3b82f6;
+        --accent-red: #ef4444;
+        --accent-orange: #f59e0b;
     }
 
-    .icon-box {
-        width: 80px;
-        height: 80px;
-        background: #f0fdf4;
-        color: #22c55e;
-        border-radius: 20px;
+    .dashboard-header {
+        margin-bottom: 32px;
+    }
+
+    .welcome-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--stripe-dark);
+        margin-bottom: 8px;
+    }
+
+    .welcome-subtitle {
+        color: var(--stripe-slate);
+        font-size: 16px;
+    }
+
+    /* Grid Layout */
+    .student-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    /* Student 360 Card */
+    .student-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: var(--card-shadow);
+    }
+
+    .student-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .student-header {
+        padding: 24px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .student-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--accent-blue);
+        color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 32px;
-        margin: 0 auto 24px;
+        font-size: 24px;
+        font-weight: 700;
+        border: 3px solid white;
+        box-shadow: 0 0 0 1px #e2e8f0;
+    }
+
+    .student-info h3 {
+        margin: 0;
+        font-size: 18px;
+        color: var(--stripe-dark);
+    }
+
+    .student-info p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--stripe-slate);
+    }
+
+    .student-body {
+        padding: 20px;
+    }
+
+    /* Status Widgets */
+    .status-widget {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        background: #f8fafc;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .status-widget:hover {
+        background: white;
+        border-color: #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .widget-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .icon-health {
+        background: #fee2e2;
+        color: var(--accent-red);
+    }
+
+    .icon-academic {
+        background: #dbeafe;
+        color: var(--accent-blue);
+    }
+
+    .icon-wallet {
+        background: #d1fae5;
+        color: var(--accent-green);
+    }
+
+    .widget-content {
+        flex: 1;
+    }
+
+    .widget-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 2px;
+    }
+
+    .widget-value {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .critical-badge {
+        background: var(--accent-red);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    /* Actions */
+    .student-actions {
+        padding: 16px 20px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .btn-360 {
+        background: white;
+        border: 1px solid #e2e8f0;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--accent-blue);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-360:hover {
+        background: var(--accent-blue);
+        color: white;
+        border-color: var(--accent-blue);
     }
 </style>
 
-<div class="welcome-card">
-    <div class="icon-box">
-        <i class="fas fa-users"></i>
-    </div>
-    <h1 style="color: var(--stripe-dark); margin-bottom: 12px;">Portal de Padres</h1>
-    <p style="color: var(--stripe-slate); margin-bottom: 32px;">Seguimiento académico y comunicación directa con la
-        institución.</p>
-
-    <div style="padding: 24px; border: 1px dashed var(--stripe-light); border-radius: 8px; color: var(--stripe-light);">
-        <i class="fas fa-tools" style="margin-right: 8px;"></i>
-        Este módulo se encuentra actualmente en desarrollo.
-    </div>
+<div class="dashboard-header">
+    <h1 class="welcome-title">Hola, {{ user.firstName }}</h1>
+    <p class="welcome-subtitle">Aquí tienes un resumen del estado de tus hijos para el ciclo actual.</p>
 </div>
+
+<!-- Family Financial Summary -->
+<div class="financial-bar"
+    style="background: var(--accent-blue); color: white; padding: 24px; border-radius: 16px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <p style="margin: 0; opacity: 0.9; font-size: 14px;">Balance Familiar Consolidado</p>
+        <h2 style="margin: 5px 0 0; font-size: 32px; font-weight: 700;">${{ family_data.financialSummary.totalBalance }}
+        </h2>
+    </div>
+    <a href="/client/financial" class="btn-pay"
+        style="background: white; color: var(--accent-blue); padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        Pagar Mensualidad
+    </a>
+</div>
+
+<div class="student-grid">
+    {% for student in family_data.students %}
+    <div class="student-card">
+        <div class="student-header">
+            <div class="student-avatar">
+                {{ student.fullName[0] }}
+            </div>
+            <div class="student-info">
+                <h3>{{ student.fullName }}</h3>
+                <p>Código: {{ student.studentCode }}</p>
+            </div>
+        </div>
+
+        <div class="student-body">
+            <!-- Health Widget -->
+            <div class="status-widget">
+                <div class="widget-icon icon-health">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="widget-content">
+                    <div class="widget-title">Salud y Enfermería</div>
+                    <div class="widget-value">
+                        {% if student.health.hasCriticalConditions %}
+                        <span class="critical-badge">Críticos detectados</span>
+                        {% else %}
+                        Estado normal ({{ student.health.conditionsCount }} condiciones)
+                        {% endif %}
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 12px;"></i>
+            </div>
+
+            <!-- Attendance Widget -->
+            <div class="status-widget">
+                <div class="widget-icon icon-academic">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="widget-content">
+                    <div class="widget-title">Asistencia</div>
+                    <div class="widget-value">
+                        {% if student.attendance %}
+                        Último: {{ student.attendance[0].type }} ({{ student.attendance[0].date }})
+                        {% else %}
+                        Sin registros recientes
+                        {% endif %}
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 12px;"></i>
+            </div>
+
+            <!-- Wallet Widget -->
+            <div class="status-widget">
+                <div class="widget-icon icon-wallet">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="widget-content">
+                    <div class="widget-title">Billetera Estudiantil</div>
+                    <div class="widget-value">
+                        Saldo: <strong style="color: var(--accent-green);">${{ student.wallet.balance }}</strong>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 12px;"></i>
+            </div>
+        </div>
+
+        <div class="student-actions">
+            <a href="/client/parents/student/{{ student.id }}/config" class="btn-360"
+                style="border: none; background: transparent; color: var(--stripe-slate);">
+                <i class="fas fa-cog"></i> Configurar
+            </a>
+            <a href="/client/parents/student/{{ student.id }}" class="btn-360">
+                Ver Detalles 360
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
 {% endblock %}

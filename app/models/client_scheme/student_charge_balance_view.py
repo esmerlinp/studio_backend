@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import NUMERIC
 
 class StudentChargeBalanceView(db.Model):
     __tablename__ = 'vestudiantescargosbalance'
-    __table_args__ = {'info': dict(is_view=True)}
+    __table_args__ = {'schema': 'cliente', 'info': dict(is_view=True)}
 
     # Composite Primary Key candidates
     studentChargeCycleId = db.Column("idestudiantecargocic", db.Integer, primary_key=True)

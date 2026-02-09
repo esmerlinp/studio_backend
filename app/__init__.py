@@ -100,6 +100,11 @@ def create_app():
     
     app.jinja_env.globals['url_args_without_page'] = url_args_without_page
 
+    # Initialize event bus subscribers
+    with app.app_context():
+        from app.services.client_scheme.communication_service import initialize_communication_subscribers
+        initialize_communication_subscribers()
+
     return app
 
 def track_activity(func):
@@ -261,10 +266,7 @@ def require_role(role_codes:list[str]):
 def require_permission(screen_code: str, functionality_code: str):
     """
     Verifica si el usuario tiene permiso para acceder a una funcionalidad específica de una pantalla.
-    
-    Args:
-        screen_code (str): Código único de la pantalla (ej: SC_DASHBOARD)
-        functionality_code (str): Código de la funcionalidad (ej: VIEW, EDIT, DELETE)
+    Usa un enfoque sensible al contexto (Master vs Cliente).
     """
     def decorator(fn):
         @wraps(fn)
@@ -274,7 +276,7 @@ def require_permission(screen_code: str, functionality_code: str):
             if not user_id:
                 return error(i18n._("auth.not_authenticated"), 401)
                 
-            # Verifica si el usuario es ROOT (acceso total)
+            # Verifica si el usuario es ROOT (acceso total a todo el sistema)
             is_root = (
                 db.session.query(UserRole)
                 .join(Role)
@@ -286,37 +288,32 @@ def require_permission(screen_code: str, functionality_code: str):
                 return fn(*args, **kwargs)
 
             try:
-                # 1. Obtener IDs de Roles del usuario
-                user_roles_subquery = (
-                    select(UserRole.role_id)
-                    .join(Role)
-                    .where(
-                        UserRole.user_id == user_id,
-                        Role.is_active == True
-                    )
-                    .scalar_subquery()
-                )
+                # 1. Determinar el contexto del cliente
+                from app.services.master_scheme.user_client_service import get_client_by_user
+                from app.services.master_scheme.permission_service import check_user_permission
 
-                # 2. Verificar si alguno de esos roles tiene permiso
-                # Join: RolePermission -> ScreenFunctionality -> Screen & Functionality
-                has_permission = (
-                    db.session.query(RolePermission)
-                    .join(ScreenFunctionality, RolePermission.screen_functionality_id == ScreenFunctionality.id)
-                    .join(Screen, ScreenFunctionality.screen_id == Screen.id)
-                    .join(Functionality, ScreenFunctionality.functionality_id == Functionality.id)
-                    .filter(
-                        RolePermission.role_id.in_(user_roles_subquery),
-                        RolePermission.is_allowed == True,
-                        ScreenFunctionality.is_active == True,
-                        Screen.code == screen_code,
-                        Functionality.code == functionality_code
-                    )
-                    .first()
+                # Prioridad: Header -> Args -> Default del usuario
+                client_uuid = request.headers.get('X-Client-UUID') or request.args.get('client_uuid')
+                
+                if not client_uuid:
+                    client = get_client_by_user(user_id=user_id)
+                    if client:
+                        client_uuid = str(client.uuid)
+                
+                if not client_uuid:
+                    app.logger.error(f"Permission check failed: No client context for user {user_id}")
+                    return error(i18n._("auth.client_context_required"), 400)
+
+                # 2. Verificar permiso usando el servicio unificado (fn_permisos_usuario)
+                has_permission = check_user_permission(
+                    user_id=int(user_id),
+                    client_uuid=client_uuid,
+                    screen_code=screen_code,
+                    functionality_code=functionality_code
                 )
 
                 if not has_permission:
-                    # Log attempt?
-                    app.logger.warning(f"Access Denied: User {user_id} tried to access {screen_code}:{functionality_code}")
+                    app.logger.warning(f"Access Denied: User {user_id} tried to access {screen_code}:{functionality_code} in client {client_uuid}")
                     if request.path.startswith('/api/'):
                         return error(i18n._("auth.insufficient_permissions"), 403)
                     return redirect('/')

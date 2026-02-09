@@ -1,0 +1,233 @@
+Tables in 'cliente' schema:
+  roles
+  rolespermisos
+  usuariosroles
+
+Function definition for cliente.fn_permisos_usuario (COMPLETE):
+CREATE OR REPLACE FUNCTION cliente.fn_permisos_usuario(p_idusuario integer, p_uuidcliente uuid, p_uuidmodulo uuid DEFAULT NULL::uuid, p_uuidpantalla uuid DEFAULT NULL::uuid, p_uuidfuncionalidad uuid DEFAULT NULL::uuid, p_bresumenmodulos boolean DEFAULT false)
+ RETURNS TABLE(idusuario integer, idmodulo smallint, uuidmodulo uuid, smodulo character varying, siconomodulo character varying, iordenmodulo smallint, idpantalla integer, uuidpantalla uuid, spantalla character varying, sdescripcionpantalla character varying, sruta character varying, siconopantalla character varying, iordenpantalla smallint, idfuncionalidad integer, uuidfuncionalidad uuid, sfuncionalidad character varying, sdescripcionfuncionalidad character varying, scodigofuncionalidad character varying, bpermitido boolean, itotalpantallas bigint, itotalpermisosactivos bigint)
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_esquema_cliente VARCHAR(63);
+    v_sql TEXT;
+    v_select TEXT;
+    v_from TEXT;
+    v_where TEXT;
+    v_group_by TEXT := '';
+    v_order_by TEXT;
+    v_es_agrupado BOOLEAN;
+    v_param_count INTEGER := 1; -- Solo p_idusuario
+BEGIN
+    -- ==========================================
+    -- VALIDACIONES INICIALES
+    -- ==========================================
+    
+    -- Validar usuario activo
+    IF NOT EXISTS (
+        SELECT 1 FROM master.usuarios u
+        WHERE u.idusuario = p_idusuario AND u.bactivo = TRUE
+    ) THEN
+        RAISE EXCEPTION 'Usuario con ID % no encontrado o inactivo', p_idusuario;
+    END IF;
+    
+    -- Validar acceso al cliente
+    IF NOT EXISTS (
+        SELECT 1 FROM master.usuariosclientes uc
+        WHERE uc.idusuario = p_idusuario AND uc.uuidcliente = p_uuidcliente
+    ) THEN
+        RAISE EXCEPTION 'Usuario % no tiene acceso al cliente %', p_idusuario, p_uuidcliente;
+    END IF;
+    
+    -- Obtener esquema del cliente
+    SELECT c.sesquema 
+    INTO v_esquema_cliente
+    FROM master.clientes c
+    WHERE c.uuidcliente = p_uuidcliente;
+    
+    IF v_esquema_cliente IS NULL THEN
+        RAISE EXCEPTION 'Cliente con UUID % no encontrado', p_uuidcliente;
+    END IF;
+    
+    -- Validar que el esquema exista
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.schemata s
+        WHERE s.schema_name = v_esquema_cliente
+    ) THEN
+        RAISE EXCEPTION 'Esquema "%" no existe', v_esquema_cliente;
+    END IF;
+    
+    -- ==========================================
+    -- DETERMINAR TIPO DE CONSULTA
+    -- ==========================================
+    
+    v_es_agrupado := p_bresumenmodulos OR 
+                     (p_uuidmodulo IS NOT NULL AND p_uuidpantalla IS NULL AND p_uuidfuncionalidad IS NULL);
+    
+    -- ==========================================
+    -- CONSTRUCCIÓN DINÁMICA DEL SELECT
+    -- ==========================================
+    
+    v_select := '
+        SELECT 
+            u.idusuario,
+            m.idmodulo,
+            m.uuidmodulo,
+            m.smodulo,
+            m.sicono AS siconomodulo,
+            m.iorden AS iordenmodulo,';
+    
+    IF v_es_agrupado THEN
+        -- SELECT para consultas agrupadas
+        v_select := v_select || '
+            NULL::INTEGER AS idpantalla,
+            NULL::UUID AS uuidpantalla,
+            NULL::VARCHAR AS spantalla,
+            NULL::VARCHAR AS sdescripcionpantalla,
+            NULL::VARCHAR AS sruta,
+            NULL::VARCHAR AS siconopantalla,
+            NULL::SMALLINT AS iordenpantalla,
+            NULL::INTEGER AS idfuncionalidad,
+            NULL::UUID AS uuidfuncionalidad,
+            NULL::VARCHAR AS sfuncionalidad,
+            NULL::VARCHAR AS sdescripcionfuncionalidad,
+            NULL::VARCHAR AS scodigofuncionalidad,
+            CASE 
+                WHEN MAX(CASE WHEN COALESCE(rp.bpermitido, FALSE) THEN 1 ELSE 0 END) > 0 
+                THEN TRUE 
+                ELSE FALSE 
+            END AS bpermitido,';
+        
+        IF p_bresumenmodulos THEN
+            v_select := v_select || '
+            COUNT(DISTINCT p.idpantalla) AS itotalpantallas,
+            SUM(CASE WHEN COALESCE(rp.bpermitido, FALSE) THEN 1 ELSE 0 END) AS itotalpermisosactivos';
+        ELSE
+            v_select := v_select || '
+            NULL::BIGINT AS itotalpantallas,
+            NULL::BIGINT AS itotalpermisosactivos';
+        END IF;
+    ELSE
+        -- SELECT para consultas detalladas
+        v_select := v_select || '
+            p.idpantalla,
+            p.uuidpantalla,
+            p.spantalla,
+            p.sdescripcion AS sdescripcionpantalla,
+            p.sruta,
+            p.sicono AS siconopantalla,
+            p.iorden AS iordenpantalla,
+            f.idfuncionalidad,
+            f.uuidfuncionalidad,
+            f.sfuncionalidad,
+            f.sdescripcion AS sdescripcionfuncionalidad,
+            f.scodigo AS scodigofuncionalidad,
+            COALESCE(rp.bpermitido, FALSE) AS bpermitido,
+            NULL::BIGINT AS itotalpantallas,
+            NULL::BIGINT AS itotalpermisosactivos';
+    END IF;
+    
+    -- ==========================================
+    -- CONSTRUCCIÓN DINÁMICA DEL FROM
+    -- ==========================================
+    
+    v_from := format('
+        FROM 
+            master.usuarios u
+            LEFT JOIN %I.usuariosroles ur ON u.idusuario = ur.idusuario
+            LEFT JOIN %I.roles r ON ur.idrol = r.idrol AND r.bactivo = TRUE',
+        v_esquema_cliente, v_esquema_cliente);
+    
+    IF v_es_agrupado THEN
+        v_from := v_from || '
+            CROSS JOIN master.modulos m
+            LEFT JOIN master.pantallas p ON p.idmodulo = m.idmodulo AND p.bactivo = TRUE
+            LEFT JOIN master.pantallasfuncionalidades pf ON pf.idpantalla = p.idpantalla AND pf.bactivo = TRUE
+            LEFT JOIN master.funcionalidades f ON pf.idfuncionalidad = f.idfuncionalidad AND f.bactivo = TRUE';
+    ELSE
+        v_from := v_from || '
+            CROSS JOIN master.pantallasfuncionalidades pf
+            INNER JOIN master.pantallas p ON pf.idpantalla = p.idpantalla AND p.bactivo = TRUE
+            INNER JOIN master.funcionalidades f ON pf.idfuncionalidad = f.idfuncionalidad AND f.bactivo = TRUE
+            INNER JOIN master.modulos m ON p.idmodulo = m.idmodulo AND m.bactivo = TRUE';
+    END IF;
+    
+    v_from := v_from || format('
+            LEFT JOIN %I.rolespermisos rp ON rp.idrol = ur.idrol 
+                AND rp.idpantallafuncionalidad = pf.idpantallafuncionalidad',
+        v_esquema_cliente);
+    
+    -- ==========================================
+    -- CONSTRUCCIÓN DINÁMICA DEL WHERE
+    -- ==========================================
+    
+    v_where := '
+        WHERE 
+            u.idusuario = $1
+            AND u.bactivo = TRUE
+            AND m.bactivo = TRUE';
+    
+    IF NOT v_es_agrupado THEN
+        v_where := v_where || '
+            AND pf.bactivo = TRUE';
+    END IF;
+    
+    -- Agregar filtros opcionales
+    IF p_uuidmodulo IS NOT NULL THEN
+        v_param_count := v_param_count + 1;
+        v_where := v_where || format('
+            AND m.uuidmodulo = $%s', v_param_count);
+    END IF;
+    
+    IF p_uuidpantalla IS NOT NULL THEN
+        v_param_count := v_param_count + 1;
+        v_where := v_where || format('
+            AND p.uuidpantalla = $%s', v_param_count);
+    END IF;
+    
+    IF p_uuidfuncionalidad IS NOT NULL THEN
+        v_param_count := v_param_count + 1;
+        v_where := v_where || format('
+            AND f.uuidfuncionalidad = $%s', v_param_count);
+    END IF;
+    
+    -- ==========================================
+    -- CONSTRUCCIÓN DINÁMICA DEL GROUP BY
+    -- ==========================================
+    
+    IF v_es_agrupado THEN
+        v_group_by := '
+        GROUP BY
+            u.idusuario,
+            m.idmodulo,
+            m.uuidmodulo,
+            m.smodulo,
+            m.sicono,
+            m.iorden';
+    END IF;
+    
+    -- ==========================================
+    -- CONSTRUCCIÓN DINÁMICA DEL ORDER BY
+    -- ==========================================
+    
+    IF v_es_agrupado THEN
+        v_order_by := '
+        ORDER BY m.iorden';
+    ELSE
+        v_order_by := '
+        ORDER BY m.iorden, p.iorden, f.sfuncionalidad';
+    END IF;
+    
+    -- ==========================================
+    -- ENSAMBLAR Y EJECUTAR CONSULTA
+    -- ==========================================
+    
+    v_sql := v_select || v_from || v_where || v_group_by || v_order_by;
+    
+    -- Ejecutar con parámetros dinámicos
+    RETURN QUERY EXECUTE v_sql 
+        USING p_idusuario, p_uuidmodulo, p_uuidpantalla, p_uuidfuncionalidad;
+    
+END;
+$function$
+

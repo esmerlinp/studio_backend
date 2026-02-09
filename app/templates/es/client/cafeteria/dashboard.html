@@ -1,43 +1,114 @@
 {% extends "es/client/layout.html" %}
 
-{% block title %}Cafetería - Akdmia{% endblock %}
+{% block title %}Cafetería - Dashboard{% endblock %}
 
 {% block content %}
-<style>
-    .welcome-card {
-        background: white;
-        padding: 40px;
-        border-radius: 12px;
-        border: 1px solid #e6ebf1;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(50, 50, 93, 0.05);
-    }
-
-    .icon-box {
-        width: 80px;
-        height: 80px;
-        background: #fffbeb;
-        color: #f59e0b;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 32px;
-        margin: 0 auto 24px;
-    }
-</style>
-
-<div class="welcome-card">
-    <div class="icon-box">
-        <i class="fas fa-utensils"></i>
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-2 text-gray-800">Panel de Cafetería</h1>
+        <p class="text-muted">Resumen de ventas y operaciones diarias.</p>
     </div>
-    <h1 style="color: var(--stripe-dark); margin-bottom: 12px;">Módulo de Cafetería</h1>
-    <p style="color: var(--stripe-slate); margin-bottom: 32px;">Menú diario, gestión de pedidos y control de inventario.
-    </p>
+</div>
 
-    <div style="padding: 24px; border: 1px dashed var(--stripe-light); border-radius: 8px; color: var(--stripe-light);">
-        <i class="fas fa-tools" style="margin-right: 8px;"></i>
-        Este módulo se encuentra actualmente en desarrollo.
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100 py-2" style="border-left: 4px solid #1cc88a !important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Ventas Hoy</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-gray-300" style="opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100 py-2" style="border-left: 4px solid #36b9cc !important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Transacciones</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-cash-register fa-2x text-gray-300" style="opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100 py-2" style="border-left: 4px solid #f6c23e !important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Ticket Promedio</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-chart-line fa-2x text-gray-300" style="opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100 py-2" style="border-left: 4px solid #4e73df !important;">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Menú Activo</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">0 Items</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-utensils fa-2x text-gray-300" style="opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Orders -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header py-3 bg-white d-flex align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Últimos Pedidos</h6>
+                <a href="/client/cafeteria/pos" class="btn btn-sm btn-primary">Ir al POS</a>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-5">
+                    <img src="https://cdni.iconscout.com/illustration/premium/thumb/empty-cart-2130356-1800917.png"
+                        alt="No data" style="width: 200px; opacity: 0.5;">
+                    <p class="text-muted mt-3">No hay transacciones recientes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm border-0 mb-4 h-100">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">Productos Más Vendidos</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        No hay datos disponibles
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

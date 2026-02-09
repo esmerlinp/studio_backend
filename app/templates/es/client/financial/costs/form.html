@@ -1,0 +1,109 @@
+{% extends "es/client/layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h4 class="mb-0">{% if cost %}Editar{% else %}Nuevo{% endif %} Costo por Curso</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="costForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ciclo Escolar</label>
+                            <select class="form-select" name="cycleId" required>
+                                <option value="">Seleccione...</option>
+                                {% for cycle in cycles %}
+                                <option value="{{ cycle.id }}" {% if cost and cost.cycleId==cycle.id %}selected{% endif
+                                    %}>{{ cycle.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Curso</label>
+                            <select class="form-select" name="courseId" required>
+                                <option value="">Seleccione...</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}" {% if cost and cost.courseId==course.id %}selected{%
+                                    endif %}>{{ course.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Concepto de Pago</label>
+                            <select class="form-select" name="conceptId" required>
+                                <option value="">Seleccione...</option>
+                                {% for concept in concepts %}
+                                <option value="{{ concept.id }}" {% if cost and cost.conceptId==concept.id %}selected{%
+                                    endif %}>{{ concept.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Monto</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" name="amount"
+                                    value="{{ cost.amount if cost else '' }}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isActive" name="isActive" {% if cost and
+                                cost.isActive %}checked{% endif %}>
+                            <label class="form-check-label" for="isActive">Activo</label>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="/client/financial/costs" class="btn btn-light">Cancelar</a>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('costForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        data.isActive = document.getElementById('isActive').checked;
+        data.amount = parseFloat(data.amount);
+        data.cycleId = parseInt(data.cycleId);
+        data.courseId = parseInt(data.courseId);
+        data.conceptId = parseInt(data.conceptId);
+
+        const url = '{{ "/api/v1/client/financial/costs/" + (cost.id|string) if cost else "/api/v1/client/financial/costs" }}';
+        const method = '{{ "PUT" if cost else "POST" }}';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.href = '/client/financial/costs';
+            } else {
+                alert('Error al guardar');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        }
+    });
+</script>
+{% endblock %}

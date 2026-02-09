@@ -4,6 +4,7 @@ from app import db
 
 class Student(db.Model):
     __tablename__ = "estudiantes"
+    __table_args__ = {"schema": "cliente"}
 
     # --- CAMPOS FIJOS (CamelCase) ---
     id = db.Column("idestudiante", db.Integer, primary_key=True)

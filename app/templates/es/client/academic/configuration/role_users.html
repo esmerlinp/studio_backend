@@ -1,0 +1,107 @@
+{% extends "es/client/layout.html" %}
+
+{% block title %}Asignar Usuarios - Roles{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Asignar Usuarios al Rol</h2>
+            <p class="text-muted" id="roleName">Cargando...</p>
+        </div>
+        <a href="/client/config/roles" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Usuarios Disponibles</label>
+                <select id="userSelect" class="form-select" multiple style="height: 300px;">
+                    <!-- Populated via JS -->
+                </select>
+                <small class="text-muted">Mantén presionado Ctrl/Cmd para seleccionar múltiples usuarios</small>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-secondary"
+                    onclick="window.location.href='/client/config/roles'">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveUserAssignments()">
+                    <i class="fas fa-save"></i> Guardar Asignaciones
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const roleId = {{ role_id }};
+    let allUsers = [];
+    let assignedUserIds = [];
+
+    async function loadData() {
+        try {
+            // Load role info
+            const rolesRes = await fetch('/api/v1/client/roles/');
+            const roles = await rolesRes.json();
+            const role = roles.find(r => r.idrol === roleId);
+            if (role) {
+                document.getElementById('roleName').textContent = role.srol;
+            }
+
+            // Load all users from client
+            const usersRes = await fetch('/api/v1/users/');
+            allUsers = await usersRes.json();
+
+            // Load assigned users
+            const assignedRes = await fetch(`/api/v1/client/roles/${roleId}/users`);
+            const assignedUsers = await assignedRes.json();
+            assignedUserIds = assignedUsers.map(u => u.id);
+
+            renderUsers();
+        } catch (error) {
+            console.error('Error loading data:', error);
+            alert('Error al cargar los datos');
+        }
+    }
+
+    function renderUsers() {
+        const select = document.getElementById('userSelect');
+        select.innerHTML = '';
+
+        allUsers.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.userId;
+            option.textContent = `${user.firstName} ${user.lastName} (${user.email})`;
+            option.selected = assignedUserIds.includes(user.userId);
+            select.appendChild(option);
+        });
+    }
+
+    async function saveUserAssignments() {
+        const select = document.getElementById('userSelect');
+        const selectedUserIds = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
+
+        try {
+            const response = await fetch(`/api/v1/client/roles/${roleId}/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_ids: selectedUserIds })
+            });
+
+            if (response.ok) {
+                alert('Usuarios asignados correctamente');
+                window.location.href = '/client/config/roles';
+            } else {
+                alert('Error al asignar usuarios');
+            }
+        } catch (error) {
+            console.error('Error saving assignments:', error);
+            alert('Error al guardar');
+        }
+    }
+
+    loadData();
+</script>
+{% endblock %}

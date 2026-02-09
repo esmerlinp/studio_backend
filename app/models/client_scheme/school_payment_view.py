@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import NUMERIC, TIMESTAMP
 
 class SchoolPaymentView(db.Model):
     __tablename__ = 'vpagoescolaridad'
-    __table_args__ = {'info': dict(is_view=True)}
+    __table_args__ = {'schema': 'cliente', 'info': dict(is_view=True)}
 
     # Primary Key
     id = db.Column("idpago", db.Integer, primary_key=True)
@@ -23,6 +23,13 @@ class SchoolPaymentView(db.Model):
     
     paymentMethod = db.Column("sfpago", db.String)
     observation = db.Column("scomentario", db.String)
+    
+    # Financial details
+    discount = db.Column("ndescuento", NUMERIC)
+    surcharge = db.Column("nrecargo", NUMERIC)
+    tax = db.Column("nitbis", NUMERIC)
+    subtotal = db.Column("nsubtotal", NUMERIC)
+    quota = db.Column("icuota", db.Integer)
 
     def to_dict(self):
         return {
@@ -36,5 +43,10 @@ class SchoolPaymentView(db.Model):
             "conceptId": self.conceptId,
             "conceptName": self.conceptName,
             "paymentMethod": self.paymentMethod,
-            "observation": self.observation
+            "observation": self.observation,
+            "discount": float(self.discount) if self.discount is not None else 0.0,
+            "surcharge": float(self.surcharge) if self.surcharge is not None else 0.0,
+            "tax": float(self.tax) if self.tax is not None else 0.0,
+            "subtotal": float(self.subtotal) if self.subtotal is not None else 0.0,
+            "quota": self.quota
         }

@@ -6,6 +6,7 @@ class Role(db.Model):
     Contiene la definición de roles y sus permisos programáticos.
     """
     __tablename__ = 'roles'
+    __table_args__ = {"schema": "cliente"}
 
     # Mapeo de columnas con nombres en inglés
     id = db.Column('idrol', db.Integer, primary_key=True, autoincrement=True)

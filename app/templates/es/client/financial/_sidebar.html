@@ -1,9 +1,15 @@
 <nav class="sidebar-nav">
-    <div class="nav-group">
-        <div class="nav-label">Finanzas</div>
-        <a href="/client/financial" class="nav-link active">
-            <i class="fas fa-wallet" style="width: 20px; font-size: 16px;"></i>
-            <span>Pagos y Facturación</span>
-        </a>
+    {% if menu_items and menu_items|length > 0 %}
+    {% for item in menu_items %}
+    <a href="{{ item.url }}" class="nav-link {% if request.path == item.url %}active{% endif %}">
+        <i class="{{ item.icon }}" style="width: 20px; font-size: 16px;"></i>
+        <span>{{ item.label }}</span>
+    </a>
+    {% endfor %}
+    {% else %}
+    <div style="padding: 20px; text-align: center; color: var(--stripe-light); font-size: 13px;">
+        <i class="fas fa-lock mb-2" style="font-size: 24px; display: block;"></i>
+        No tienes acceso a ninguna función de este módulo
     </div>
+    {% endif %}
 </nav>

@@ -1,0 +1,37 @@
+{% extends "es/client/layout.html" %}
+
+{% block title %}Cafetería - Historial de Pedidos{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Historial de Transacciones</h1>
+</div>
+
+<div class="card shadow mb-4 border-0">
+    <div class="card-header py-3 bg-white">
+        <h6 class="m-0 font-weight-bold text-primary">Listado de Ventas</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped" id="ordersTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ID Transacción</th>
+                        <th>Fecha</th>
+                        <th>Estudiante</th>
+                        <th>Monto Total</th>
+                        <th>Método Pago</th>
+                        <th>Estado</th>
+                        <th>Detalles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No hay historial de ventas.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

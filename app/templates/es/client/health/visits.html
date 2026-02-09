@@ -1,0 +1,110 @@
+{% extends "es/client/layout.html" %}
+
+{% block title %}Enfermería - Visitas{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Registro de Visitas</h1>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal"
+        data-bs-target="#newVisitModal">
+        <i class="fas fa-plus fa-sm text-white-50"></i> Nueva Visita
+    </a>
+</div>
+
+<div class="card shadow mb-4 border-0">
+    <div class="card-header py-3 bg-white d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Historial de Atenciones</h6>
+        <div class="dropdown no-arrow">
+            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="visitsTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Estudiante</th>
+                        <th>Motivo</th>
+                        <th>Tratamiento</th>
+                        <th>Resultado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Placeholder Row -->
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No hay visitas registradas.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- New Visit Modal -->
+<div class="modal fade" id="newVisitModal" tabindex="-1" aria-labelledby="newVisitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newVisitModalLabel">Registrar Nueva Visita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="studentSelect" class="form-label">Estudiante</label>
+                        <select class="form-select" id="studentSelect">
+                            <option selected>Buscar estudiante...</option>
+                            <!-- Ajax Search -->
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="visitReason" class="form-label">Motivo</label>
+                            <input type="text" class="form-control" id="visitReason" placeholder="Ej. Dolor de cabeza">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="visitDate" class="form-label">Fecha y Hora</label>
+                            <input type="datetime-local" class="form-control" id="visitDate">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="visitSymptoms" class="form-label">Síntomas</label>
+                        <textarea class="form-control" id="visitSymptoms" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="visitTreatment" class="form-label">Tratamiento / Medicamento</label>
+                        <textarea class="form-control" id="visitTreatment" rows="2"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="visitOutcome" class="form-label">Resultado</label>
+                            <select class="form-select" id="visitOutcome">
+                                <option value="class">Regresó a clase</option>
+                                <option value="home">Se fue a casa</option>
+                                <option value="hospital">Remitido a hospital</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3 pt-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="parentNotified">
+                                <label class="form-check-label" for="parentNotified">
+                                    Padres Notificados
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary">Guardar Registro</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

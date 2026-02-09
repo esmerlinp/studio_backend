@@ -103,8 +103,13 @@ def save_bulk_attendance(data):
         
         if att:
             # Update
+            old_type = att.attendanceTypeId
             att.attendanceTypeId = attendance_type_id
             att.comment = comment
+            
+            # Emit if status changed to critical
+            if old_type != attendance_type_id:
+                _emit_attendance_event(att)
         else:
             # Create
             att = Attendance(
@@ -114,8 +119,25 @@ def save_bulk_attendance(data):
                 comment=comment
             )
             db.session.add(att)
+            _emit_attendance_event(att)
             
         results.append(att)
         
     db.session.commit()
     return results
+
+def _emit_attendance_event(attendance):
+    """Internal helper to emit event based on type."""
+    from app.services.event_bus_service import emit_event, Events
+    
+    # 2 = Absent, 3 = Tardy
+    if attendance.attendanceTypeId == 2:
+        emit_event(Events.STUDENT_ATTENDANCE_ABSENT, {
+            "studentCycleClassroomId": attendance.studentCycleClassroomId,
+            "date": attendance.date.isoformat()
+        })
+    elif attendance.attendanceTypeId == 3:
+        emit_event(Events.STUDENT_ATTENDANCE_TARDY, {
+            "studentCycleClassroomId": attendance.studentCycleClassroomId,
+            "date": attendance.date.isoformat()
+        })

@@ -1,0 +1,74 @@
+{% extends "es/client/layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h4 class="mb-0">{% if frequency %}Editar{% else %}Nueva{% endif %} Frecuencia de Pago</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="frequencyForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre</label>
+                            <input type="text" class="form-control" name="frequencyName"
+                                value="{{ frequency.frequencyName if frequency else '' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Cantidad de Pagos</label>
+                            <input type="number" class="form-control" name="paymentCount"
+                                value="{{ frequency.paymentCount if frequency else '' }}" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isActive" name="isActive" {% if
+                                frequency and frequency.isActive %}checked{% endif %}>
+                            <label class="form-check-label" for="isActive">Activo</label>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="/client/financial/frequencies" class="btn btn-light">Cancelar</a>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('frequencyForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        data.isActive = document.getElementById('isActive').checked;
+        data.paymentCount = parseInt(data.paymentCount);
+
+        const url = '{{ "/api/v1/client/financial/frequencies/" + (frequency.id|string) if frequency else "/api/v1/client/financial/frequencies" }}';
+        const method = '{{ "PUT" if frequency else "POST" }}';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.href = '/client/financial/frequencies';
+            } else {
+                alert('Error al guardar');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends "es/client/layout.html" %}
+
+{% block title %}Gestionar Permisos | Akdmia{% endblock %}
+
+{% block content %}
+<div class="page-header"
+    style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+        <h1 style="font-family: 'Outfit', sans-serif; font-size: 28px; color: var(--stripe-dark); margin-bottom: 4px;"
+            id="roleTitle">
+            Permisos del Rol</h1>
+        <p style="font-size: 14px; color: var(--stripe-slate);">Selecciona las funcionalidades permitidas para este rol.
+        </p>
+    </div>
+    <div style="display: flex; gap: 12px; margin-bottom: 8px;">
+        <a href="/client/config/roles" class="btn btn-light btn-sm" style="font-weight: 600;">Regresar</a>
+        <button class="btn btn-primary btn-sm" style="background: var(--stripe-indigo); font-weight: 600;"
+            onclick="savePermissions()">
+            Guardar Cambios
+        </button>
+    </div>
+</div>
+
+<div id="loadingState"
+    style="padding: 100px; text-align: center; color: #64748b; background: white; border-radius: 12px; border: 1px solid #e6ebf1;">
+    <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Cargando catálogo de permisos...
+</div>
+
+<div id="permissionMatrix" style="display: none;">
+    <!-- Catalog will be injected here -->
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ROLE_ID = {{ role_id }};
+    let currentPermissions = new Set();
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await fetchRoleInfo();
+        await loadMatrix();
+    });
+
+    async function fetchRoleInfo() {
+        // We could fetch role name to display it
+        // For now, we assume ID is enough or fetch from the list
+    }
+
+    async function loadMatrix() {
+        try {
+            // 1. Fetch fixed catalog
+            const catRes = await fetch('/api/v1/client/roles/catalog');
+            const catalog = await catRes.json();
+
+            // 2. Fetch current role permissions
+            const permRes = await fetch(`/api/v1/client/roles/${ROLE_ID}/permissions`);
+            const permissions = await permRes.json();
+
+            // Map allowed IDs to a Set for fast lookup
+            currentPermissions = new Set(
+                permissions.filter(p => p.is_allowed).map(p => p.screen_functionality_id)
+            );
+
+            renderMatrix(catalog);
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loadingState').innerHTML = '<span class="text-danger">Error al cargar la matriz de permisos.</span>';
+        }
+    }
+
+    function renderMatrix(catalog) {
+        const matrixDiv = document.getElementById('permissionMatrix');
+        matrixDiv.innerHTML = '';
+
+        catalog.forEach(module => {
+            const modSection = document.createElement('div');
+            modSection.className = 'mb-5';
+            modSection.innerHTML = `
+                <h3 style="font-size: 18px; font-weight: 700; color: var(--stripe-indigo); border-bottom: 2px solid #f6f9fc; padding-bottom: 8px; margin-bottom: 20px;">
+                    ${module.name}
+                </h3>
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                </div>
+            `;
+
+            const grid = modSection.querySelector('.row');
+
+            module.screens.forEach(screen => {
+                const screenCard = document.createElement('div');
+                screenCard.className = 'col';
+                screenCard.innerHTML = `
+                    <div style="background: white; border-radius: 12px; border: 1px solid #e6ebf1; height: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.01);">
+                        <div style="padding: 16px; border-bottom: 1px solid #f6f9fc; background: #fafbff;">
+                            <h4 style="font-size: 14px; font-weight: 600; color: var(--stripe-dark); margin: 0;">
+                                <i class="fas fa-desktop me-2" style="color: #94a3b8;"></i> ${screen.name}
+                            </h4>
+                        </div>
+                        <div style="padding: 16px;">
+                            <div class="d-flex flex-wrap gap-3">
+                                ${screen.functionalities.map(f => `
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input perm-check" type="checkbox" 
+                                            id="perm_${f.id}" 
+                                            data-id="${f.id}"
+                                            ${currentPermissions.has(f.id) ? 'checked' : ''}>
+                                        <label class="form-check-label" for="perm_${f.id}" style="font-size: 13px; color: var(--stripe-slate);">
+                                            ${f.name}
+                                        </label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(screenCard);
+            });
+
+            matrixDiv.appendChild(modSection);
+        });
+
+        document.getElementById('loadingState').style.display = 'none';
+        matrixDiv.style.display = 'block';
+    }
+
+    async function savePermissions() {
+        const checks = document.querySelectorAll('.perm-check');
+        const permissions = Array.from(checks).map(c => ({
+            screen_functionality_id: parseInt(c.dataset.id),
+            is_allowed: c.checked
+        }));
+
+        try {
+            const response = await fetch(`/api/v1/client/roles/${ROLE_ID}/permissions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ permissions })
+            });
+
+            if (response.ok) {
+                alert("Permisos actualizados correctamente");
+                window.location.href = "/client/config/roles";
+            } else {
+                alert("Error al guardar permisos");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+</script>
+{% endblock %}

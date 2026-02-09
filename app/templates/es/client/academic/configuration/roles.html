@@ -1,0 +1,188 @@
+{% extends "es/client/layout.html" %}
+
+{% block title %}Roles y Permisos | Akdmia{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 32px;">
+    <h1 style="font-family: 'Outfit', sans-serif; font-size: 28px; color: var(--stripe-dark); margin-bottom: 4px;">
+        Roles y Permisos</h1>
+    <p style="font-size: 14px; color: var(--stripe-slate);">Define quién puede acceder a cada parte del sistema en tu
+        institución.
+    </p>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div
+            style="background: white; border-radius: 12px; border: 1px solid #e6ebf1; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--stripe-dark); margin-bottom: 16px;">Menú</h3>
+            <div class="list-group list-group-flush">
+                <a href="/client/configuration" class="list-group-item list-group-item-action border-0 px-0"
+                    style="font-size: 14px; color: var(--stripe-slate);">
+                    <i class="fas fa-arrow-left me-2"></i> Volver a Configuración
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div
+            style="background: white; border-radius: 12px; border: 1px solid #e6ebf1; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+            <div
+                style="padding: 20px 24px; border-bottom: 1px solid #f6f9fc; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 16px; font-weight: 600; color: var(--stripe-dark);">Roles de la Institución</h2>
+                <button onclick="openCreateRoleModal()"
+                    style="background: var(--stripe-indigo); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                    + Nuevo Rol
+                </button>
+            </div>
+
+            <div id="loadingState" style="padding: 40px; text-align: center; color: #64748b;">
+                <i class="fas fa-spinner fa-spin"></i> Cargando roles...
+            </div>
+
+            <table id="rolesTable" style="width: 100%; border-collapse: collapse; text-align: left; display: none;">
+                <thead>
+                    <tr style="background: #fafbff; border-bottom: 1px solid #e6ebf1;">
+                        <th
+                            style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
+                            Rol</th>
+                        <th
+                            style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
+                            Código</th>
+                        <th
+                            style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase;">
+                            Estado</th>
+                        <th
+                            style="padding: 16px 24px; font-size: 11px; font-weight: 700; color: var(--stripe-light); text-transform: uppercase; text-align: right;">
+                            Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="rolesTableBody">
+                    <!-- Data will be loaded via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Crear Rol (Placeholder) -->
+<div id="roleModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+    <div
+        style="background: white; margin: 10% auto; padding: 24px; border-radius: 12px; width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom: 20px; font-family: 'Outfit', sans-serif;">Nuevo Rol</h3>
+        <div class="mb-3">
+            <label class="form-label">Nombre del Rol</label>
+            <input type="text" id="roleName" class="form-control" placeholder="Ej: Coordinador">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Código (Único)</label>
+            <input type="text" id="roleCode" class="form-control" placeholder="EJ_COORDINADOR">
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            <button onclick="closeModal()" class="btn btn-light">Cancelar</button>
+            <button onclick="saveRole()" class="btn btn-primary"
+                style="background: var(--stripe-indigo);">Guardar</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadRoles();
+    });
+
+    async function loadRoles() {
+        try {
+            const response = await fetch('/api/v1/client/roles/');
+            if (!response.ok) throw new Error('Error loading roles');
+            const roles = await response.json();
+            renderRoles(roles);
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loadingState').innerHTML = '<span class="text-danger">Error al cargar roles.</span>';
+        }
+    }
+
+    function renderRoles(roles) {
+        const tbody = document.getElementById('rolesTableBody');
+        tbody.innerHTML = '';
+
+        if (roles.length === 0) {
+            document.getElementById('loadingState').innerText = 'No hay roles definidos.';
+            return;
+        }
+
+        roles.forEach(role => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #f6f9fc';
+
+            const statusHtml = role.is_active
+                ? `<span style="display: inline-flex; align-items: center; padding: 2px 8px; background: #ecfdf5; color: #10b981; border-radius: 100px; font-size: 12px; font-weight: 500;">
+                     Activo
+                   </span>`
+                : `<span style="display: inline-flex; align-items: center; padding: 2px 8px; background: #f1f5f9; color: #64748b; border-radius: 100px; font-size: 12px; font-weight: 500;">
+                     Inactivo
+                   </span>`;
+
+            tr.innerHTML = `
+                <td style="padding: 16px 24px; font-weight: 500; color: var(--stripe-dark);">${role.name}</td>
+                <td style="padding: 16px 24px; color: var(--stripe-slate); font-family: monospace;">${role.code}</td>
+                <td style="padding: 16px 24px;">${statusHtml}</td>
+                <td style="padding: 16px 24px; text-align: right;">
+                    <a href="/client/config/roles/${role.id}/permissions" 
+                        style="color: var(--stripe-indigo); text-decoration: none; font-size: 13px; font-weight: 600; margin-right: 12px;"
+                        title="Gestionar Permisos">
+                        <i class="fas fa-shield-alt"></i> Permisos
+                    </a>
+                    <a href="/client/config/roles/${role.id}/users" 
+                        style="color: #10b981; text-decoration: none; font-size: 13px; font-weight: 600;"
+                        title="Asignar Usuarios">
+                        <i class="fas fa-users"></i> Usuarios
+                    </a>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('rolesTable').style.display = 'table';
+    }
+
+    function openCreateRoleModal() {
+        document.getElementById('roleModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('roleModal').style.display = 'none';
+    }
+
+    async function saveRole() {
+        const name = document.getElementById('roleName').value;
+        const code = document.getElementById('roleCode').value;
+
+        if (!name || !code) return alert("Por favor complete todos los campos");
+
+        try {
+            const response = await fetch('/api/v1/client/roles/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, code })
+            });
+
+            if (response.ok) {
+                closeModal();
+                loadRoles();
+            } else {
+                alert("Error al crear el rol");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+</script>
+{% endblock %}
